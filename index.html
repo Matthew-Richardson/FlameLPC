@@ -60,10 +60,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 </head>
 <body>
 <div class="side">
-  <div class="s-hd">
-    <h1><span class="s-logo">🔥</span>FireCast LPC<span class="s-tag">v4</span></h1>
-    <p>MTT spread · NWS wx · LANDFIRE · 3DEP</p>
-  </div>
+  <div class="s-hd"><h1><span class="s-logo">🔥</span>FireCast LPC<span class="s-tag">v4</span></h1><p>Rothermel MTT · NWS · Leaflet Vector</p></div>
   <div class="s-body">
     <div class="sec"><div class="sec-t">Ignition Point</div>
       <div class="brow" style="margin-bottom:6px"><button class="btn btn-s" id="bp" onclick="startPlace()">📍 Click Map</button><button class="btn btn-s" onclick="toggleEl('crd')">⌨ Coords</button></div>
@@ -78,9 +75,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
       <button class="btn btn-s" onclick="fetchWx()" style="font-size:10px;margin-top:2px">🔄 Refresh from NWS</button>
     </div><div class="div"></div>
     <div class="sec"><div class="sec-t">Landscape</div>
-      <div class="g2"><div class="fg"><label>Resolution</label><select id="res"><option value="90" selected>90m</option><option value="120">120m</option><option value="60">60m</option></select></div>
+      <div class="g2"><div class="fg"><label>Resolution</label><select id="res"><option value="120" selected>120m</option><option value="90">90m</option><option value="60">60m (slow)</option></select></div>
       <div class="fg"><label>Extent</label><select id="ext"><option value="3">3km</option><option value="5" selected>5km</option><option value="8">8km</option></select></div></div>
-      <div class="fg"><label>Terrain</label><select id="tsrc"><option value="synth" selected>Synthetic (Perlin noise)</option><option value="flat">Flat / Uniform</option><option value="real">LANDFIRE + 3DEP (real)</option></select></div>
+      <div class="fg"><label>Terrain</label><select id="tsrc"><option value="synth" selected>Synthetic (varied terrain)</option><option value="flat">Flat / Uniform</option></select></div>
       <div class="fg"><label>Fuel Model</label><select id="ffm"><option value="GR2">GR2 — Low load dry grass</option><option value="GS2">GS2 — Mod grass-shrub</option><option value="SH5" selected>SH5 — High load shrub</option><option value="TU1">TU1 — Timber-grass-shrub</option><option value="TL3">TL3 — Mod conifer litter</option><option value="TL5">TL5 — High conifer litter</option></select></div>
     </div><div class="div"></div>
     <div class="sec"><div class="sec-t">Simulation</div>
@@ -92,9 +89,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
     <div class="sec" id="vsec" style="display:none"><div class="sec-t">View</div>
       <div class="tog"><button id="viso" class="on" onclick="setView('iso')">Hourly Bands</button><button id="vheat" onclick="setView('heat')">Heatmap</button></div>
     </div>
-    <div class="sec"><div class="sec-t">Reference</div><div class="ref">Rothermel 1972 · Albini 1976 · MTT: Finney 2002 · Scott &amp; Burgan FBFM40 · Simard 1968 FM<br><br>⚠ Planning only. Not operational.<br><a href="https://www.fs.usda.gov/research/treesearch/55928" target="_blank">Andrews 2018 →</a></div></div>
+    <div class="sec"><div class="sec-t">Reference</div><div class="ref">Rothermel 1972 · Albini 1976 · MTT: Finney 2002 · FBFM40 · Simard 1968<br><br>⚠ Planning only.<br><a href="https://www.fs.usda.gov/research/treesearch/55928">Andrews 2018 →</a></div></div>
   </div>
-  <div class="stat"><span class="sdot" id="sdot"></span><span id="stxt">Ready — click map to set ignition</span></div>
+  <div class="stat"><span class="sdot" id="sdot"></span><span id="stxt">Ready — click map</span></div>
 </div>
 <div class="mapc" id="mapc">
   <div id="map"></div>
@@ -107,30 +104,29 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
 <script>
 const EL=id=>document.getElementById(id);
 const toggleEl=id=>{const e=EL(id);e.style.display=e.style.display==='none'?'block':'none'};
-function status(s,t){EL('sdot').className='sdot'+(s==='run'?' run':'');EL('stxt').textContent=t}
-function prog(p){EL('progf').style.width=p+'%'}
-function wxBadge(s,t){const e=EL('wxb');e.className='badge b-'+({ok:'ok',wait:'wait',err:'err'}[s]||'wait');e.textContent=t}
+function setStatus(s,t){EL('sdot').className='sdot'+(s==='run'?' run':'');EL('stxt').textContent=t}
+function setProg(p){EL('progf').style.width=p+'%'}
 
-// ============================
-// FUEL MODELS
-// ============================
+// ═══════════════════════════════════════
+// FUEL MODELS (Scott & Burgan 40 subset)
+// ═══════════════════════════════════════
 const FM={
 GR2:{w1:.1,w10:0,w100:0,wLH:1,wLW:0,sv1:2000,svLH:1800,svLW:0,d:1,mx:.15,h:8000,wrf:.6},
+GS1:{w1:.2,w10:0,w100:0,wLH:.5,wLW:.65,sv1:2000,svLH:1800,svLW:1800,d:.9,mx:.15,h:8000,wrf:.55},
 GS2:{w1:.5,w10:.5,w100:0,wLH:.6,wLW:1,sv1:2000,svLH:1800,svLW:1800,d:1.5,mx:.15,h:8000,wrf:.55},
 SH5:{w1:3.6,w10:2.1,w100:0,wLH:0,wLW:2.9,sv1:750,svLH:0,svLW:1600,d:6,mx:.15,h:8000,wrf:.5},
 TU1:{w1:.2,w10:.9,w100:1.5,wLH:.2,wLW:.9,sv1:2000,svLH:1800,svLW:1600,d:.6,mx:.2,h:8000,wrf:.4},
 TL3:{w1:.5,w10:2.2,w100:2.8,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.3,mx:.2,h:8000,wrf:.4},
 TL5:{w1:1.15,w10:2.5,w100:4.4,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.6,mx:.25,h:8000,wrf:.4},
-GS1:{w1:.2,w10:0,w100:0,wLH:.5,wLW:.65,sv1:2000,svLH:1800,svLW:1800,d:.9,mx:.15,h:8000,wrf:.55},
 NB:{w1:0,w10:0,w100:0,wLH:0,wLW:0,sv1:0,svLH:0,svLW:0,d:0,mx:0,h:0,wrf:0},
 };
 
-// ============================
-// NWS WEATHER FETCH
-// ============================
+// ═══════════════════════════════════════
+// NWS WEATHER
+// ═══════════════════════════════════════
 async function fetchWx(){
   if(!ignLL)return;
-  wxBadge('wait','fetching...');
+  EL('wxb').className='badge b-wait';EL('wxb').textContent='fetching...';
   try{
     const r1=await fetch(`https://api.weather.gov/points/${ignLL.lat.toFixed(4)},${ignLL.lng.toFixed(4)}`,{headers:{'User-Agent':'FireCastLPC/4','Accept':'application/geo+json'}});
     const j1=await r1.json();
@@ -145,566 +141,244 @@ async function fetchWx(){
     let m;if(rh<=10)m=.03229+.281073*rh-.000578*rh*tF;else if(rh<=50)m=2.22749+.160107*rh-.01478*tF;else m=21.0606+.005565*rh*rh-.00035*rh*tF-.483199*rh;
     m=Math.max(1,Math.min(35,m));
     EL('f1').value=Math.round(m);EL('f10').value=Math.round(m*1.3);EL('f100').value=Math.round(m*1.8);
-    wxBadge('ok','NWS '+j1.properties.gridId);
-  }catch(e){console.error(e);wxBadge('err','failed')}
+    EL('wxb').className='badge b-ok';EL('wxb').textContent='NWS '+j1.properties.gridId;
+  }catch(e){console.error(e);EL('wxb').className='badge b-err';EL('wxb').textContent='failed'}
 }
 
-// ============================
-// PERLIN NOISE
-// ============================
-function createPerlin(seed){
-  const p=new Uint8Array(512);const q=new Uint8Array(256);
+// ═══════════════════════════════════════
+// PERLIN NOISE (proper closure-based)
+// ═══════════════════════════════════════
+function makePerlin(seed){
+  const p=new Uint8Array(512);
+  const q=new Uint8Array(256);
   for(let i=0;i<256;i++)q[i]=i;
-  let s=seed;for(let i=255;i>0;i--){s=(s*16807)%2147483647;const j=s%(i+1);[q[i],q[j]]=[q[j],q[i]]}
+  let s=seed;
+  for(let i=255;i>0;i--){s=(s*16807)%2147483647;const j=s%(i+1);[q[i],q[j]]=[q[j],q[i]]}
   for(let i=0;i<512;i++)p[i]=q[i&255];
-  
-  function fade(t){return t*t*t*(t*(t*6-15)+10)}
-  function lerp(a,b,t){return a+t*(b-a)}
-  function grad(h,x,y){const v=h&3;return((v&1)?-x:x)+((v&2)?-y:y)}
-  
-  function noise(x,y){
-    const X=Math.floor(x)&255,Y=Math.floor(y)&255;
-    const xf=x-Math.floor(x),yf=y-Math.floor(y);
-    const u=fade(xf),v=fade(yf);
-    return lerp(
-      lerp(grad(p[p[X]+Y],xf,yf), grad(p[p[X+1]+Y],xf-1,yf), u),
-      lerp(grad(p[p[X]+Y+1],xf,yf-1), grad(p[p[X+1]+Y+1],xf-1,yf-1), u), v);
-  }
-  
-  function fbm(x,y,oct){
-    oct=oct||5;let val=0,amp=1,freq=1,max=0;
-    for(let i=0;i<oct;i++){val+=noise(x*freq,y*freq)*amp;max+=amp;amp*=.5;freq*=2}
-    return val/max;
-  }
-  
-  return {noise,fbm};
+  const fade=t=>t*t*t*(t*(t*6-15)+10);
+  const lerp=(a,b,t)=>a+t*(b-a);
+  const grad=(h,x,y)=>{const v=h&3;return((v&1)?-x:x)+((v&2)?-y:y)};
+  return function fbm(x,y,oct){
+    oct=oct||4;let val=0,amp=1,freq=1,mx=0;
+    for(let i=0;i<oct;i++){
+      const X=Math.floor(x*freq)&255,Y=Math.floor(y*freq)&255;
+      const xf=x*freq-Math.floor(x*freq),yf=y*freq-Math.floor(y*freq);
+      const u=fade(xf),v=fade(yf);
+      const n=lerp(lerp(grad(p[p[X]+Y],xf,yf),grad(p[p[X+1]+Y],xf-1,yf),u),
+                   lerp(grad(p[p[X]+Y+1],xf,yf-1),grad(p[p[X+1]+Y+1],xf-1,yf-1),u),v);
+      val+=n*amp;mx+=amp;amp*=.5;freq*=2;
+    }
+    return val/mx;
+  };
 }
 
-// ============================
-// BUILD GRID
-// ============================
-function buildGrid(lat,lng,cellM,extKm,src,fuelKey){
-  const n=Math.min(Math.ceil(extKm*2000/cellM),200);
-  console.log('Grid size:',n,'x',n,'=',n*n,'cells');
-  
-  const elev=new Float32Array(n*n);
-  const slope=new Float32Array(n*n);
-  const aspect=new Float32Array(n*n);
-  const fuel=new Array(n*n);
-  const at=new Float32Array(n*n);
-  at.fill(Infinity);
-  
-  // Fill ALL cells with the selected fuel model by default
-  for(let i=0;i<n*n;i++) fuel[i]=fuelKey;
-  
-  if(src==='synth'){
-    const pn1=createPerlin(42);
-    const pn2=createPerlin(137);
-    const base=2100;
-    
-    for(let r=0;r<n;r++){
-      for(let c=0;c<n;c++){
-        const idx=r*n+c;
-        // Generate terrain
-        const e1=pn1.fbm(c*0.0008,r*0.0008,4)*400;
-        const e2=pn1.fbm(c*0.003,r*0.003,3)*100;
-        const ridge=Math.sin((c+r)*0.015)*150;
-        elev[idx]=base+e1+e2+ridge;
-        
-        // Vary fuel by elevation
-        const fn=pn2.fbm(c*0.005,r*0.005,3);
-        const el=elev[idx];
-        if(fn<-0.4) fuel[idx]='NB'; // ~5% non-burnable
-        else if(el<base-100) fuel[idx]='GR2';
-        else if(el<base+100) fuel[idx]=fuelKey;
-        else if(el<base+300) fuel[idx]='TL3';
-        else fuel[idx]='TL5';
-      }
-    }
-  } else if(src==='flat'){
-    elev.fill(2000);
-  }
-  // 'real' mode: TODO - LANDFIRE integration
-  
-  // Compute slope and aspect from elevation
-  for(let r=1;r<n-1;r++){
-    for(let c=1;c<n-1;c++){
-      const idx=r*n+c;
-      const dzdx=(elev[idx+1]-elev[idx-1])/(2*cellM);
-      const dzdy=(elev[(r+1)*n+c]-elev[(r-1)*n+c])/(2*cellM);
-      slope[idx]=Math.atan(Math.sqrt(dzdx*dzdx+dzdy*dzdy))*180/Math.PI;
-      let a=Math.atan2(-dzdx,dzdy)*180/Math.PI;
-      if(a<0)a+=360;
-      aspect[idx]=a;
-    }
-  }
-  // Fill edges
-  for(let r=0;r<n;r++){slope[r*n]=slope[r*n+1];slope[r*n+n-1]=slope[r*n+n-2];aspect[r*n]=aspect[r*n+1];aspect[r*n+n-1]=aspect[r*n+n-2]}
-  for(let c=0;c<n;c++){slope[c]=slope[n+c];slope[(n-1)*n+c]=slope[(n-2)*n+c];aspect[c]=aspect[n+c];aspect[(n-1)*n+c]=aspect[(n-2)*n+c]}
-  
-  // Count fuel types for debug
-  const fuelCount={};
-  for(let i=0;i<n*n;i++){const fk=fuel[i];fuelCount[fk]=(fuelCount[fk]||0)+1}
-  console.log('Fuel distribution:',fuelCount);
-  
-  return {n,cellM,lat,lng,elev,slope,aspect,fuel,at};
-}
-
-// ============================
+// ═══════════════════════════════════════
 // ROTHERMEL SPREAD MODEL
-// ============================
-function computeROS(fuelKey,windMph,windDir,fm1,fm10,fm100,fmLive,slopeDeg,aspectDeg){
-  const f=FM[fuelKey];
-  if(!f||f.d<=0) return {ros:0,R0:0,fl:0,maxAz:0};
-  
-  // Convert tons/acre to lb/ft²
+// ═══════════════════════════════════════
+function calcROS(fk,wMph,wDir,m1,m10,m100,mLv,slp,asp){
+  const f=FM[fk];
+  if(!f||f.d<=0)return{ros:0,R0:0,fl:0,az:0};
   const L=t=>t*2000/43560;
-  const w=[L(f.w1),L(f.w10),L(f.w100)];
-  const wL=[L(f.wLH),L(f.wLW)];
-  const sv=[f.sv1,109,30];
-  const svL=[f.svLH||0.001,f.svLW||0.001]; // avoid zero
-  const mf=[fm1/100,fm10/100,fm100/100];
-  const mfL=[fmLive/100,fmLive/100];
-  
-  // Surface area weighting
-  const dSA=w.map((wi,i)=>wi*sv[i]);
-  const dSAT=dSA.reduce((a,b)=>a+b,0);
-  const lSA=wL.map((wi,i)=>wi*svL[i]);
-  const lSAT=lSA.reduce((a,b)=>a+b,0);
-  const totalSA=dSAT+lSAT;
-  if(totalSA<0.00001) return {ros:0,R0:0,fl:0,maxAz:0};
-  
-  const dF=dSA.map(s=>dSAT>0?s/dSAT:0);
-  const lF=lSA.map(s=>lSAT>0?s/lSAT:0);
-  const fDead=dSAT/totalSA;
-  const fLive=lSAT/totalSA;
-  
-  // Characteristic SAV
-  const sigma=fDead*dF.reduce((s,fi,i)=>s+fi*sv[i],0)+fLive*lF.reduce((s,fi,i)=>s+fi*svL[i],0);
-  if(sigma<1) return {ros:0,R0:0,fl:0,maxAz:0};
-  
-  // Packing ratio
-  const wTotal=w.reduce((a,b)=>a+b,0)+wL.reduce((a,b)=>a+b,0);
-  const beta=wTotal/(f.d*32);
-  const betaOp=3.348*Math.pow(sigma,-0.8189);
-  const betaR=beta/betaOp;
-  
-  // Reaction intensity
-  const A=133*Math.pow(sigma,-0.7913);
-  const gammaMax=Math.pow(sigma,1.5)/(495+0.0594*Math.pow(sigma,1.5));
-  const gamma=gammaMax*Math.pow(betaR,A)*Math.exp(A*(1-betaR));
-  
-  const wnDead=w.reduce((s,wi,i)=>s+dF[i]*wi*0.9445,0);
-  const wnLive=wL.reduce((s,wi,i)=>s+lF[i]*wi*0.9445,0);
-  
-  // Moisture damping
-  const mfDeadW=dF.reduce((s,fi,i)=>s+fi*mf[i],0);
-  const rmD=Math.min(mfDeadW/f.mx,1);
-  const etaD=Math.max(0,1-2.59*rmD+5.11*rmD*rmD-3.52*Math.pow(rmD,3));
-  
-  let etaL=1;
-  if(lSAT>0.00001){
-    const mfLiveW=lF.reduce((s,fi,i)=>s+fi*mfL[i],0);
-    const MxL=Math.max(f.mx,0.3);
-    const rmL=Math.min(mfLiveW/MxL,1);
-    etaL=Math.max(0,1-2.59*rmL+5.11*rmL*rmL-3.52*Math.pow(rmL,3));
-  }
-  
-  const etaS=0.174*Math.pow(0.01,-0.19);
-  const IR=gamma*(wnDead*f.h*etaD*etaS+wnLive*f.h*etaL*etaS);
-  
-  // Propagating flux
-  const xi=Math.exp((0.792+0.681*Math.pow(sigma,0.5))*(beta+0.1))/(192+0.2595*sigma);
-  
-  // Heat sink
-  const rhoB=wTotal/f.d;
-  const epsilon=Math.exp(-138/sigma);
-  const mfCombined=fDead*mfDeadW+fLive*(lF.reduce((s,fi,i)=>s+fi*mfL[i],0)||0);
-  const Qig=250+1116*mfCombined;
-  const heatSink=rhoB*epsilon*Qig;
-  if(heatSink<0.001) return {ros:0,R0:0,fl:0,maxAz:0};
-  
-  // No-wind no-slope ROS
-  const R0=IR*xi/heatSink;
-  
-  // Wind factor
-  const midflameWind=windMph*f.wrf*88; // ft/min
-  const C=7.47*Math.exp(-0.133*Math.pow(sigma,0.55));
-  const B=0.02526*Math.pow(sigma,0.54);
-  const E=0.715*Math.exp(-3.59e-4*sigma);
-  const phiW=midflameWind>0?C*Math.pow(midflameWind,B)*Math.pow(betaR,-E):0;
-  
-  // Slope factor
-  const slopeRad=slopeDeg*Math.PI/180;
-  const tanSlope=Math.tan(slopeRad);
-  const phiS=5.275*Math.pow(Math.max(beta,0.0001),-0.3)*tanSlope*tanSlope;
-  
-  // Combined wind+slope vector
-  const windPushAz=((windDir+180)%360)*Math.PI/180;
-  const slopePushAz=((aspectDeg+180)%360)*Math.PI/180;
-  const vx=phiW*Math.sin(windPushAz)+phiS*Math.sin(slopePushAz);
-  const vy=phiW*Math.cos(windPushAz)+phiS*Math.cos(slopePushAz);
-  const phiEff=Math.sqrt(vx*vx+vy*vy);
-  const maxAz=Math.atan2(vx,vy);
-  
-  const ros=R0*(1+phiEff);
-  const fli=(IR*ros)/60;
-  const fl=0.45*Math.pow(Math.max(fli,0.01),0.46);
-  
-  return {ros,R0,fl,maxAz,phiEff};
+  const w=[L(f.w1),L(f.w10),L(f.w100)],wl=[L(f.wLH),L(f.wLW)];
+  const sv=[f.sv1,109,30],svl=[f.svLH||.001,f.svLW||.001];
+  const mf=[m1/100,m10/100,m100/100],ml=[mLv/100,mLv/100];
+  const dSA=w.map((a,i)=>a*sv[i]),dT=dSA.reduce((a,b)=>a+b,0);
+  const lSA=wl.map((a,i)=>a*svl[i]),lT=lSA.reduce((a,b)=>a+b,0);
+  const tSA=dT+lT;if(tSA<1e-6)return{ros:0,R0:0,fl:0,az:0};
+  const dF=dSA.map(s=>dT>0?s/dT:0),lF=lSA.map(s=>lT>0?s/lT:0);
+  const fD=dT/tSA,fL=lT/tSA;
+  const sig=fD*dF.reduce((s,a,i)=>s+a*sv[i],0)+fL*lF.reduce((s,a,i)=>s+a*svl[i],0);
+  if(sig<1)return{ros:0,R0:0,fl:0,az:0};
+  const wT=w.reduce((a,b)=>a+b,0)+wl.reduce((a,b)=>a+b,0);
+  const beta=wT/(f.d*32),bo=3.348*Math.pow(sig,-.8189),br=beta/bo;
+  const A=133*Math.pow(sig,-.7913),gMax=Math.pow(sig,1.5)/(495+.0594*Math.pow(sig,1.5));
+  const gam=gMax*Math.pow(br,A)*Math.exp(A*(1-br));
+  const wnD=w.reduce((s,a,i)=>s+dF[i]*a*.9445,0),wnL=wl.reduce((s,a,i)=>s+lF[i]*a*.9445,0);
+  const mfDw=dF.reduce((s,a,i)=>s+a*mf[i],0),rmD=Math.min(mfDw/f.mx,1);
+  const etD=Math.max(0,1-2.59*rmD+5.11*rmD*rmD-3.52*rmD*rmD*rmD);
+  let etL=1;
+  if(lT>1e-5){const mfLw=lF.reduce((s,a,i)=>s+a*ml[i],0),rmL=Math.min(mfLw/Math.max(f.mx,.3),1);etL=Math.max(0,1-2.59*rmL+5.11*rmL*rmL-3.52*rmL*rmL*rmL)}
+  const etS=.174*Math.pow(.01,-.19);
+  const IR=gam*(wnD*f.h*etD*etS+wnL*f.h*etL*etS);
+  const xi=Math.exp((.792+.681*Math.pow(sig,.5))*(beta+.1))/(192+.2595*sig);
+  const rhoB=wT/f.d,eps=Math.exp(-138/sig);
+  const mfC=fD*mfDw+fL*(lF.reduce((s,a,i)=>s+a*ml[i],0)||0);
+  const Qig=250+1116*mfC,hs=rhoB*eps*Qig;
+  if(hs<.001)return{ros:0,R0:0,fl:0,az:0};
+  const R0=IR*xi/hs;
+  const U=wMph*f.wrf*88;
+  const C=7.47*Math.exp(-.133*Math.pow(sig,.55)),B=.02526*Math.pow(sig,.54),E=.715*Math.exp(-3.59e-4*sig);
+  const phiW=U>0?C*Math.pow(U,B)*Math.pow(br,-E):0;
+  const sR=slp*Math.PI/180,phiS=5.275*Math.pow(Math.max(beta,1e-4),-.3)*Math.pow(Math.tan(sR),2);
+  const wAz=((wDir+180)%360)*Math.PI/180,sAz=((asp+180)%360)*Math.PI/180;
+  const vx=phiW*Math.sin(wAz)+phiS*Math.sin(sAz),vy=phiW*Math.cos(wAz)+phiS*Math.cos(sAz);
+  const phiE=Math.sqrt(vx*vx+vy*vy),maxAz=Math.atan2(vx,vy);
+  const ros=R0*(1+phiE),fli=IR*ros/60,fl=.45*Math.pow(Math.max(fli,.01),.46);
+  return{ros,R0,fl,az:maxAz};
 }
 
-// ============================
-// MTT FIRE SPREAD (Dijkstra)
-// ============================
-function spreadFire(grid,ignR,ignC,windSpd,windDir,fm1,fm10,fm100,fmLive,durMin){
-  const {n,cellM,fuel,slope,aspect,at}=grid;
+// ═══════════════════════════════════════
+// MTT FIRE SPREAD
+// ═══════════════════════════════════════
+function spreadFire(n,cellM,fuel,slope,aspect,wS,wD,m1,m10,m100,mLv,durMin){
+  const at=new Float32Array(n*n); at.fill(Infinity);
   const cellFt=cellM*3.28084;
   
-  // Reset arrival times
-  for(let i=0;i<n*n;i++) at[i]=Infinity;
-  
-  // Pre-compute ROS for every cell
-  const ros=new Float32Array(n*n);
-  const r0=new Float32Array(n*n);
-  const maxAz=new Float32Array(n*n);
-  const fl=new Float32Array(n*n);
-  
-  let validCells=0;
+  // Pre-compute ROS per cell
+  const cROS=new Float32Array(n*n),cR0=new Float32Array(n*n),cAZ=new Float32Array(n*n),cFL=new Float32Array(n*n);
   for(let i=0;i<n*n;i++){
-    const result=computeROS(fuel[i],windSpd,windDir,fm1,fm10,fm100,fmLive,slope[i],aspect[i]);
-    ros[i]=result.ros;
-    r0[i]=result.R0;
-    maxAz[i]=result.maxAz;
-    fl[i]=result.fl;
-    if(result.ros>0)validCells++;
-  }
-  console.log('Valid burnable cells:',validCells,'/',n*n);
-  grid.cellROS=ros;grid.cellFL=fl;
-  
-  // Ellipse shape from wind
-  const effWind=windSpd*0.5;
-  const LB=Math.max(1,0.936*Math.exp(0.2566*effWind)+0.461*Math.exp(-0.1548*effWind)-0.397);
-  const ecc=LB>1?Math.sqrt(1-1/(LB*LB)):0;
-  console.log('LB ratio:',LB.toFixed(2),'eccentricity:',ecc.toFixed(3));
-  
-  // Min-heap priority queue
-  const heap=[];
-  function heapPush(t,r,c){
-    heap.push([t,r,c]);
-    let i=heap.length-1;
-    while(i>0){
-      const pi=(i-1)>>1;
-      if(heap[pi][0]<=heap[i][0])break;
-      [heap[pi],heap[i]]=[heap[i],heap[pi]];
-      i=pi;
-    }
-  }
-  function heapPop(){
-    const top=heap[0];
-    const last=heap.pop();
-    if(heap.length>0){
-      heap[0]=last;
-      let i=0;
-      while(true){
-        let sm=i;
-        const l=2*i+1,r=2*i+2;
-        if(l<heap.length&&heap[l][0]<heap[sm][0])sm=l;
-        if(r<heap.length&&heap[r][0]<heap[sm][0])sm=r;
-        if(sm===i)break;
-        [heap[sm],heap[i]]=[heap[i],heap[sm]];
-        i=sm;
-      }
-    }
-    return top;
+    const r=calcROS(fuel[i],wS,wD,m1,m10,m100,mLv,slope[i],aspect[i]);
+    cROS[i]=r.ros;cR0[i]=r.R0;cAZ[i]=r.az;cFL[i]=r.fl;
   }
   
-  // Seed ignition
-  const ignIdx=ignR*n+ignC;
-  if(ros[ignIdx]<=0){
-    console.warn('Ignition cell has zero ROS! Fuel:',fuel[ignIdx]);
-    // Try to find nearest burnable cell
-    for(let d=1;d<10;d++){
-      for(let dr=-d;dr<=d;dr++) for(let dc=-d;dc<=d;dc++){
-        const nr=ignR+dr,nc=ignC+dc;
-        if(nr>=0&&nr<n&&nc>=0&&nc<n&&ros[nr*n+nc]>0){
-          console.log('Found burnable cell at offset',dr,dc);
-          at[nr*n+nc]=0;
-          heapPush(0,nr,nc);
-          dr=dc=d=999; // break all loops
-        }
-      }
-    }
-  } else {
-    at[ignIdx]=0;
-    heapPush(0,ignR,ignC);
-  }
+  // Ellipse eccentricity
+  const ew=wS*.5,LB=Math.max(1,.936*Math.exp(.2566*ew)+.461*Math.exp(-.1548*ew)-.397);
+  const ecc=LB>1.01?Math.sqrt(1-1/(LB*LB)):0;
+  console.log('LB='+LB.toFixed(2)+' ecc='+ecc.toFixed(3));
   
-  const visited=new Uint8Array(n*n);
+  // Heap
+  const H=[];
+  const push=(t,r,c)=>{H.push([t,r,c]);let i=H.length-1;while(i>0){const p=(i-1)>>1;if(H[p][0]<=H[i][0])break;[H[p],H[i]]=[H[i],H[p]];i=p}};
+  const pop=()=>{const t=H[0],l=H.pop();if(H.length>0){H[0]=l;let i=0;while(true){let s=i;const a=2*i+1,b=2*i+2;if(a<H.length&&H[a][0]<H[s][0])s=a;if(b<H.length&&H[b][0]<H[s][0])s=b;if(s===i)break;[H[s],H[i]]=[H[i],H[s]];i=s}}return t};
   
-  // 8-connected neighbors
-  const neighbors=[
-    [-1,0,1],[1,0,1],[0,-1,1],[0,1,1],
-    [-1,-1,1.414],[-1,1,1.414],[1,-1,1.414],[1,1,1.414]
-  ];
+  // Seed ignition at center
+  const iR=Math.floor(n/2),iC=Math.floor(n/2);
+  at[iR*n+iC]=0;push(0,iR,iC);
   
-  // Directional ROS: how fast does fire spread in a given direction?
-  function directionalROS(headROS,backROS,cellMaxAz,travelAz,eccentricity){
-    if(eccentricity<0.01) return headROS; // Circular spread
-    
-    // Angle between travel direction and max spread direction
-    let angleDiff=travelAz-cellMaxAz;
-    // Normalize to [-PI, PI]
-    while(angleDiff>Math.PI)angleDiff-=2*Math.PI;
-    while(angleDiff<-Math.PI)angleDiff+=2*Math.PI;
-    
-    const cosA=Math.cos(angleDiff);
-    const denom=1-eccentricity*cosA;
-    
-    if(denom<0.05) return headROS; // Near head direction
-    
-    const dirRos=headROS*(1-eccentricity)/denom;
-    
-    // Clamp between backing ROS and head ROS
-    return Math.max(backROS*0.3, Math.min(dirRos, headROS*1.1));
-  }
+  const vis=new Uint8Array(n*n);
+  const NB=[[-1,0,1],[1,0,1],[0,-1,1],[0,1,1],[-1,-1,1.414],[-1,1,1.414],[1,-1,1.414],[1,1,1.414]];
   
-  let processedCells=0;
-  
-  while(heap.length>0){
-    const [time,row,col]=heapPop();
-    const idx=row*n+col;
+  while(H.length>0){
+    const[t,r,c]=pop();
+    const idx=r*n+c;
+    if(vis[idx])continue;
+    if(t>durMin)continue;
+    vis[idx]=1;
+    if(cROS[idx]<=0)continue;
     
-    if(visited[idx]) continue;
-    if(time>durMin) continue;
-    visited[idx]=1;
-    processedCells++;
-    
-    const srcROS=ros[idx];
-    if(srcROS<=0) continue;
-    
-    for(const [dr,dc,distMult] of neighbors){
-      const nr=row+dr, nc=col+dc;
-      if(nr<0||nr>=n||nc<0||nc>=n) continue;
+    for(const[dr,dc,dm]of NB){
+      const nr=r+dr,nc=c+dc;
+      if(nr<0||nr>=n||nc<0||nc>=n)continue;
       const ni=nr*n+nc;
-      if(visited[ni]) continue;
+      if(vis[ni]||cROS[ni]<=0)continue;
       
-      const destROS=ros[ni];
-      if(destROS<=0) continue;
-      
-      // Direction of travel (from source cell toward neighbor)
+      // Direction of travel
       const travelAz=Math.atan2(dc,-dr);
       
-      // ROS in the travel direction from source cell
-      const srcDirROS=directionalROS(srcROS,r0[idx],maxAz[idx],travelAz,ecc);
-      // ROS in the travel direction from dest cell
-      const destDirROS=directionalROS(destROS,r0[ni],maxAz[ni],travelAz,ecc);
-      
-      // Average ROS between the two cells
-      const avgROS=(srcDirROS+destDirROS)/2;
-      
-      if(avgROS<=0||!isFinite(avgROS)) continue;
-      
-      // Travel time = distance / speed
-      const dist=cellFt*distMult;
-      const travelTime=dist/avgROS; // minutes
-      
-      if(!isFinite(travelTime)||travelTime<=0) continue;
-      
-      const newArrival=time+travelTime;
-      
-      if(newArrival<at[ni]&&newArrival<=durMin){
-        at[ni]=newArrival;
-        heapPush(newArrival,nr,nc);
+      // Directional ROS with proper angle wrapping
+      function dROS(headROS,backROS,cellAz){
+        if(ecc<.01)return headROS;
+        let ad=travelAz-cellAz;
+        while(ad>Math.PI)ad-=2*Math.PI;
+        while(ad<-Math.PI)ad+=2*Math.PI;
+        const den=1-ecc*Math.cos(ad);
+        if(den<.05)return headROS;
+        const r=headROS*(1-ecc)/den;
+        return Math.max(backROS*.3,Math.min(r,headROS));
       }
+      
+      const r1=dROS(cROS[idx],cR0[idx],cAZ[idx]);
+      const r2=dROS(cROS[ni],cR0[ni],cAZ[ni]);
+      const avg=(r1+r2)/2;
+      if(avg<=0||!isFinite(avg))continue;
+      
+      const tt=cellFt*dm/avg;
+      if(!isFinite(tt)||tt<=0)continue;
+      const na=t+tt;
+      if(na<at[ni]&&na<=durMin){at[ni]=na;push(na,nr,nc)}
     }
   }
   
-  // Count burned cells
-  let burnedCount=0;
-  for(let i=0;i<n*n;i++) if(at[i]<Infinity) burnedCount++;
-  console.log('MTT complete. Processed:',processedCells,'Burned:',burnedCount);
+  let burned=0;for(let i=0;i<n*n;i++)if(isFinite(at[i]))burned++;
+  console.log('Burned cells:',burned,'/',n*n);
   
-  return grid;
+  return{at,cROS,cFL};
 }
 
-
-// ============================
-// RENDERER - uses ImageData (raw pixel buffer, no fillStyle)
-// ============================
-const COLORS=[
-  [255,255,80],   // hr 1: bright yellow
-  [255,210,30],   // hr 2: gold
-  [255,165,0],    // hr 3: orange
-  [255,100,0],    // hr 4: dark orange
-  [230,55,15],    // hr 5: red-orange
-  [200,30,20],    // hr 6: red
-  [160,15,20],    // hr 7: dark red
-  [120,10,15],    // hr 8: crimson
-  [90,5,10],      // hr 9
-  [65,3,8],       // hr 10
-  [45,2,5],       // hr 11
-  [30,1,3],       // hr 12
+// ═══════════════════════════════════════
+// RENDERER — Leaflet vector rectangles
+// Uses L.canvas renderer for performance
+// ═══════════════════════════════════════
+const HOUR_COLORS=[
+  '#FFFF50', // 1 bright yellow
+  '#FFD620', // 2 gold
+  '#FFA500', // 3 orange
+  '#FF6400', // 4 dark orange
+  '#E6370F', // 5 red-orange
+  '#CC1E14', // 6 red
+  '#A00F14', // 7 dark red
+  '#780A0F', // 8 crimson
+  '#5A050A', // 9
+  '#410308', // 10
+  '#2D0205', // 11
+  '#1E0103', // 12
 ];
 
-let overlay=null,gridRef=null,durRef=6,viewMode='iso';
+const HEAT_COLORS=['#FFFF78','#FFF03C','#FFD21E','#FFAF0F','#FF8C00','#FA6400','#F04105','#E1280F','#C81914','#AF0F19','#960A14','#7D0811','#64050C','#4B0308','#320105'];
 
-function gridBounds(g){
-  const mLat=111320,mLng=mLat*Math.cos(g.lat*Math.PI/180);
-  const hLat=(g.n/2*g.cellM)/mLat,hLng=(g.n/2*g.cellM)/mLng;
-  return [[g.lat+hLat,g.lng-hLng],[g.lat-hLat,g.lng+hLng]];
-}
-function clearOverlay(){if(overlay){map.removeLayer(overlay);overlay=null}}
+let fireLayer=null,gridData=null,durStore=6,viewMode='iso';
+const canvasRenderer=L.canvas({padding:0.5});
 
-function renderIsochrones(g,durHrs){
-  clearOverlay();
-  const {n,at}=g;
-  const durMin=durHrs*60;
-  const scale=3;
-  const W=n*scale,H=n*scale;
-  
-  const canvas=document.createElement('canvas');
-  canvas.width=W;canvas.height=H;
-  const ctx=canvas.getContext('2d');
-  const imgData=ctx.createImageData(W,H);
-  const px=imgData.data;
-  
-  // Step 1: Assign hour band to each grid cell
-  const hourBand=new Uint8Array(n*n);
-  let burnedCount=0;
-  for(let i=0;i<n*n;i++){
-    const arrival=at[i];
-    if(isFinite(arrival)&&arrival>=0&&arrival<=durMin){
-      hourBand[i]=Math.min(Math.floor(arrival/60)+1,durHrs);
-      burnedCount++;
-    }
-  }
-  console.log('Rendering',burnedCount,'burned cells for',durHrs,'hours');
-  
-  // Step 2: Fill pixels using ImageData (direct pixel buffer)
-  for(let r=0;r<n;r++){
-    for(let c=0;c<n;c++){
-      const h=hourBand[r*n+c];
-      if(h<1) continue;
-      
-      const colorIdx=Math.min(h-1,COLORS.length-1);
-      const color=COLORS[colorIdx];
-      
-      // Fill the scaled block
-      for(let dy=0;dy<scale;dy++){
-        for(let dx=0;dx<scale;dx++){
-          const pi=((r*scale+dy)*W+(c*scale+dx))*4;
-          px[pi]=color[0];
-          px[pi+1]=color[1];
-          px[pi+2]=color[2];
-          px[pi+3]=210; // alpha ~82%
-        }
-      }
-    }
-  }
-  
-  // Step 3: Draw dark edges at hour boundaries and fire perimeter
-  for(let r=0;r<n;r++){
-    for(let c=0;c<n;c++){
-      const h=hourBand[r*n+c];
-      if(h<1) continue;
-      
-      // Check if this cell is at the fire perimeter or an hour boundary
-      const isPerimeter=(
-        c===0||c===n-1||r===0||r===n-1||
-        hourBand[r*n+(c-1)]===0||hourBand[r*n+(c+1)]===0||
-        hourBand[(r-1)*n+c]===0||hourBand[(r+1)*n+c]===0
-      );
-      
-      const rightDiff=c<n-1&&hourBand[r*n+c+1]>0&&hourBand[r*n+c+1]!==h;
-      const bottomDiff=r<n-1&&hourBand[(r+1)*n+c]>0&&hourBand[(r+1)*n+c]!==h;
-      
-      if(isPerimeter){
-        // Draw dark border pixels on edges facing unburned cells
-        for(let dy=0;dy<scale;dy++){
-          for(let dx=0;dx<scale;dx++){
-            const atEdge=(
-              (dx===0&&(c===0||hourBand[r*n+(c-1)]===0))||
-              (dx===scale-1&&(c===n-1||hourBand[r*n+(c+1)]===0))||
-              (dy===0&&(r===0||hourBand[(r-1)*n+c]===0))||
-              (dy===scale-1&&(r===n-1||hourBand[(r+1)*n+c]===0))
-            );
-            if(atEdge){
-              const pi=((r*scale+dy)*W+(c*scale+dx))*4;
-              px[pi]=20;px[pi+1]=5;px[pi+2]=0;px[pi+3]=240;
-            }
-          }
-        }
-      }
-      
-      if(rightDiff){
-        // Vertical line on right edge
-        for(let dy=0;dy<scale;dy++){
-          const pi=((r*scale+dy)*W+(c*scale+scale-1))*4;
-          px[pi]=40;px[pi+1]=10;px[pi+2]=5;px[pi+3]=200;
-        }
-      }
-      if(bottomDiff){
-        // Horizontal line on bottom edge
-        for(let dx=0;dx<scale;dx++){
-          const pi=((r*scale+scale-1)*W+(c*scale+dx))*4;
-          px[pi]=40;px[pi+1]=10;px[pi+2]=5;px[pi+3]=200;
-        }
-      }
-    }
-  }
-  
-  ctx.putImageData(imgData,0,0);
-  overlay=L.imageOverlay(canvas.toDataURL(),gridBounds(g),{opacity:1}).addTo(map);
-  buildLegend(durHrs,'iso');
+function clearFire(){
+  if(fireLayer){map.removeLayer(fireLayer);fireLayer=null}
 }
 
-function renderHeatmap(g,durHrs){
-  clearOverlay();
-  const {n,at}=g;
+function renderFire(n,cellM,lat,lng,at,durHrs,mode){
+  clearFire();
   const durMin=durHrs*60;
-  const scale=3;
-  const W=n*scale,H=n*scale;
+  const mLat=111320,mLng=mLat*Math.cos(lat*Math.PI/180);
+  const dLat=cellM/mLat,dLng=cellM/mLng;
   
-  const canvas=document.createElement('canvas');
-  canvas.width=W;canvas.height=H;
-  const ctx=canvas.getContext('2d');
-  const imgData=ctx.createImageData(W,H);
-  const px=imgData.data;
+  fireLayer=L.layerGroup();
+  let count=0;
   
   for(let r=0;r<n;r++){
     for(let c=0;c<n;c++){
       const a=at[r*n+c];
-      if(!isFinite(a)||a<0||a>durMin) continue;
+      if(!isFinite(a)||a<0||a>durMin)continue;
       
-      const t=Math.min(a/durMin,1);
-      const idx=t*(COLORS.length-1);
-      const lo=Math.floor(idx),hi=Math.min(lo+1,COLORS.length-1),frac=idx-lo;
-      const cr=Math.round(COLORS[lo][0]+(COLORS[hi][0]-COLORS[lo][0])*frac);
-      const cg=Math.round(COLORS[lo][1]+(COLORS[hi][1]-COLORS[lo][1])*frac);
-      const cb=Math.round(COLORS[lo][2]+(COLORS[hi][2]-COLORS[lo][2])*frac);
-      
-      for(let dy=0;dy<scale;dy++){
-        for(let dx=0;dx<scale;dx++){
-          const pi=((r*scale+dy)*W+(c*scale+dx))*4;
-          px[pi]=cr;px[pi+1]=cg;px[pi+2]=cb;px[pi+3]=220;
-        }
+      let color;
+      if(mode==='iso'){
+        const hr=Math.min(Math.floor(a/60),durHrs-1);
+        color=HOUR_COLORS[Math.min(hr,HOUR_COLORS.length-1)];
+      }else{
+        const t=Math.min(a/durMin,1);
+        const idx=t*(HEAT_COLORS.length-1);
+        const lo=Math.floor(idx);
+        color=HEAT_COLORS[Math.min(lo,HEAT_COLORS.length-1)];
       }
+      
+      const cellLat=lat+((n/2-r)*cellM)/mLat;
+      const cellLng=lng+((c-n/2)*cellM)/mLng;
+      
+      const rect=L.rectangle(
+        [[cellLat,cellLng],[cellLat-dLat,cellLng+dLng]],
+        {color:color,weight:0,fillColor:color,fillOpacity:0.75,renderer:canvasRenderer}
+      );
+      fireLayer.addLayer(rect);
+      count++;
     }
   }
   
-  ctx.putImageData(imgData,0,0);
-  overlay=L.imageOverlay(canvas.toDataURL(),gridBounds(g),{opacity:1}).addTo(map);
-  buildLegend(durHrs,'heat');
-}
-
-function buildLegend(durHrs,mode){
+  // Add outer perimeter outline
+  // Find bounding cells and draw perimeter
+  let minR=n,maxR=0,minC=n,maxC=0;
+  for(let r=0;r<n;r++) for(let c=0;c<n;c++){
+    if(isFinite(at[r*n+c])&&at[r*n+c]<=durMin){
+      if(r<minR)minR=r;if(r>maxR)maxR=r;if(c<minC)minC=c;if(c>maxC)maxC=c;
+    }
+  }
+  
+  fireLayer.addTo(map);
+  console.log('Rendered',count,'fire cells');
+  
+  // Legend
   const el=EL('lgdi');el.innerHTML='';
   EL('lgdh').textContent=mode==='iso'?'Hourly Spread':'Arrival Time';
-  const count=Math.min(durHrs,COLORS.length);
-  for(let h=1;h<=count;h++){
-    const c=COLORS[Math.min(h-1,COLORS.length-1)];
-    el.innerHTML+=`<div class="lgi"><span class="lgs" style="background:rgb(${c[0]},${c[1]},${c[2]})"></span>Hour ${h}</div>`;
+  const cnt=Math.min(durHrs,HOUR_COLORS.length);
+  for(let h=0;h<cnt;h++){
+    const c=mode==='iso'?HOUR_COLORS[h]:HEAT_COLORS[Math.floor(h/cnt*HEAT_COLORS.length)];
+    el.innerHTML+=`<div class="lgi"><span class="lgs" style="background:${c}"></span>Hour ${h+1}</div>`;
   }
   EL('lgd').style.display='block';
 }
@@ -713,105 +387,109 @@ function setView(m){
   viewMode=m;
   EL('viso').className=m==='iso'?'on':'';
   EL('vheat').className=m==='heat'?'on':'';
-  if(gridRef){if(m==='iso')renderIsochrones(gridRef,durRef);else renderHeatmap(gridRef,durRef)}
+  if(gridData)renderFire(gridData.n,gridData.cellM,gridData.lat,gridData.lng,gridData.at,durStore,m);
 }
 
-
-// ============================
+// ═══════════════════════════════════════
 // MAP
-// ============================
-const map=L.map('map',{center:[37.28,-107.88],zoom:12});
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri, Maxar',maxZoom:19}).addTo(map);
+// ═══════════════════════════════════════
+const map=L.map('map',{center:[37.28,-107.88],zoom:12,preferCanvas:true});
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri',maxZoom:19}).addTo(map);
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,opacity:.6}).addTo(map);
 
 let ignMk=null,ignLL=null,placing=false;
-
 function startPlace(){placing=true;EL('mapc').classList.add('placing');EL('banner').classList.add('vis');EL('bp').classList.add('on')}
 function stopPlace(){placing=false;EL('mapc').classList.remove('placing');EL('banner').classList.remove('vis');EL('bp').classList.remove('on')}
 map.on('click',e=>{if(placing){setIgn(e.latlng);stopPlace()}});
-function applyCoords(){const la=parseFloat(EL('ilat').value),ln=parseFloat(EL('ilng').value);if(!isNaN(la)&&!isNaN(ln))setIgn(L.latLng(la,ln))}
+function applyCoords(){const a=parseFloat(EL('ilat').value),b=parseFloat(EL('ilng').value);if(!isNaN(a)&&!isNaN(b))setIgn(L.latLng(a,b))}
 function setIgn(ll){
-  ignLL=ll;
-  if(ignMk)map.removeLayer(ignMk);
+  ignLL=ll;if(ignMk)map.removeLayer(ignMk);
   ignMk=L.circleMarker(ll,{radius:6,fillColor:'#f97316',fillOpacity:1,color:'#fff',weight:2}).addTo(map);
   EL('igd').textContent=`${ll.lat.toFixed(5)}, ${ll.lng.toFixed(5)}`;
   EL('ilat').value=ll.lat.toFixed(5);EL('ilng').value=ll.lng.toFixed(5);
-  status('ready','Ignition set — fetching weather...');
-  fetchWx();
+  setStatus('ready','Ignition set — fetching weather...');fetchWx();
 }
-function clearAll(){clearOverlay();gridRef=null;EL('rpan').classList.remove('vis');EL('lgd').style.display='none';EL('prog').classList.remove('on');EL('vsec').style.display='none';status('ready','Cleared')}
+function clearAll(){clearFire();gridData=null;EL('rpan').classList.remove('vis');EL('lgd').style.display='none';EL('prog').classList.remove('on');EL('vsec').style.display='none';setStatus('ready','Cleared')}
 
-
-// ============================
-// RUN SIMULATION
-// ============================
+// ═══════════════════════════════════════
+// RUN
+// ═══════════════════════════════════════
 async function runSim(){
-  if(!ignLL){alert('Place an ignition point first.');return}
-  clearAll();
-  status('run','Building grid...');
-  EL('prog').classList.add('on');prog(5);
+  if(!ignLL){alert('Place ignition first.');return}
+  clearAll();setStatus('run','Building grid...');
+  EL('prog').classList.add('on');setProg(5);
   await new Promise(r=>setTimeout(r,50));
 
-  const cellM=parseInt(EL('res').value);
-  const extKm=parseInt(EL('ext').value);
-  const src=EL('tsrc').value;
-  const fuelKey=EL('ffm').value;
-  const wS=parseFloat(EL('ws').value);
-  const wD=parseFloat(EL('wd').value);
-  const m1=parseFloat(EL('f1').value);
-  const m10=parseFloat(EL('f10').value);
-  const m100=parseFloat(EL('f100').value);
-  const mLv=parseFloat(EL('flv').value);
-  const dH=parseInt(EL('dur').value);
-  durRef=dH;
+  const cellM=parseInt(EL('res').value),extKm=parseInt(EL('ext').value);
+  const src=EL('tsrc').value,fuelKey=EL('ffm').value;
+  const wS=+EL('ws').value,wD=+EL('wd').value;
+  const m1=+EL('f1').value,m10=+EL('f10').value,m100=+EL('f100').value,mLv=+EL('flv').value;
+  const dH=+EL('dur').value;durStore=dH;
 
-  // Test Rothermel output for the selected fuel
-  const testROS=computeROS(fuelKey,wS,wD,m1,m10,m100,mLv,10,180);
-  console.log('Test ROS for',fuelKey,':',testROS.ros.toFixed(2),'ft/min, R0:',testROS.R0.toFixed(2),'fl:',testROS.fl.toFixed(1),'ft');
-
-  const grid=buildGrid(ignLL.lat,ignLL.lng,cellM,extKm,src,fuelKey);
-  prog(30);
-  status('run',`Grid ${grid.n}×${grid.n} — spreading fire...`);
-  await new Promise(r=>setTimeout(r,50));
-
-  const t0=performance.now();
-  spreadFire(grid,Math.floor(grid.n/2),Math.floor(grid.n/2),wS,wD,m1,m10,m100,mLv,dH*60);
-  const elapsed=((performance.now()-t0)/1000).toFixed(2);
+  const n=Math.min(Math.ceil(extKm*2000/cellM),180);
+  console.log('Grid:',n,'x',n);
   
-  prog(80);
-  status('run','Rendering...');
-  await new Promise(r=>setTimeout(r,50));
+  // Build terrain
+  const elev=new Float32Array(n*n),slope=new Float32Array(n*n),aspect=new Float32Array(n*n);
+  const fuel=new Array(n*n);
+  for(let i=0;i<n*n;i++)fuel[i]=fuelKey;
 
-  gridRef=grid;
-  if(viewMode==='iso')renderIsochrones(grid,dH);else renderHeatmap(grid,dH);
-  map.fitBounds(gridBounds(grid),{padding:[30,30]});
-
-  // Stats
-  let burned=0,maxR=0,maxFL=0;
-  for(let i=0;i<grid.n*grid.n;i++){
-    if(isFinite(grid.at[i])&&grid.at[i]<=dH*60){
-      burned++;
-      if(grid.cellROS[i]>maxR)maxR=grid.cellROS[i];
-      if(grid.cellFL[i]>maxFL)maxFL=grid.cellFL[i];
+  if(src==='synth'){
+    const pn1=makePerlin(42),pn2=makePerlin(137);
+    const base=2100;
+    for(let r=0;r<n;r++)for(let c=0;c<n;c++){
+      const i=r*n+c;
+      elev[i]=base+pn1(c*.0008,r*.0008,4)*400+pn1(c*.003,r*.003,3)*100+Math.sin((c+r)*.015)*150;
+      const fn=pn2(c*.005,r*.005,3);
+      if(fn<-.4)fuel[i]='NB';
+      else if(elev[i]<base-100)fuel[i]='GR2';
+      else if(elev[i]>base+200)fuel[i]='TL3';
     }
   }
-  const acres=burned*cellM*cellM/4046.86;
-  const maxRch=maxR/66*60;
+  
+  // Slope/aspect
+  for(let r=1;r<n-1;r++)for(let c=1;c<n-1;c++){
+    const i=r*n+c,dx=(elev[i+1]-elev[i-1])/(2*cellM),dy=(elev[(r+1)*n+c]-elev[(r-1)*n+c])/(2*cellM);
+    slope[i]=Math.atan(Math.sqrt(dx*dx+dy*dy))*180/Math.PI;
+    let a=Math.atan2(-dx,dy)*180/Math.PI;if(a<0)a+=360;aspect[i]=a;
+  }
 
-  EL('rcon').innerHTML=`
-    <div class="ir"><span class="l">Grid</span><span class="v">${grid.n}×${grid.n} @ ${cellM}m</span></div>
+  setProg(25);setStatus('run',`Grid ${n}×${n} — running MTT...`);
+  await new Promise(r=>setTimeout(r,50));
+
+  // Test ROS
+  const test=calcROS(fuelKey,wS,wD,m1,m10,m100,mLv,10,180);
+  console.log('Test ROS:',test.ros.toFixed(1),'ft/min, R0:',test.R0.toFixed(2));
+
+  const t0=performance.now();
+  const result=spreadFire(n,cellM,fuel,slope,aspect,wS,wD,m1,m10,m100,mLv,dH*60);
+  const elapsed=((performance.now()-t0)/1000).toFixed(2);
+
+  setProg(70);setStatus('run','Rendering...');
+  await new Promise(r=>setTimeout(r,50));
+
+  gridData={n,cellM,lat:ignLL.lat,lng:ignLL.lng,at:result.at,cROS:result.cROS,cFL:result.cFL};
+  renderFire(n,cellM,ignLL.lat,ignLL.lng,result.at,dH,viewMode);
+
+  // Fit bounds
+  const mLat=111320,mLng=mLat*Math.cos(ignLL.lat*Math.PI/180);
+  const hLat=(n/2*cellM)/mLat,hLng=(n/2*cellM)/mLng;
+  map.fitBounds([[ignLL.lat+hLat,ignLL.lng-hLng],[ignLL.lat-hLat,ignLL.lng+hLng]],{padding:[30,30]});
+
+  // Stats
+  const dM=dH*60;let burned=0,maxR=0,maxFL=0;
+  for(let i=0;i<n*n;i++){if(isFinite(result.at[i])&&result.at[i]<=dM){burned++;if(result.cROS[i]>maxR)maxR=result.cROS[i];if(result.cFL[i]>maxFL)maxFL=result.cFL[i]}}
+  const acres=burned*cellM*cellM/4046.86,rch=maxR/66*60;
+
+  EL('rcon').innerHTML=`<div class="ir"><span class="l">Grid</span><span class="v">${n}×${n}@${cellM}m</span></div>
     <div class="ir"><span class="l">Solve</span><span class="v">${elapsed}s</span></div><div class="hr"></div>
     <div class="ir"><span class="l">Burned</span><span class="v">${acres.toFixed(0)} ac</span></div>
-    <div class="ir"><span class="l">Max ROS</span><span class="v">${maxRch.toFixed(1)} ch/hr</span></div>
+    <div class="ir"><span class="l">Max ROS</span><span class="v">${rch.toFixed(1)} ch/hr</span></div>
     <div class="ir"><span class="l">Max flame</span><span class="v">${maxFL.toFixed(1)} ft</span></div><div class="hr"></div>
     <div class="ir"><span class="l">Wind</span><span class="v">${wS}mph@${wD}°</span></div>
-    <div class="ir"><span class="l">1hr FM</span><span class="v">${m1}%</span></div>
-    <div class="ir"><span class="l">Source</span><span class="v">${src}</span></div>
-  `;
-  EL('rpan').classList.add('vis');
-  EL('vsec').style.display='block';
-  prog(100);
-  status('ready',`Done — ${acres.toFixed(0)}ac, ${maxRch.toFixed(1)}ch/hr`);
+    <div class="ir"><span class="l">1hr FM</span><span class="v">${m1}%</span></div>`;
+  EL('rpan').classList.add('vis');EL('vsec').style.display='block';
+  setProg(100);setStatus('ready',`Done — ${acres.toFixed(0)}ac, ${rch.toFixed(1)}ch/hr`);
   setTimeout(()=>EL('prog').classList.remove('on'),1500);
 }
 </script>
