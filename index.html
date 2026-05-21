@@ -147,7 +147,13 @@ header{display:flex;align-items:center;gap:14px;padding:8px 20px;background:var(
   <!-- Weather -->
   <div class="sec">
     <div class="sec-hd"><span class="dot" id="wxDot"></span> Weather</div>
-    <div class="wx-summary" id="wxSummary">Click <strong>Run</strong> to pull current conditions.</div>
+    <div class="toggle-row">
+      <span class="tl active" id="wxLiveLabel">Live</span>
+      <div class="toggle-sw on" id="wxToggle" onclick="toggleWxMode()"></div>
+      <span class="tl" id="wxCustomLabel">Custom</span>
+      <span style="font-size:9px;color:var(--dim);margin-left:auto" id="wxModeHint">Auto-fetched from Open-Meteo</span>
+    </div>
+    <div class="wx-summary" id="wxSummary">Click the map to fetch current conditions.</div>
     <div class="row">
       <div class="fld"><label>Temperature (°F)</label><input type="number" id="wxTemp" value="85"></div>
       <div class="fld"><label>Relative Humidity (%)</label><input type="number" id="wxRH" value="15" min="1" max="100"></div>
@@ -166,10 +172,10 @@ header{display:flex;align-items:center;gap:14px;padding:8px 20px;background:var(
   <div class="sec" id="fmSec">
     <div class="sec-hd"><span class="dot" id="fmDot"></span> Fuel Moisture</div>
     <div class="toggle-row">
-      <span class="tl" id="fmLiveLabel">Live</span>
+      <span class="tl active" id="fmLiveLabel">Live</span>
       <div class="toggle-sw on" id="fmToggle" onclick="toggleFMMode()"></div>
       <span class="tl" id="fmCustomLabel">Custom</span>
-      <span style="font-size:9px;color:var(--dim);margin-left:auto" id="fmModeHint">Auto-derived from weather</span>
+      <span style="font-size:9px;color:var(--dim);margin-left:auto" id="fmModeHint">Weather + condition → auto values</span>
     </div>
 
     <div class="fld">
@@ -281,8 +287,8 @@ header{display:flex;align-items:center;gap:14px;padding:8px 20px;background:var(
 
   <!-- Basemap switcher -->
   <div class="basemap-wrap">
-    <button class="bm-btn active" onclick="setBasemap('dark',this)">Dark</button>
-    <button class="bm-btn" onclick="setBasemap('topo',this)">Topo</button>
+    <button class="bm-btn" onclick="setBasemap('dark',this)">Dark</button>
+    <button class="bm-btn active" onclick="setBasemap('topo',this)">Topo</button>
     <button class="bm-btn" onclick="setBasemap('satellite',this)">Satellite</button>
   </div>
 
@@ -354,7 +360,7 @@ const basemaps = {
   satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution:'&copy; Esri',maxZoom:19})
 };
 const map = L.map('map',{center:[37.275,-107.88],zoom:12,zoomControl:true});
-let currentBasemap = basemaps.dark;
+let currentBasemap = basemaps.topo;
 currentBasemap.addTo(map);
 
 function setBasemap(key,btn) {
@@ -373,6 +379,8 @@ map.on('click',e=>{
   document.getElementById('lng').value=e.latlng.lng.toFixed(4);
   placeIgnition(e.latlng.lat,e.latlng.lng);
   lookupFuel(e.latlng.lat,e.latlng.lng);
+  // Auto-fetch weather if in Live mode
+  if(wxIsLive) fetchWeather(e.latlng.lat, e.latlng.lng);
 });
 function placeIgnition(lat,lng){if(ignMarker)map.removeLayer(ignMarker);ignMarker=L.marker([lat,lng],{icon:ignIcon}).addTo(map)}
 function toggleInfo(){document.getElementById('infoModal').classList.toggle('on')}
@@ -382,6 +390,23 @@ function toggleInfo(){document.getElementById('infoModal').classList.toggle('on'
 // ═══════════════════════════════════════
 function log(m,c=''){const el=document.getElementById('log');const ts=new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});el.innerHTML+=`<div class="log-ln ${c}"><span class="t">${ts}</span>${m}</div>`;el.scrollTop=el.scrollHeight}
 function setProg(p){const w=document.getElementById('pbar');w.classList.toggle('on',p>0&&p<100);document.getElementById('pbarFill').style.width=p+'%'}
+
+// ═══════════════════════════════════════
+// WEATHER MODE — Live vs Custom
+// ═══════════════════════════════════════
+let wxIsLive = true;
+function toggleWxMode(){
+  wxIsLive = !wxIsLive;
+  const toggle = document.getElementById('wxToggle');
+  toggle.classList.toggle('on', wxIsLive);
+  document.getElementById('wxLiveLabel').classList.toggle('active', wxIsLive);
+  document.getElementById('wxCustomLabel').classList.toggle('active', !wxIsLive);
+  document.getElementById('wxModeHint').textContent = wxIsLive ? 'Auto-fetched from Open-Meteo' : 'All values editable';
+  // Toggle derived styling on weather inputs
+  ['wxTemp','wxRH','wxWind','wxPrecip24','wxPrecip7d'].forEach(id=>{
+    document.getElementById(id).classList.toggle('derived', wxIsLive);
+  });
+}
 
 // ═══════════════════════════════════════
 // WIND ARROW
@@ -445,13 +470,13 @@ function toggleFMMode(){
   toggle.classList.toggle('on', fmIsLive);
   document.getElementById('fmLiveLabel').classList.toggle('active', fmIsLive);
   document.getElementById('fmCustomLabel').classList.toggle('active', !fmIsLive);
-  document.getElementById('fmModeHint').textContent = fmIsLive ? 'Auto-derived from weather' : 'Manual entry — values locked';
+  document.getElementById('fmModeHint').textContent = fmIsLive ? 'Weather + condition → auto values' : 'All values editable';
 
-  // Toggle derived styling
+  // Toggle derived styling on number inputs only (not the selector)
   ['fm1','fm10','fm100','fmLive'].forEach(id=>{
     document.getElementById(id).classList.toggle('derived', fmIsLive);
   });
-  document.getElementById('fmLiveSel').disabled = !fmIsLive;
+  // Veg condition selector always stays enabled
 }
 
 // Vegetation condition presets — sets ALL moisture values together
@@ -465,25 +490,21 @@ const FM_PRESETS = {
 };
 
 function applyCondition(){
-  if(!fmIsLive) return; // don't override in custom mode
   const key = document.getElementById('fmLiveSel').value;
   const preset = FM_PRESETS[key];
   if(!preset) return;
 
-  // Start from preset, then adjust dead fuels by current weather if available
-  const temp = parseFloat(document.getElementById('wxTemp').value);
-  const rh = parseFloat(document.getElementById('wxRH').value);
-  const p24 = parseFloat(document.getElementById('wxPrecip24').value);
-
-  // If we have live weather, use Simard EMC to adjust dead fuels from preset baseline
-  if(document.getElementById('wxDot').classList.contains('live')){
+  if(fmIsLive && document.getElementById('wxDot').classList.contains('live')){
+    // Live mode with weather: blend Simard EMC with preset
+    const temp = parseFloat(document.getElementById('wxTemp').value);
+    const rh = parseFloat(document.getElementById('wxRH').value);
+    const p24 = parseFloat(document.getElementById('wxPrecip24').value);
     let emc1 = simardEMC(temp, rh);
-    // Blend: 60% weather-derived, 40% condition preset
     document.getElementById('fm1').value = Math.max(1,Math.min(35,Math.round(emc1*0.6 + preset.fm1*0.4)));
     document.getElementById('fm10').value = Math.max(2,Math.min(35,Math.round(emc1*0.6*1.2 + preset.fm10*0.4 + (p24>0.05?p24*3:0))));
     document.getElementById('fm100').value = Math.max(3,Math.min(35,Math.round(preset.fm100 + (p24>0.1?p24*2:0))));
   } else {
-    // No weather — use preset directly
+    // Custom mode or no weather: use preset values directly
     document.getElementById('fm1').value = preset.fm1;
     document.getElementById('fm10').value = preset.fm10;
     document.getElementById('fm100').value = preset.fm100;
@@ -526,6 +547,7 @@ async function lookupFuel(lat,lng){
 // WEATHER
 // ═══════════════════════════════════════
 async function fetchWeather(lat,lng){
+  if(!wxIsLive){log('Weather: Custom mode — skipping fetch','w');return}
   log('Fetching weather (Open-Meteo)...','i');
   document.getElementById('wxDot').classList.remove('live');
   try{
@@ -678,8 +700,8 @@ async function run(){
     setProg(10);
     log(`FireCast LPC — ${lat.toFixed(4)}, ${lng.toFixed(4)}`,'i');
 
-    // Fetch weather if not already live
-    if(!document.getElementById('wxDot').classList.contains('live'))await fetchWeather(lat,lng);
+    // Fetch weather if in live mode and not already fetched
+    if(wxIsLive && !document.getElementById('wxDot').classList.contains('live'))await fetchWeather(lat,lng);
     setProg(20);
 
     const windMph=parseFloat(document.getElementById('wxWind').value);
