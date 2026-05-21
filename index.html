@@ -523,7 +523,8 @@ async function fetchElevation(bounds, n, cellM) {
   log('Fetching elevation (Open-Meteo / Copernicus 90m DEM)...');
 
   // Sample a coarser grid and interpolate to full resolution
-  const sampleN = Math.min(n, 50); // 50x50 = 2500 points → 25 batch requests
+  // Open-Meteo free tier: ~600 calls/min. Use 30x30 = 900 points = 9 batches.
+  const sampleN = Math.min(n, 30);
   const sampleElev = new Float32Array(sampleN * sampleN);
   sampleElev.fill(NaN);
 
@@ -549,24 +550,38 @@ async function fetchElevation(bounds, n, cellM) {
 
     const url = `https://api.open-meteo.com/v1/elevation?latitude=${batchLats.join(',')}&longitude=${batchLngs.join(',')}`;
 
-    try {
-      const resp = await fetchWithTimeout(url, 10000);
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const data = await resp.json();
+    // Retry up to 2 times on 429 with backoff
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        if (attempt > 0) await new Promise(r => setTimeout(r, 1500 * attempt));
+        const resp = await fetchWithTimeout(url, 10000);
+        if (resp.status === 429) {
+          if (attempt < 2) { continue; } // retry after delay
+          throw new Error('Rate limited (429) after retries');
+        }
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const data = await resp.json();
 
-      if (data.elevation && Array.isArray(data.elevation)) {
-        data.elevation.forEach((val, j) => {
-          const idx = i + j;
-          if (idx < sampleElev.length && val != null && val > -1000) {
-            sampleElev[idx] = val;
-            fetched++;
-          }
-        });
+        if (data.elevation && Array.isArray(data.elevation)) {
+          data.elevation.forEach((val, j) => {
+            const idx = i + j;
+            if (idx < sampleElev.length && val != null && val > -1000) {
+              sampleElev[idx] = val;
+              fetched++;
+            }
+          });
+        }
+        break; // success — exit retry loop
+      } catch (e) {
+        if (attempt === 2) {
+          errors++;
+          log(`  Batch ${Math.floor(i/BATCH)+1} error: ${e.message}`, 'warn');
+        }
       }
-    } catch (e) {
-      errors++;
-      log(`  Batch ${Math.floor(i/BATCH)+1} error: ${e.message}`, 'warn');
     }
+
+    // Rate limit: 300ms between requests
+    await new Promise(r => setTimeout(r, 300));
 
     setProgress(5 + 30 * Math.min(1, (i + BATCH) / allLats.length));
   }
@@ -822,7 +837,7 @@ function computeTerrain(elev, n, cellM) {
 
       const dx = (eE - eW) / (2 * cellM);
       const dy = (eS - eN) / (2 * cellM);
-      slope[i] = Math.atan(Math.sqrt(dx*dx + dy*dy)) * 180 / Math.PI;
+      slope[i] = Math.min(Math.atan(Math.sqrt(dx*dx + dy*dy)) * 180 / Math.PI, 45);
       let a = Math.atan2(-dx, dy) * 180 / Math.PI;
       if (a < 0) a += 360;
       aspect[i] = a;
@@ -958,6 +973,16 @@ function runMTT(n, fuel, slope, aspect, wS, wD, m1, m10, m100, mLv, durMin, cell
   }
   log(`  Burnable: ${validCount}/${n*n}`);
 
+  // Diagnostic: check ignition cell and its neighbors
+  const cIdx = Math.floor(n/2) * n + Math.floor(n/2);
+  log(`  Ignition cell: fuel=${fuel[cIdx]}, slope=${slope[cIdx].toFixed(1)}°, ROS=${cROS[cIdx].toFixed(1)} ft/min, R0=${cR0[cIdx].toFixed(2)}`);
+  // Check 4 neighbors
+  const dirs = [[-1,0,'N'],[1,0,'S'],[0,-1,'W'],[0,1,'E']];
+  for (const [dr,dc,lbl] of dirs) {
+    const ni = (Math.floor(n/2)+dr)*n + Math.floor(n/2)+dc;
+    log(`    ${lbl}: fuel=${fuel[ni]}, slope=${slope[ni].toFixed(1)}°, ROS=${cROS[ni].toFixed(1)}`);
+  }
+
   const ew = wS * 0.5;
   const LB = Math.max(1, 0.936 * Math.exp(0.2566 * ew) + 0.461 * Math.exp(-0.1548 * ew) - 0.397);
   const ecc = LB > 1.01 ? Math.sqrt(1 - 1 / (LB * LB)) : 0;
@@ -993,10 +1018,17 @@ function runMTT(n, fuel, slope, aspect, wS, wD, m1, m10, m100, mLv, durMin, cell
     return top;
   }
 
-  // Ignite center
+  // Ignite center 3×3 kernel to avoid single-cell edge effects
   const cr = Math.floor(n / 2), cc = Math.floor(n / 2);
-  at[cr * n + cc] = 0;
-  push(0, cr, cc);
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      const ir = cr + dr, ic = cc + dc;
+      if (ir >= 0 && ir < n && ic >= 0 && ic < n) {
+        at[ir * n + ic] = 0;
+        push(0, ir, ic);
+      }
+    }
+  }
 
   const visited = new Uint8Array(n * n);
   const neighbors = [
@@ -1049,7 +1081,16 @@ function runMTT(n, fuel, slope, aspect, wS, wD, m1, m10, m100, mLv, durMin, cell
   }
 
   let burned = 0;
-  for (let i = 0; i < n * n; i++) if (isFinite(at[i])) burned++;
+  let minAT = Infinity, maxAT = 0;
+  for (let i = 0; i < n * n; i++) {
+    if (isFinite(at[i])) {
+      burned++;
+      if (at[i] > 0) { minAT = Math.min(minAT, at[i]); maxAT = Math.max(maxAT, at[i]); }
+    }
+  }
+  if (burned > 1) {
+    log(`  Arrival times: ${minAT.toFixed(1)}–${maxAT.toFixed(1)} min`);
+  }
 
   return { at, cROS, cFL, burned };
 }
