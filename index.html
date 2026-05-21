@@ -1105,164 +1105,156 @@ function runMTT(n, fuel, slope, aspect, wS, wD, m1, m10, m100, mLv, durMin, cell
 
 
 // ═══════════════════════════════════════
-// MARCHING SQUARES + CONTOUR EXTRACTION
+// CONTOUR EXTRACTION — BOUNDARY TRACING
+// Traces the outer boundary of burned cells at each hourly threshold,
+// converts to lat/lng polygon, applies Chaikin smoothing
 // ═══════════════════════════════════════
 
 /**
- * Marching squares: extract isolines from the arrival-time grid
- * Returns arrays of line segments for each threshold
+ * For a given arrival-time grid and threshold (in minutes), find all cells
+ * where arrival time <= threshold, then trace the outer boundary of that region.
+ * Returns an array of closed rings in grid coordinates [col, row].
+ *
+ * Uses the "square boundary" method: walk the edges between burned/unburned cells.
  */
-function marchingSquares(grid, n, threshold) {
-  const segments = [];
-
-  for (let r = 0; r < n - 1; r++) {
-    for (let c = 0; c < n - 1; c++) {
-      // Four corners: TL, TR, BR, BL
-      const tl = grid[r * n + c];
-      const tr = grid[r * n + c + 1];
-      const br = grid[(r+1) * n + c + 1];
-      const bl = grid[(r+1) * n + c];
-
-      // Skip cells with any Infinity
-      if (!isFinite(tl) || !isFinite(tr) || !isFinite(br) || !isFinite(bl)) continue;
-
-      // Binary index: bit3=TL, bit2=TR, bit1=BR, bit0=BL
-      let idx = 0;
-      if (tl >= threshold) idx |= 8;
-      if (tr >= threshold) idx |= 4;
-      if (br >= threshold) idx |= 2;
-      if (bl >= threshold) idx |= 1;
-
-      if (idx === 0 || idx === 15) continue;
-
-      // Interpolation helpers
-      function interpTop() {
-        const t = (threshold - tl) / (tr - tl);
-        return [c + t, r];
-      }
-      function interpRight() {
-        const t = (threshold - tr) / (br - tr);
-        return [c + 1, r + t];
-      }
-      function interpBottom() {
-        const t = (threshold - bl) / (br - bl);
-        return [c + t, r + 1];
-      }
-      function interpLeft() {
-        const t = (threshold - tl) / (bl - tl);
-        return [c, r + t];
-      }
-
-      // 16 cases
-      const cases = {
-        1: [interpLeft, interpBottom],
-        2: [interpBottom, interpRight],
-        3: [interpLeft, interpRight],
-        4: [interpRight, interpTop],
-        5: null, // saddle
-        6: [interpBottom, interpTop],
-        7: [interpLeft, interpTop],
-        8: [interpTop, interpLeft],
-        9: [interpTop, interpBottom],
-        10: null, // saddle
-        11: [interpTop, interpRight],
-        12: [interpRight, interpLeft],
-        13: [interpRight, interpBottom],
-        14: [interpBottom, interpLeft],
-      };
-
-      if (idx === 5) {
-        // Saddle: use center average to disambiguate
-        const avg = (tl + tr + br + bl) / 4;
-        if (avg >= threshold) {
-          segments.push([interpLeft(), interpTop()]);
-          segments.push([interpBottom(), interpRight()]);
-        } else {
-          segments.push([interpLeft(), interpBottom()]);
-          segments.push([interpTop(), interpRight()]);
-        }
-      } else if (idx === 10) {
-        const avg = (tl + tr + br + bl) / 4;
-        if (avg >= threshold) {
-          segments.push([interpTop(), interpRight()]);
-          segments.push([interpBottom(), interpLeft()]);
-        } else {
-          segments.push([interpTop(), interpLeft()]);
-          segments.push([interpBottom(), interpRight()]);
-        }
-      } else if (cases[idx]) {
-        segments.push([cases[idx][0](), cases[idx][1]()]);
+function traceBurnBoundary(at, n, threshold) {
+  // Build a binary grid: 1 = burned (at <= threshold), 0 = not
+  const burned = new Uint8Array((n + 2) * (n + 2)); // padded by 1 on each side
+  const W = n + 2;
+  for (let r = 0; r < n; r++) {
+    for (let c = 0; c < n; c++) {
+      const v = at[r * n + c];
+      if (isFinite(v) && v <= threshold) {
+        burned[(r + 1) * W + (c + 1)] = 1;
       }
     }
   }
 
-  return segments;
+  // Find boundary edges: edges between burned and unburned cells
+  // An edge is defined by its position and orientation.
+  // We store edges as: [r, c, direction] where direction is 'R' (right), 'D' (down)
+  // Each boundary edge connects two corner vertices of the grid.
+  // Convention: grid cell [r,c] has corners at (c,r), (c+1,r), (c+1,r+1), (c,r+1)
+
+  // Use a different approach: trace the contour using marching squares on the binary grid
+  // but treat Infinity as "unburned" (value 0) and burned as value 1, threshold 0.5
+  // This always produces clean closed contours since the padded border is all 0.
+
+  const segments = [];
+  for (let r = 0; r < n + 1; r++) {
+    for (let c = 0; c < n + 1; c++) {
+      // Four corners of this marching square cell (in padded coords)
+      const tl = burned[r * W + c];
+      const tr = burned[r * W + c + 1];
+      const br = burned[(r + 1) * W + c + 1];
+      const bl = burned[(r + 1) * W + c];
+
+      let idx = 0;
+      if (tl) idx |= 8;
+      if (tr) idx |= 4;
+      if (br) idx |= 2;
+      if (bl) idx |= 1;
+
+      if (idx === 0 || idx === 15) continue;
+
+      // For binary grid (no interpolation needed — edges are at midpoints)
+      const midTop    = [c + 0.5, r];
+      const midRight  = [c + 1,   r + 0.5];
+      const midBottom = [c + 0.5, r + 1];
+      const midLeft   = [c,       r + 0.5];
+
+      // Standard marching squares cases for binary data
+      const caseTable = {
+        1:  [[midLeft, midBottom]],
+        2:  [[midBottom, midRight]],
+        3:  [[midLeft, midRight]],
+        4:  [[midRight, midTop]],
+        5:  [[midLeft, midTop], [midBottom, midRight]], // saddle
+        6:  [[midBottom, midTop]],
+        7:  [[midLeft, midTop]],
+        8:  [[midTop, midLeft]],
+        9:  [[midTop, midBottom]],
+        10: [[midTop, midRight], [midLeft, midBottom]], // saddle
+        11: [[midTop, midRight]],
+        12: [[midRight, midLeft]],
+        13: [[midRight, midBottom]],
+        14: [[midBottom, midLeft]],
+      };
+
+      const segs = caseTable[idx];
+      if (segs) {
+        for (const s of segs) {
+          // Convert from padded coords back to original grid coords (subtract 1)
+          segments.push([
+            [s[0][0] - 1, s[0][1] - 1],
+            [s[1][0] - 1, s[1][1] - 1]
+          ]);
+        }
+      }
+    }
+  }
+
+  // Assemble segments into closed rings
+  return assembleRings(segments);
 }
 
 /**
- * Assemble line segments into ordered polygons
- * Uses endpoint matching with spatial hashing
+ * Assemble line segments into closed rings using endpoint chaining
  */
-function assemblePolygons(segments) {
+function assembleRings(segments) {
   if (segments.length === 0) return [];
 
-  const EPS = 1e-6;
-  const key = (p) => `${p[0].toFixed(4)},${p[1].toFixed(4)}`;
+  const key = (p) => `${(p[0]*10000|0)},${(p[1]*10000|0)}`;
 
-  // Build adjacency: each endpoint maps to segment indices
-  const endpointMap = new Map();
+  // Build adjacency
+  const adj = new Map();
   segments.forEach((seg, i) => {
     const k0 = key(seg[0]), k1 = key(seg[1]);
-    if (!endpointMap.has(k0)) endpointMap.set(k0, []);
-    if (!endpointMap.has(k1)) endpointMap.set(k1, []);
-    endpointMap.get(k0).push(i);
-    endpointMap.get(k1).push(i);
+    if (!adj.has(k0)) adj.set(k0, []);
+    if (!adj.has(k1)) adj.set(k1, []);
+    adj.get(k0).push({ idx: i, other: seg[1], otherKey: k1 });
+    adj.get(k1).push({ idx: i, other: seg[0], otherKey: k0 });
   });
 
   const used = new Uint8Array(segments.length);
   const rings = [];
 
-  for (let start = 0; start < segments.length; start++) {
-    if (used[start]) continue;
+  for (let si = 0; si < segments.length; si++) {
+    if (used[si]) continue;
+    used[si] = 1;
 
-    const ring = [segments[start][0], segments[start][1]];
-    used[start] = 1;
+    const ring = [segments[si][0], segments[si][1]];
+    let currentKey = key(segments[si][1]);
+    const startKey = key(segments[si][0]);
 
-    // Walk forward
-    let maxIter = segments.length;
-    while (maxIter-- > 0) {
-      const lastPt = ring[ring.length - 1];
-      const k = key(lastPt);
-      const neighbors = endpointMap.get(k) || [];
+    for (let iter = 0; iter < segments.length; iter++) {
+      if (currentKey === startKey && ring.length > 2) break; // closed
+
+      const neighbors = adj.get(currentKey);
+      if (!neighbors) break;
+
       let found = false;
+      for (const nb of neighbors) {
+        if (used[nb.idx]) continue;
+        used[nb.idx] = 1;
 
-      for (const ni of neighbors) {
-        if (used[ni]) continue;
-        const seg = segments[ni];
-        const k0 = key(seg[0]), k1 = key(seg[1]);
-
-        if (k0 === k) {
-          ring.push(seg[1]);
-          used[ni] = 1;
-          found = true;
-          break;
-        } else if (k1 === k) {
-          ring.push(seg[0]);
-          used[ni] = 1;
-          found = true;
-          break;
+        // Determine which endpoint connects
+        const segPt0Key = key(segments[nb.idx][0]);
+        if (segPt0Key === currentKey) {
+          ring.push(segments[nb.idx][1]);
+          currentKey = key(segments[nb.idx][1]);
+        } else {
+          ring.push(segments[nb.idx][0]);
+          currentKey = key(segments[nb.idx][0]);
         }
-      }
-
-      if (!found) break;
-
-      // Check if ring closed
-      if (ring.length > 2 && key(ring[ring.length-1]) === key(ring[0])) {
+        found = true;
         break;
       }
+      if (!found) break;
     }
 
-    if (ring.length >= 4) {
+    // Only keep closed rings with enough points
+    if (ring.length >= 4 && key(ring[ring.length-1]) === key(ring[0])) {
       rings.push(ring);
     }
   }
@@ -1273,24 +1265,18 @@ function assemblePolygons(segments) {
 /**
  * Chaikin corner-cutting subdivision for smooth contours
  */
-function chaikinSmooth(ring, iterations = 3) {
+function chaikinSmooth(ring, iterations = 2) {
   let pts = ring.slice();
 
   for (let iter = 0; iter < iterations; iter++) {
+    if (pts.length < 3) return pts;
     const smoothed = [];
-    const n = pts.length;
-    const closed = (Math.abs(pts[0][0] - pts[n-1][0]) < 1e-6 &&
-                    Math.abs(pts[0][1] - pts[n-1][1]) < 1e-6);
-    const len = closed ? n - 1 : n;
+    // Assume closed ring: last point ≈ first point
+    const len = pts.length - 1; // skip duplicate closing point
 
     for (let i = 0; i < len; i++) {
       const p0 = pts[i];
-      const p1 = pts[(i + 1) % (closed ? len : n)];
-
-      if (i === len - 1 && !closed) {
-        smoothed.push(p0);
-        break;
-      }
+      const p1 = pts[(i + 1) % len];
 
       smoothed.push([
         0.75 * p0[0] + 0.25 * p1[0],
@@ -1302,10 +1288,10 @@ function chaikinSmooth(ring, iterations = 3) {
       ]);
     }
 
-    if (closed && smoothed.length > 0) {
+    // Close the ring
+    if (smoothed.length > 0) {
       smoothed.push([smoothed[0][0], smoothed[0][1]]);
     }
-
     pts = smoothed;
   }
 
@@ -1330,42 +1316,55 @@ function renderContours(at, n, durHrs, grid) {
   const { bounds } = grid;
 
   // Convert grid coords [col, row] to [lat, lng]
+  // Grid row 0 = north edge, row n-1 = south edge
+  // Grid col 0 = west edge, col n-1 = east edge
   function gridToLatLng(pt) {
     const col = pt[0], row = pt[1];
-    // Interpolate within the grid
-    const latFrac = row / (n - 1);
-    const lngFrac = col / (n - 1);
-    const lat = bounds.north - latFrac * (bounds.north - bounds.south);
-    const lng = bounds.west + lngFrac * (bounds.east - bounds.west);
+    const lat = bounds.north - (row / (n - 1)) * (bounds.north - bounds.south);
+    const lng = bounds.west + (col / (n - 1)) * (bounds.east - bounds.west);
     return [lat, lng];
   }
 
-  // Generate contours for each hour (working outward, i.e., latest first for fill ordering)
+  let totalPolygons = 0;
+
+  // Render from outermost hour inward so inner rings draw on top
   for (let h = durHrs; h >= 1; h--) {
     const threshold = h * 60; // minutes
-    const segments = marchingSquares(at, n, threshold);
-    if (segments.length === 0) continue;
+    const rings = traceBurnBoundary(at, n, threshold);
 
-    const rings = assemblePolygons(segments);
+    if (rings.length === 0) continue;
+
     const color = HOUR_COLORS[Math.min(h - 1, HOUR_COLORS.length - 1)];
 
-    for (const ring of rings) {
-      const smoothed = chaikinSmooth(ring, 3);
+    // Find the largest ring (by point count) — that's the outer boundary
+    // Smaller rings are holes or isolated patches
+    let largestIdx = 0, largestLen = 0;
+    rings.forEach((ring, i) => {
+      if (ring.length > largestLen) { largestLen = ring.length; largestIdx = i; }
+    });
+
+    for (let ri = 0; ri < rings.length; ri++) {
+      const ring = rings[ri];
+      if (ring.length < 4) continue;
+
+      const smoothed = chaikinSmooth(ring, 2);
       const latlngs = smoothed.map(gridToLatLng);
 
       if (latlngs.length < 3) continue;
 
+      const isOuter = (ri === largestIdx);
       const polygon = L.polygon(latlngs, {
         color: color,
-        weight: 1.5,
+        weight: isOuter ? 2 : 1,
         opacity: 0.9,
         fillColor: color,
-        fillOpacity: 0.15 + 0.05 * (durHrs - h), // inner hours more opaque
+        fillOpacity: isOuter ? 0.25 : 0.1,
         smoothFactor: 1
       });
       polygon.bindTooltip(`Hour ${h}`, { sticky: true, className: '' });
       polygon.addTo(map);
       contourLayers.push(polygon);
+      totalPolygons++;
     }
   }
 
@@ -1379,6 +1378,8 @@ function renderContours(at, n, durHrs, grid) {
     const group = L.featureGroup(contourLayers);
     map.fitBounds(group.getBounds().pad(0.1));
   }
+
+  log(`  ${totalPolygons} contour polygons rendered`);
 
   // Legend
   const legendBox = document.getElementById('legendBox');
