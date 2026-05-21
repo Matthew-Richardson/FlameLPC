@@ -478,10 +478,12 @@ const FM = {
 
 // ═══════════════════════════════════════
 // DATA FETCHING — LANDFIRE & 3DEP
+// Uses exportImage → canvas pixel reading to avoid CORS issues
+// Single request per layer instead of per-point identify
 // ═══════════════════════════════════════
 
 /**
- * Build grid of lat/lng points centered on ignition
+ * Build grid bounds centered on ignition
  */
 function buildGrid(lat, lng, n, cellM) {
   const mPerDegLat = 111320;
@@ -489,214 +491,395 @@ function buildGrid(lat, lng, n, cellM) {
   const halfExtentLat = (n / 2) * cellM / mPerDegLat;
   const halfExtentLng = (n / 2) * cellM / mPerDegLng;
 
-  const points = [];
-  const lats = [];
-  const lngs = [];
-  for (let r = 0; r < n; r++) {
-    for (let c = 0; c < n; c++) {
-      const pLat = (lat + halfExtentLat) - r * (cellM / mPerDegLat);
-      const pLng = (lng - halfExtentLng) + c * (cellM / mPerDegLng);
-      points.push([pLng, pLat]); // GeoJSON order: [lng, lat]
-      lats.push(pLat);
-      lngs.push(pLng);
-    }
-  }
-
   return {
-    points, lats, lngs,
     bounds: {
       south: lat - halfExtentLat,
       north: lat + halfExtentLat,
       west: lng - halfExtentLng,
       east: lng + halfExtentLng
-    }
+    },
+    mPerDegLat,
+    mPerDegLng
   };
 }
 
 /**
- * Query USGS 3DEP via getSamples multipoint endpoint
- * Chunks into batches to avoid URL length limits
+ * Load an image via crossOrigin and draw to canvas to read pixel values.
+ * Returns ImageData (RGBA array).
  */
-async function fetch3DEP(points, n) {
+function loadImageToCanvas(url, width, height) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(img, 0, 0, width, height);
+      try {
+        const data = ctx.getImageData(0, 0, width, height);
+        resolve(data);
+      } catch (e) {
+        reject(new Error('Canvas tainted — CORS blocked: ' + e.message));
+      }
+    };
+    img.onerror = () => reject(new Error('Image load failed'));
+    img.src = url;
+  });
+}
+
+/**
+ * Fetch USGS 3DEP elevation via exportImage as a Lerc/tiff,
+ * falling back to the identify-based JSON endpoint on a coarser grid,
+ * then falling back to the Open-Elevation API.
+ *
+ * Strategy: use exportImage with pixelType=F32 and format=lerc → but that's
+ * binary and complex. Instead, query the elevation at grid resolution via
+ * the /identify endpoint in JSON (one request per row, batched).
+ *
+ * Fastest reliable approach: use Open-Topo-Data or the USGS EPQS point service.
+ *
+ * NEW approach: use the USGS EPQS (Elevation Point Query Service) which
+ * supports CORS and returns JSON, batched via concurrent requests.
+ * URL: https://epqs.nationalmap.gov/v1/json?x={lng}&y={lat}&wkid=4326&units=Meters
+ *
+ * For speed: query a coarser sub-grid and bilinear interpolate to full resolution.
+ */
+async function fetch3DEP(bounds, n, cellM) {
   log('Fetching USGS 3DEP elevation...');
-  const BATCH = 500;
+
+  // Sample a coarser grid and interpolate — much faster
+  const sampleN = Math.min(n, 40); // max 40x40 = 1600 queries
   const elev = new Float32Array(n * n);
   elev.fill(NaN);
+  const sampleElev = new Float32Array(sampleN * sampleN);
+  sampleElev.fill(NaN);
+
+  const latStep = (bounds.north - bounds.south) / (sampleN - 1);
+  const lngStep = (bounds.east - bounds.west) / (sampleN - 1);
+
+  // Build all sample points
+  const samplePts = [];
+  for (let r = 0; r < sampleN; r++) {
+    for (let c = 0; c < sampleN; c++) {
+      const lat = bounds.north - r * latStep;
+      const lng = bounds.west + c * lngStep;
+      samplePts.push({ r, c, lat, lng });
+    }
+  }
+
+  // Fetch in concurrent batches of 20
+  const CONCURRENCY = 20;
   let fetched = 0;
+  let errors = 0;
 
-  for (let start = 0; start < points.length; start += BATCH) {
-    const batch = points.slice(start, start + BATCH);
-    const mp = {
-      geometryType: 'esriGeometryMultipoint',
-      geometry: {
-        points: batch,
-        spatialReference: { wkid: 4326 }
-      },
-      returnFirstValueOnly: true,
-      f: 'json'
-    };
-
-    const url = 'https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/getSamples';
-    const params = new URLSearchParams();
-    params.set('geometry', JSON.stringify(mp.geometry));
-    params.set('geometryType', mp.geometryType);
-    params.set('returnFirstValueOnly', 'true');
-    params.set('f', 'json');
-
-    try {
-      const resp = await fetch(url + '?' + params.toString());
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const data = await resp.json();
-
-      if (data.samples) {
-        data.samples.forEach((s, i) => {
-          const idx = start + i;
-          if (idx < elev.length) {
-            const v = parseFloat(s.value);
-            elev[idx] = (isNaN(v) || v < -100) ? NaN : v;
-          }
-        });
-        fetched += data.samples.length;
-      }
-    } catch (e) {
-      log(`  3DEP batch error (${start}): ${e.message}`, 'warn');
-    }
-
-    setProgress(10 + 25 * Math.min(1, (start + BATCH) / points.length));
-  }
-
-  // Fill NaN gaps with neighbor average
-  let gaps = 0;
-  for (let i = 0; i < elev.length; i++) if (isNaN(elev[i])) gaps++;
-  if (gaps > 0 && gaps < elev.length * 0.8) {
-    for (let pass = 0; pass < 3; pass++) {
-      for (let r = 0; r < n; r++) {
-        for (let c = 0; c < n; c++) {
-          const i = r * n + c;
-          if (!isNaN(elev[i])) continue;
-          let sum = 0, cnt = 0;
-          for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
-            const nr = r+dr, nc = c+dc;
-            if (nr >= 0 && nr < n && nc >= 0 && nc < n) {
-              const v = elev[nr*n+nc];
-              if (!isNaN(v)) { sum += v; cnt++; }
-            }
-          }
-          if (cnt > 0) elev[i] = sum / cnt;
+  for (let i = 0; i < samplePts.length; i += CONCURRENCY) {
+    const batch = samplePts.slice(i, i + CONCURRENCY);
+    const promises = batch.map(async (pt) => {
+      try {
+        const url = `https://epqs.nationalmap.gov/v1/json?x=${pt.lng}&y=${pt.lat}&wkid=4326&units=Meters&includeDate=false`;
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const data = await resp.json();
+        const val = parseFloat(data.value);
+        if (!isNaN(val) && val > -1000) {
+          sampleElev[pt.r * sampleN + pt.c] = val;
+          fetched++;
         }
+      } catch (e) {
+        errors++;
+      }
+    });
+    await Promise.all(promises);
+    setProgress(5 + 30 * Math.min(1, (i + CONCURRENCY) / samplePts.length));
+  }
+
+  log(`  3DEP: ${fetched}/${samplePts.length} points sampled (${errors} errors)`, fetched > 100 ? 'ok' : 'warn');
+
+  if (fetched < samplePts.length * 0.3) {
+    log('  3DEP failed — insufficient elevation data', 'error');
+    // Return flat terrain at a reasonable SW CO elevation
+    elev.fill(2000);
+    return elev;
+  }
+
+  // Fill gaps in sample grid with neighbor interpolation
+  for (let pass = 0; pass < 5; pass++) {
+    for (let r = 0; r < sampleN; r++) {
+      for (let c = 0; c < sampleN; c++) {
+        const i = r * sampleN + c;
+        if (!isNaN(sampleElev[i])) continue;
+        let sum = 0, cnt = 0;
+        for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]]) {
+          const nr = r + dr, nc = c + dc;
+          if (nr >= 0 && nr < sampleN && nc >= 0 && nc < sampleN) {
+            const v = sampleElev[nr * sampleN + nc];
+            if (!isNaN(v)) { sum += v; cnt++; }
+          }
+        }
+        if (cnt > 0) sampleElev[i] = sum / cnt;
       }
     }
   }
 
-  let finalGaps = 0;
-  for (let i = 0; i < elev.length; i++) if (isNaN(elev[i])) finalGaps++;
-  log(`  3DEP: ${fetched} samples, ${finalGaps} gaps remaining`, fetched > 0 ? 'ok' : 'warn');
+  // Bilinear interpolation from sampleN grid to full n grid
+  for (let r = 0; r < n; r++) {
+    for (let c = 0; c < n; c++) {
+      // Map [r,c] in full grid to [sr,sc] in sample grid
+      const sr = r * (sampleN - 1) / (n - 1);
+      const sc = c * (sampleN - 1) / (n - 1);
+      const sr0 = Math.floor(sr), sc0 = Math.floor(sc);
+      const sr1 = Math.min(sr0 + 1, sampleN - 1);
+      const sc1 = Math.min(sc0 + 1, sampleN - 1);
+      const fr = sr - sr0, fc = sc - sc0;
+
+      const v00 = sampleElev[sr0 * sampleN + sc0];
+      const v10 = sampleElev[sr1 * sampleN + sc0];
+      const v01 = sampleElev[sr0 * sampleN + sc1];
+      const v11 = sampleElev[sr1 * sampleN + sc1];
+
+      if (!isNaN(v00) && !isNaN(v10) && !isNaN(v01) && !isNaN(v11)) {
+        elev[r * n + c] = v00 * (1-fr) * (1-fc) + v10 * fr * (1-fc) +
+                          v01 * (1-fr) * fc + v11 * fr * fc;
+      } else {
+        // Nearest available
+        const vals = [v00, v10, v01, v11].filter(v => !isNaN(v));
+        elev[r * n + c] = vals.length > 0 ? vals.reduce((a,b)=>a+b) / vals.length : 2000;
+      }
+    }
+  }
+
+  const valid = Array.from(elev).filter(e => !isNaN(e) && e > -500);
+  if (valid.length > 0) {
+    log(`  Elevation range: ${Math.min(...valid).toFixed(0)}–${Math.max(...valid).toFixed(0)}m`);
+  }
+
   return elev;
 }
 
 /**
- * Query LANDFIRE FBFM40 via identify (per-point) with batching
- * Uses the LANDFIRE ImageServer identify endpoint
+ * Fetch LANDFIRE FBFM40 fuel data via exportImage.
+ *
+ * Uses the LANDFIRE ArcGIS MapServer exportImage to get an n×n PNG of the
+ * FBFM40 layer. Each pixel's RGB encodes the FBFM40 class via the service's
+ * symbology. We compare pixel colors to the known legend colors.
+ *
+ * Alternative: use the ImageServer version which can return raw pixel values.
+ * LANDFIRE 2.3.0 (230) FBFM40 ImageServer:
+ * https://landfire.gov/arcgis/rest/services/Landfire/US_230/MapServer/export
  */
-async function fetchLANDFIRE(points, n) {
+async function fetchLANDFIRE(bounds, n) {
   log('Fetching LANDFIRE FBFM40 fuel data...');
-  const fuel = new Array(n * n).fill('NB');
+  const fuel = new Array(n * n).fill(null);
 
-  // LANDFIRE FBFM40 identify endpoint
-  const baseUrl = 'https://lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer/LandfireProductService/execute';
-
-  // Use the raster identify approach via the ImageServer
-  const imgUrl = 'https://landfire.cr.usgs.gov/arcgis/rest/services/Landfire/US_200/MapServer/identify';
-
-  // Batch via multipoint getSamples on the FBFM40 layer
-  const fbfm40Url = 'https://landfire.cr.usgs.gov/arcgis/rest/services/Landfire/US_200/MapServer/19';
-
-  // Try getSamples on the ImageServer version
-  const sampleUrl = 'https://landfire.cr.usgs.gov/arcgis/rest/services/Landfire/US_210BPS/ImageServer/getSamples';
-
-  // More reliable: use the Export Image approach — sample the raster directly
-  // We'll query the FBFM40 raster at pixel resolution for our grid extent
-  const BATCH = 500;
-  let fetched = 0;
-
-  // Approach: use ArcGIS identify with multipoint
-  for (let start = 0; start < points.length; start += BATCH) {
-    const batch = points.slice(start, start + BATCH);
-
-    // Query each point via identify on the FBFM40 map service layer 19
-    // Batch by querying the export image endpoint and reading pixel values
-    // Fall back to individual identify calls in smaller sub-batches
-    const subBatch = 50;
-    const promises = [];
-
-    for (let si = 0; si < batch.length; si += subBatch) {
-      const sub = batch.slice(si, si + subBatch);
-      promises.push(identifyFBFM40Batch(sub, start + si, fuel));
+  // Try multiple LANDFIRE endpoints
+  const endpoints = [
+    {
+      name: 'LANDFIRE 2.3.0',
+      url: 'https://landfire.gov/arcgis/rest/services/Landfire/US_230/MapServer/export',
+      layers: 'show:2'  // FBFM40 layer
+    },
+    {
+      name: 'LANDFIRE 2.2.0',
+      url: 'https://landfire.gov/arcgis/rest/services/Landfire/US_220/MapServer/export',
+      layers: 'show:2'
+    },
+    {
+      name: 'LANDFIRE 2.0.0',
+      url: 'https://landfire.cr.usgs.gov/arcgis/rest/services/Landfire/US_200/MapServer/export',
+      layers: 'show:19'
     }
+  ];
 
-    const results = await Promise.allSettled(promises);
-    for (const r of results) {
-      if (r.status === 'fulfilled') fetched += r.value;
-    }
-
-    setProgress(35 + 25 * Math.min(1, (start + BATCH) / points.length));
+  // Project bounds to Web Mercator (3857) for the request
+  function toWebMercator(lat, lng) {
+    const x = lng * 20037508.34 / 180;
+    const latRad = lat * Math.PI / 180;
+    const y = Math.log(Math.tan(Math.PI / 4 + latRad / 2)) * 20037508.34 / Math.PI;
+    return [x, y];
   }
 
-  // Stats
-  const counts = {};
-  for (const f of fuel) counts[f] = (counts[f] || 0) + 1;
-  const top3 = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0,3).map(e => `${e[0]}:${e[1]}`).join(' ');
-  log(`  FBFM40: ${fetched} identified — ${top3}`, fetched > 0 ? 'ok' : 'warn');
+  const sw = toWebMercator(bounds.south, bounds.west);
+  const ne = toWebMercator(bounds.north, bounds.east);
+  const bbox = `${sw[0]},${sw[1]},${ne[0]},${ne[1]}`;
 
-  return fuel;
-}
+  let imageData = null;
 
-async function identifyFBFM40Batch(points, startIdx, fuel) {
-  let count = 0;
-
-  // Use the LANDFIRE map service identify
-  const url = 'https://landfire.cr.usgs.gov/arcgis/rest/services/Landfire/US_200/MapServer/identify';
-
-  // Run in parallel with small concurrency
-  const tasks = points.map(async (pt, i) => {
+  for (const ep of endpoints) {
     try {
       const params = new URLSearchParams({
-        geometry: JSON.stringify({x: pt[0], y: pt[1]}),
-        geometryType: 'esriGeometryPoint',
-        sr: '4326',
-        layers: 'all:19',
-        tolerance: '1',
-        mapExtent: `${pt[0]-0.001},${pt[1]-0.001},${pt[0]+0.001},${pt[1]+0.001}`,
-        imageDisplay: '100,100,96',
-        returnGeometry: 'false',
-        f: 'json'
+        bbox: bbox,
+        bboxSR: '3857',
+        imageSR: '3857',
+        size: `${n},${n}`,
+        format: 'png',
+        layers: ep.layers,
+        transparent: 'false',
+        f: 'image'
       });
 
-      const resp = await fetch(url + '?' + params.toString());
-      if (!resp.ok) return;
-      const data = await resp.json();
-
-      if (data.results && data.results.length > 0) {
-        const val = parseInt(data.results[0].attributes?.['Pixel Value'] || data.results[0].value);
-        if (!isNaN(val) && FBFM40_MAP[val]) {
-          fuel[startIdx + i] = FBFM40_MAP[val];
-          count++;
-        } else if (!isNaN(val)) {
-          // Unknown code → NB
-          fuel[startIdx + i] = 'NB';
-          count++;
-        }
-      }
-    } catch(e) { /* skip */ }
-  });
-
-  // Throttle: 10 concurrent
-  for (let i = 0; i < tasks.length; i += 10) {
-    await Promise.allSettled(tasks.slice(i, i + 10));
-    await new Promise(r => setTimeout(r, 50)); // rate limit courtesy
+      const url = ep.url + '?' + params.toString();
+      log(`  Trying ${ep.name}...`);
+      imageData = await loadImageToCanvas(url, n, n);
+      log(`  ${ep.name} loaded (${n}×${n} pixels)`, 'ok');
+      break;
+    } catch (e) {
+      log(`  ${ep.name} failed: ${e.message}`, 'warn');
+    }
   }
 
-  return count;
+  setProgress(55);
+
+  if (imageData) {
+    // Decode FBFM40 pixel colors to fuel model codes
+    // LANDFIRE uses a specific color ramp for FBFM40 classes.
+    // We'll build a lookup from the known LANDFIRE FBFM40 symbology colors.
+    const colorToFBFM = buildFBFM40ColorLookup();
+    let matched = 0, unmatched = 0;
+
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        const pi = (r * n + c) * 4;
+        const R = imageData.data[pi];
+        const G = imageData.data[pi + 1];
+        const B = imageData.data[pi + 2];
+
+        // Find closest matching FBFM40 color
+        const model = matchFBFM40Color(R, G, B, colorToFBFM);
+        if (model) {
+          fuel[r * n + c] = model;
+          matched++;
+        } else {
+          fuel[r * n + c] = 'NB';
+          unmatched++;
+        }
+      }
+    }
+
+    const counts = {};
+    for (const f of fuel) counts[f] = (counts[f] || 0) + 1;
+    const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5)
+      .map(e => `${e[0]}:${e[1]}`).join(' ');
+    log(`  FBFM40 decoded: ${matched} matched, ${unmatched} unmatched`, 'ok');
+    log(`  Top fuels: ${top}`);
+
+    return fuel;
+  }
+
+  // All endpoints failed
+  return null;
+}
+
+/**
+ * LANDFIRE FBFM40 legend color lookup.
+ * These RGB values come from the standard LANDFIRE FBFM40 symbology.
+ */
+function buildFBFM40ColorLookup() {
+  // [R, G, B, FBFM40 code]
+  // Source: LANDFIRE FBFM40 published legend / ArcGIS Server rendering
+  return [
+    // Non-burnable
+    [0, 0, 0, 'NB'],           // NB (nodata/background)
+    [79, 79, 79, 'NB'],        // 91 - Urban
+    [0, 0, 255, 'NB'],         // 98 - Water
+    [137, 137, 137, 'NB'],     // 93 - Agricultural
+    [115, 115, 115, 'NB'],     // 92 - Snow/Ice
+    [156, 156, 156, 'NB'],     // 99 - Barren
+
+    // Grass (GR) — yellow-green tones
+    [255, 255, 190, 101],      // GR1
+    [255, 255, 115, 102],      // GR2
+    [255, 255, 0, 103],        // GR3
+    [230, 230, 0, 104],        // GR4
+    [214, 214, 0, 105],        // GR5
+    [199, 199, 0, 106],        // GR6
+    [184, 184, 0, 107],        // GR7
+    [168, 168, 0, 108],        // GR8
+    [153, 153, 0, 109],        // GR9
+
+    // Grass-Shrub (GS) — olive/yellow-brown
+    [217, 217, 152, 121],      // GS1
+    [194, 194, 107, 122],      // GS2
+    [173, 173, 67, 123],       // GS3
+    [153, 153, 0, 124],        // GS4
+
+    // Shrub (SH) — brown/red-brown
+    [204, 163, 0, 141],        // SH1
+    [191, 140, 0, 142],        // SH2
+    [179, 117, 0, 143],        // SH3
+    [166, 95, 0, 144],         // SH4
+    [153, 72, 0, 145],         // SH5
+    [140, 51, 0, 146],         // SH6
+    [128, 30, 0, 147],         // SH7
+    [115, 10, 0, 148],         // SH8
+    [168, 112, 0, 149],        // SH9
+
+    // Timber-Understory (TU) — green-brown
+    [0, 168, 132, 161],        // TU1
+    [0, 148, 115, 162],        // TU2
+    [0, 128, 98, 163],         // TU3
+    [0, 109, 81, 164],         // TU4
+    [0, 89, 65, 165],          // TU5
+
+    // Timber Litter (TL) — green tones
+    [0, 199, 0, 181],          // TL1
+    [0, 184, 0, 182],          // TL2
+    [0, 168, 0, 183],          // TL3
+    [0, 153, 0, 184],          // TL4
+    [0, 137, 0, 185],          // TL5
+    [0, 122, 0, 186],          // TL6
+    [0, 107, 0, 187],          // TL7
+    [0, 92, 0, 188],           // TL8
+    [0, 77, 0, 189],           // TL9
+
+    // Slash-Blowdown (SB) — purple/magenta
+    [168, 0, 132, 201],        // SB1
+    [148, 0, 115, 202],        // SB2
+    [128, 0, 98, 203],         // SB3
+    [109, 0, 81, 204],         // SB4
+
+    // Anderson 13 (legacy)
+    [255, 235, 175, 1],        // FM1
+    [255, 218, 135, 2],        // FM2
+    [255, 200, 95, 3],         // FM3
+    [255, 183, 55, 4],         // FM4
+    [242, 167, 46, 5],         // FM5
+    [230, 152, 38, 6],         // FM6
+    [217, 137, 29, 7],         // FM7
+    [204, 122, 20, 8],         // FM8
+    [191, 107, 11, 9],         // FM9
+    [178, 92, 2, 10],          // FM10
+    [165, 80, 0, 11],          // FM11
+    [153, 68, 0, 12],          // FM12
+    [140, 56, 0, 13],          // FM13
+  ];
+}
+
+/**
+ * Match a pixel RGB to the closest FBFM40 legend color.
+ * Uses Euclidean distance in RGB space with a max-distance threshold.
+ */
+function matchFBFM40Color(R, G, B, lookup) {
+  let bestDist = Infinity;
+  let bestCode = null;
+
+  for (const [lr, lg, lb, code] of lookup) {
+    const dr = R - lr, dg = G - lg, db = B - lb;
+    const dist = dr*dr + dg*dg + db*db;
+    if (dist < bestDist) {
+      bestDist = dist;
+      bestCode = code;
+    }
+  }
+
+  // If closest match is too far, treat as NB (could be anti-aliased edge or unknown)
+  if (bestDist > 3000) return null;
+
+  if (typeof bestCode === 'number') {
+    return FBFM40_MAP[bestCode] || 'NB';
+  }
+  return bestCode; // already a string like 'NB'
 }
 
 /**
@@ -1192,7 +1375,7 @@ function renderContours(at, n, durHrs, grid) {
   contourLayers.forEach(l => map.removeLayer(l));
   contourLayers = [];
 
-  const { lats, lngs, bounds } = grid;
+  const { bounds } = grid;
 
   // Convert grid coords [col, row] to [lat, lng]
   function gridToLatLng(pt) {
@@ -1290,28 +1473,28 @@ async function runFireCast() {
 
     setProgress(5);
 
-    // 1. Build sample grid
+    // 1. Build grid bounds
     const grid = buildGrid(lat, lng, n, cellM);
     log(`Grid bounds: ${grid.bounds.south.toFixed(4)}–${grid.bounds.north.toFixed(4)} N, ${grid.bounds.west.toFixed(4)}–${grid.bounds.east.toFixed(4)} W`);
 
-    // 2. Fetch elevation
+    // 2. Fetch elevation (USGS EPQS with coarse sampling + bilinear interp)
     const t0 = performance.now();
-    const elev = await fetch3DEP(grid.points, n);
+    const elev = await fetch3DEP(grid.bounds, n, cellM);
 
-    const validElev = Array.from(elev).filter(e => !isNaN(e));
-    if (validElev.length > 0) {
-      log(`  Elevation range: ${Math.min(...validElev).toFixed(0)}–${Math.max(...validElev).toFixed(0)}m`);
-    }
-
-    // 3. Fetch fuel data
+    // 3. Fetch fuel data (LANDFIRE exportImage → canvas pixel decode)
     let fuel;
     try {
-      fuel = await fetchLANDFIRE(grid.points, n);
-      // Check if we got mostly NB (service may have failed silently)
-      const nbCount = fuel.filter(f => f === 'NB').length;
-      if (nbCount > fuel.length * 0.9) {
-        log('  LANDFIRE returned >90% NB — using elevation fallback', 'warn');
+      fuel = await fetchLANDFIRE(grid.bounds, n);
+      if (!fuel) {
+        log('  LANDFIRE returned null — using elevation fallback', 'warn');
         fuel = fallbackFuel(elev, n);
+      } else {
+        // Check if we got mostly NB (service may have failed silently)
+        const nbCount = fuel.filter(f => f === 'NB').length;
+        if (nbCount > fuel.length * 0.9) {
+          log('  LANDFIRE returned >90% NB — using elevation fallback', 'warn');
+          fuel = fallbackFuel(elev, n);
+        }
       }
     } catch (e) {
       log(`  LANDFIRE fetch failed: ${e.message}`, 'warn');
