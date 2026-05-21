@@ -3,113 +3,114 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FireCast LPC v4</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>FireCast LPC</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#070b14;--bg1:#0d1424;--bg2:#141e35;--bg3:#1b2847;--bd:#223054;--t1:#e0e8f5;--t2:#8da0c0;--t3:#506585;--ac:#f97316;--ac2:#ea580c;--rd:#ef4444;--gn:#22c55e;--yl:#eab308}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t1);height:100vh;overflow:hidden;display:flex}
-.side{width:360px;min-width:360px;height:100vh;background:var(--bg1);border-right:1px solid var(--bd);display:flex;flex-direction:column;z-index:1000}
-.s-hd{padding:16px 20px 12px;border-bottom:1px solid var(--bd)}
-.s-hd h1{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
-.s-logo{width:24px;height:24px;background:linear-gradient(135deg,var(--ac),var(--rd));border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px}
-.s-tag{font-size:8px;font-weight:600;background:var(--bg2);color:var(--t3);padding:2px 6px;border-radius:3px;border:1px solid var(--bd)}
-.s-hd p{font-size:10px;color:var(--t3);margin-top:2px;font-family:'JetBrains Mono',monospace}
-.s-body{flex:1;overflow-y:auto;padding:14px 20px 20px;scrollbar-width:thin;scrollbar-color:var(--bd) transparent}
-.sec{margin-bottom:14px}.sec-t{font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:7px;display:flex;align-items:center;gap:6px}
-.fg{margin-bottom:8px}.fg label{display:block;font-size:11px;font-weight:500;color:var(--t2);margin-bottom:3px}.fg .u{color:var(--t3);font-weight:400;font-size:10px}
-input[type=number],select{width:100%;padding:7px 9px;background:var(--bg);border:1px solid var(--bd);border-radius:4px;color:var(--t1);font-family:'JetBrains Mono',monospace;font-size:12px;outline:0}
-input:focus,select:focus{border-color:var(--ac)}
-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' fill='%23506585'%3E%3Cpath d='M4 6L.5 1.5h7z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;padding-right:24px}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:7px}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
-.btn{width:100%;padding:10px;border:none;border-radius:6px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
-.btn-p{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff}.btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(249,115,22,.3)}
-.btn-s{background:var(--bg2);color:var(--t2);border:1px solid var(--bd)}.btn-s:hover{border-color:var(--t3);color:var(--t1)}.btn-s.on{border-color:var(--ac);color:var(--ac)}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0a0e17;color:#e0e8f5;height:100vh;overflow:hidden;display:flex}
+.sb{width:340px;min-width:340px;height:100vh;background:#0d1424;border-right:1px solid #1e2d4a;display:flex;flex-direction:column}
+.sb-h{padding:14px 18px 10px;border-bottom:1px solid #1e2d4a}
+.sb-h h1{font-size:15px;font-weight:700;display:flex;align-items:center;gap:7px}
+.sb-h span.logo{width:22px;height:22px;background:linear-gradient(135deg,#f97316,#ef4444);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px}
+.sb-h p{font-size:10px;color:#4a5c7a;margin-top:2px;font-family:monospace}
+.sb-b{flex:1;overflow-y:auto;padding:12px 18px 18px}
+.s{margin-bottom:12px}
+.st{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#4a5c7a;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.fg{margin-bottom:7px}
+.fg label{display:block;font-size:10.5px;font-weight:500;color:#7d8faa;margin-bottom:2px}
+.fg .u{color:#4a5c7a;font-size:9px}
+input[type=number],select{width:100%;padding:6px 8px;background:#070b14;border:1px solid #1e2d4a;border-radius:3px;color:#e0e8f5;font-family:monospace;font-size:12px;outline:0}
+input:focus,select:focus{border-color:#f97316}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' fill='%234a5c7a'%3E%3Cpath d='M4 6L.5 1.5h7z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:22px;font-family:system-ui;font-size:11px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.btn{width:100%;padding:9px;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px}
+.btn-p{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff}
+.btn-p:hover{box-shadow:0 3px 12px rgba(249,115,22,.3)}
+.btn-p:disabled{opacity:.4;cursor:wait}
+.btn-s{background:#141e35;color:#7d8faa;border:1px solid #1e2d4a}
+.btn-s:hover{border-color:#4a5c7a;color:#e0e8f5}
+.btn-s.on{border-color:#f97316;color:#f97316}
 .brow{display:flex;gap:5px}.brow .btn{flex:1}
-.badge{display:inline-flex;padding:2px 6px;border-radius:3px;font-size:8px;font-weight:600;font-family:'JetBrains Mono',monospace}
-.b-ok{background:rgba(34,197,94,.12);color:var(--gn);border:1px solid rgba(34,197,94,.2)}
-.b-wait{background:rgba(234,179,8,.12);color:var(--yl);border:1px solid rgba(234,179,8,.2)}
-.b-err{background:rgba(239,68,68,.12);color:var(--rd);border:1px solid rgba(239,68,68,.2)}
-.div{height:1px;background:var(--bd);margin:12px 0}
-input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:3px;background:var(--bd);border-radius:2px;outline:0;margin:6px 0}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--ac);border-radius:50%;cursor:pointer}
-.slab{display:flex;justify-content:space-between;font-size:9px;color:var(--t3);font-family:'JetBrains Mono',monospace}
-.prog{width:100%;height:3px;background:var(--bd);border-radius:2px;margin-top:8px;overflow:hidden;display:none}.prog.on{display:block}
-.progf{height:100%;background:var(--ac);border-radius:2px;width:0%;transition:width .15s}
-.tog{display:flex;background:var(--bg);border:1px solid var(--bd);border-radius:4px;overflow:hidden;margin-bottom:8px}
-.tog button{flex:1;padding:6px 0;border:0;background:0;color:var(--t3);font-size:10px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s}.tog button.on{background:var(--bg3);color:var(--t1)}
-.ref{font-size:9px;color:var(--t3);font-family:'JetBrains Mono',monospace;line-height:1.5;padding:8px 10px;background:var(--bg);border-radius:4px;border-left:2px solid var(--bd)}.ref a{color:var(--ac);text-decoration:none}
-.stat{padding:10px 20px;border-top:1px solid var(--bd);font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--t3);display:flex;align-items:center;gap:6px}
-.sdot{width:5px;height:5px;border-radius:50%;background:var(--gn);flex-shrink:0}.sdot.run{background:var(--ac);animation:pu 1s ease infinite}
-@keyframes pu{0%,100%{opacity:1}50%{opacity:.4}}
-.mapc{flex:1;position:relative}#map{width:100%;height:100%;background:var(--bg)}
-.leaflet-container{background:var(--bg)}.leaflet-control-zoom a{background:var(--bg2)!important;color:var(--t1)!important;border-color:var(--bd)!important}
-.leaflet-control-attribution{background:rgba(7,11,20,.85)!important;color:var(--t3)!important;font-size:9px!important}.leaflet-control-attribution a{color:var(--t2)!important}
-.ov{position:absolute;z-index:800;pointer-events:none}
-.rpan{top:12px;right:12px;background:rgba(20,30,53,.94);backdrop-filter:blur(10px);border:1px solid var(--bd);border-radius:6px;padding:14px 16px;pointer-events:auto;display:none;min-width:210px;max-width:260px}.rpan.vis{display:block}
-.rpan h3,.lgd h3{font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:7px}
-.ir{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px}.ir .l{color:var(--t2)}.ir .v{color:var(--t1);font-family:'JetBrains Mono',monospace;font-weight:500;font-size:10px}
-.hr{height:1px;background:var(--bd);margin:6px 0}
-.lgd{bottom:24px;right:12px;background:rgba(20,30,53,.94);backdrop-filter:blur(10px);border:1px solid var(--bd);border-radius:6px;padding:12px 14px;pointer-events:auto;min-width:150px;display:none}
-.lgi{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--t2);margin-bottom:3px;font-family:'JetBrains Mono',monospace}
-.lgs{width:16px;height:10px;border-radius:2px;flex-shrink:0}
-.banner{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:900;background:rgba(249,115,22,.95);color:#fff;padding:8px 22px;border-radius:100px;font-size:12px;font-weight:600;pointer-events:none;display:none;white-space:nowrap;box-shadow:0 3px 16px rgba(249,115,22,.4)}.banner.vis{display:block}
+.dv{height:1px;background:#1e2d4a;margin:10px 0}
+.badge{display:inline-flex;padding:1px 5px;border-radius:3px;font-size:7.5px;font-weight:600;font-family:monospace}
+.b-ok{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
+.b-wait{background:rgba(234,179,8,.12);color:#facc15;border:1px solid rgba(234,179,8,.2)}
+.prog{width:100%;height:2px;background:#1e2d4a;border-radius:1px;margin:6px 0;overflow:hidden}
+.pf{height:100%;background:#f97316;width:0%;transition:width .1s}
+.sb-f{padding:8px 18px;border-top:1px solid #1e2d4a;font-size:9.5px;font-family:monospace;color:#4a5c7a;display:flex;align-items:center;gap:5px}
+.dot{width:5px;height:5px;border-radius:50%;background:#22c55e;flex-shrink:0}
+.dot.run{background:#f97316;animation:p 1s ease infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+.mc{flex:1;position:relative}
+#map{width:100%;height:100%;background:#070b14}
+.leaflet-container{background:#070b14}
+.leaflet-control-zoom a{background:#141e35!important;color:#e0e8f5!important;border-color:#1e2d4a!important}
+.leaflet-control-attribution{background:rgba(7,11,20,.85)!important;color:#4a5c7a!important;font-size:9px!important}
+.leaflet-control-attribution a{color:#7d8faa!important}
+.banner{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:900;background:rgba(249,115,22,.92);color:#fff;padding:7px 20px;border-radius:50px;font-size:12px;font-weight:600;pointer-events:none;display:none;white-space:nowrap}
+.banner.vis{display:block}
 .placing #map{cursor:crosshair!important}
+.ov{position:absolute;z-index:800;pointer-events:none}
+.rpn{top:10px;right:10px;background:rgba(13,20,36,.93);backdrop-filter:blur(8px);border:1px solid #1e2d4a;border-radius:5px;padding:12px 14px;pointer-events:auto;display:none;min-width:190px}
+.rpn.vis{display:block}
+.rpn h3{font-size:7.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#4a5c7a;margin-bottom:6px}
+.ir{display:flex;justify-content:space-between;font-size:10.5px;margin-bottom:3px}
+.ir .l{color:#7d8faa}.ir .v{color:#e0e8f5;font-family:monospace;font-weight:500;font-size:10px}
+.hr{height:1px;background:#1e2d4a;margin:5px 0}
+.lgd{bottom:20px;right:10px;background:rgba(13,20,36,.93);backdrop-filter:blur(8px);border:1px solid #1e2d4a;border-radius:5px;padding:10px 12px;pointer-events:auto;display:none;min-width:130px}
+.lgd h3{font-size:7.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#4a5c7a;margin-bottom:5px}
+.li{display:flex;align-items:center;gap:6px;font-size:9.5px;color:#7d8faa;margin-bottom:2px;font-family:monospace}
+.ls{width:14px;height:8px;border-radius:1px;flex-shrink:0}
+.ref{font-size:8px;color:#3a4d6a;font-family:monospace;line-height:1.4;padding:6px 8px;background:#070b14;border-radius:3px;border-left:2px solid #1e2d4a}
 </style>
 </head>
 <body>
-<div class="side">
-  <div class="s-hd"><h1><span class="s-logo">🔥</span>FireCast LPC<span class="s-tag">v4</span></h1><p>Rothermel MTT · NWS · Leaflet Vector</p></div>
-  <div class="s-body">
-    <div class="sec"><div class="sec-t">Ignition Point</div>
-      <div class="brow" style="margin-bottom:6px"><button class="btn btn-s" id="bp" onclick="startPlace()">📍 Click Map</button><button class="btn btn-s" onclick="toggleEl('crd')">⌨ Coords</button></div>
-      <div id="crd" style="display:none"><div class="g2"><div class="fg"><label>Lat</label><input type="number" id="ilat" step=".0001" onchange="applyCoords()"></div><div class="fg"><label>Lng</label><input type="number" id="ilng" step=".0001" onchange="applyCoords()"></div></div></div>
-      <div id="igd" style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--t3);min-height:14px"></div>
-    </div><div class="div"></div>
-    <div class="sec"><div class="sec-t">Weather <span class="badge b-wait" id="wxb">awaiting ignition</span></div>
-      <div class="g2"><div class="fg"><label>Wind Speed <span class="u">(mph@20ft)</span></label><input type="number" id="ws" value="15" min="0" max="80"></div><div class="fg"><label>Wind From <span class="u">(°)</span></label><input type="number" id="wd" value="225" min="0" max="360" step="5"></div></div>
-      <div class="g2"><div class="fg"><label>Temp <span class="u">(°F)</span></label><input type="number" id="wt" value="82"></div><div class="fg"><label>RH <span class="u">(%)</span></label><input type="number" id="wh" value="12"></div></div>
-      <div class="g3"><div class="fg"><label>1hr FM <span class="u">(%)</span></label><input type="number" id="f1" value="4"></div><div class="fg"><label>10hr <span class="u">(%)</span></label><input type="number" id="f10" value="6"></div><div class="fg"><label>100hr <span class="u">(%)</span></label><input type="number" id="f100" value="9"></div></div>
-      <div class="fg"><label>Live FM <span class="u">(%)</span></label><input type="number" id="flv" value="70" step="5"></div>
-      <button class="btn btn-s" onclick="fetchWx()" style="font-size:10px;margin-top:2px">🔄 Refresh from NWS</button>
-    </div><div class="div"></div>
-    <div class="sec"><div class="sec-t">Landscape</div>
-      <div class="g2"><div class="fg"><label>Resolution</label><select id="res"><option value="120" selected>120m</option><option value="90">90m</option><option value="60">60m (slow)</option></select></div>
-      <div class="fg"><label>Extent</label><select id="ext"><option value="3">3km</option><option value="5" selected>5km</option><option value="8">8km</option></select></div></div>
-      <div class="fg"><label>Terrain</label><select id="tsrc"><option value="synth" selected>Synthetic (varied terrain)</option><option value="flat">Flat / Uniform</option></select></div>
-      <div class="fg"><label>Fuel Model</label><select id="ffm"><option value="GR2">GR2 — Low load dry grass</option><option value="GS2">GS2 — Mod grass-shrub</option><option value="SH5" selected>SH5 — High load shrub</option><option value="TU1">TU1 — Timber-grass-shrub</option><option value="TL3">TL3 — Mod conifer litter</option><option value="TL5">TL5 — High conifer litter</option></select></div>
-    </div><div class="div"></div>
-    <div class="sec"><div class="sec-t">Simulation</div>
-      <div class="fg"><label>Duration <span class="u">(hours)</span></label><input type="range" id="dur" min="1" max="12" value="6" oninput="EL('dval').textContent=this.value+'hr'"><div class="slab"><span>1hr</span><span id="dval">6hr</span><span>12hr</span></div></div>
-      <button class="btn btn-p" onclick="runSim()" style="margin-top:6px">▶ Run Spread Model</button>
-      <div class="prog" id="prog"><div class="progf" id="progf"></div></div>
-      <button class="btn btn-s" onclick="clearAll()" style="margin-top:5px">Clear Results</button>
-    </div><div class="div"></div>
-    <div class="sec" id="vsec" style="display:none"><div class="sec-t">View</div>
-      <div class="tog"><button id="viso" class="on" onclick="setView('iso')">Hourly Bands</button><button id="vheat" onclick="setView('heat')">Heatmap</button></div>
-    </div>
-    <div class="sec"><div class="sec-t">Reference</div><div class="ref">Rothermel 1972 · Albini 1976 · MTT: Finney 2002 · FBFM40 · Simard 1968<br><br>⚠ Planning only.<br><a href="https://www.fs.usda.gov/research/treesearch/55928">Andrews 2018 →</a></div></div>
+<div class="sb">
+  <div class="sb-h"><h1><span class="logo">🔥</span>FireCast LPC</h1><p>Rothermel MTT · LANDFIRE · NWS</p></div>
+  <div class="sb-b">
+    <div class="s"><div class="st">Ignition</div>
+      <div class="brow"><button class="btn btn-s" id="bp" onclick="startPlace()">📍 Click Map</button></div>
+      <div id="igd" style="font-size:10px;font-family:monospace;color:#4a5c7a;margin-top:4px;min-height:14px"></div>
+    </div><div class="dv"></div>
+    <div class="s"><div class="st">Weather <span class="badge b-wait" id="wxb">awaiting</span></div>
+      <div class="g2"><div class="fg"><label>Wind <span class="u">mph@20ft</span></label><input type="number" id="ws" value="15"></div><div class="fg"><label>From <span class="u">°</span></label><input type="number" id="wd" value="225" step="15"></div></div>
+      <div class="g2"><div class="fg"><label>Temp <span class="u">°F</span></label><input type="number" id="wt" value="85"></div><div class="fg"><label>RH <span class="u">%</span></label><input type="number" id="wh" value="12"></div></div>
+      <div class="g3"><div class="fg"><label>1hr FM%</label><input type="number" id="f1" value="4"></div><div class="fg"><label>10hr</label><input type="number" id="f10" value="6"></div><div class="fg"><label>100hr</label><input type="number" id="f100" value="9"></div></div>
+      <div class="fg"><label>Live FM <span class="u">%</span></label><input type="number" id="flv" value="70" step="5"></div>
+      <button class="btn btn-s" onclick="fetchNWS()" style="font-size:10px">🔄 Fetch NWS</button>
+    </div><div class="dv"></div>
+    <div class="s"><div class="st">Landscape</div>
+      <div class="g2">
+        <div class="fg"><label>Resolution</label><select id="res"><option value="120" selected>120m</option><option value="90">90m</option></select></div>
+        <div class="fg"><label>Extent</label><select id="ext"><option value="4">4km</option><option value="5" selected>5km</option><option value="7">7km</option></select></div>
+      </div>
+      <div class="fg"><label>Terrain</label><select id="tsrc"><option value="synth" selected>Synthetic terrain</option><option value="flat">Flat / Uniform</option></select></div>
+      <div class="fg"><label>Fuel Model</label><select id="ffm"><option value="GR2">GR2 — Dry grass</option><option value="GS2">GS2 — Grass-shrub</option><option value="SH5" selected>SH5 — High load shrub</option><option value="TU1">TU1 — Timber-grass-shrub</option><option value="TL3">TL3 — Conifer litter</option><option value="TL5">TL5 — Heavy conifer litter</option></select></div>
+    </div><div class="dv"></div>
+    <div class="s"><div class="st">Simulation</div>
+      <div class="fg"><label>Duration <span class="u">(hours)</span></label><input type="number" id="dur" value="6" min="1" max="12"></div>
+      <button class="btn btn-p" id="runBtn" onclick="runSim()" style="margin-top:6px">▶ Run Spread Model</button>
+      <div class="prog"><div class="pf" id="pf"></div></div>
+      <button class="btn btn-s" onclick="clearFire()" style="margin-top:4px">Clear</button>
+    </div><div class="dv"></div>
+    <div class="ref">Rothermel 1972 · Albini 1976 · MTT Finney 2002<br>Scott &amp; Burgan FBFM40 · Simard 1968<br>⚠ Planning only. Not operational.</div>
   </div>
-  <div class="stat"><span class="sdot" id="sdot"></span><span id="stxt">Ready — click map</span></div>
+  <div class="sb-f"><span class="dot" id="dot"></span><span id="stxt">Click map to set ignition</span></div>
 </div>
-<div class="mapc" id="mapc">
+<div class="mc" id="mc">
   <div id="map"></div>
-  <div class="banner" id="banner">Click the map to place ignition point</div>
-  <div class="ov rpan" id="rpan"><h3>Results</h3><div id="rcon"></div></div>
-  <div class="ov lgd" id="lgd"><h3 id="lgdh">Hourly Spread</h3><div id="lgdi"></div></div>
+  <div class="banner" id="ban">Click map to place ignition</div>
+  <div class="ov rpn" id="rpn"><h3>Results</h3><div id="rc"></div></div>
+  <div class="ov lgd" id="lgd"><h3>Hourly Spread</h3><div id="lgi"></div></div>
 </div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const EL=id=>document.getElementById(id);
-const toggleEl=id=>{const e=EL(id);e.style.display=e.style.display==='none'?'block':'none'};
-function setStatus(s,t){EL('sdot').className='sdot'+(s==='run'?' run':'');EL('stxt').textContent=t}
-function setProg(p){EL('progf').style.width=p+'%'}
+const $=id=>document.getElementById(id);
+function st(s,t){$('dot').className='dot'+(s==='run'?' run':'');$('stxt').textContent=t}
+function pg(p){$('pf').style.width=p+'%'}
 
-// ═══════════════════════════════════════
-// FUEL MODELS (Scott & Burgan 40 subset)
-// ═══════════════════════════════════════
+// ═══ FUEL MODELS ═══
 const FM={
 GR2:{w1:.1,w10:0,w100:0,wLH:1,wLW:0,sv1:2000,svLH:1800,svLW:0,d:1,mx:.15,h:8000,wrf:.6},
 GS1:{w1:.2,w10:0,w100:0,wLH:.5,wLW:.65,sv1:2000,svLH:1800,svLW:1800,d:.9,mx:.15,h:8000,wrf:.55},
@@ -118,335 +119,133 @@ SH5:{w1:3.6,w10:2.1,w100:0,wLH:0,wLW:2.9,sv1:750,svLH:0,svLW:1600,d:6,mx:.15,h:8
 TU1:{w1:.2,w10:.9,w100:1.5,wLH:.2,wLW:.9,sv1:2000,svLH:1800,svLW:1600,d:.6,mx:.2,h:8000,wrf:.4},
 TL3:{w1:.5,w10:2.2,w100:2.8,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.3,mx:.2,h:8000,wrf:.4},
 TL5:{w1:1.15,w10:2.5,w100:4.4,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.6,mx:.25,h:8000,wrf:.4},
-NB:{w1:0,w10:0,w100:0,wLH:0,wLW:0,sv1:0,svLH:0,svLW:0,d:0,mx:0,h:0,wrf:0},
-};
+NB:{w1:0,w10:0,w100:0,wLH:0,wLW:0,sv1:0,svLH:0,svLW:0,d:0,mx:0,h:0,wrf:0}};
 
-// ═══════════════════════════════════════
-// NWS WEATHER
-// ═══════════════════════════════════════
-async function fetchWx(){
+// ═══ NWS ═══
+async function fetchNWS(){
   if(!ignLL)return;
-  EL('wxb').className='badge b-wait';EL('wxb').textContent='fetching...';
+  $('wxb').className='badge b-wait';$('wxb').textContent='...';
   try{
-    const r1=await fetch(`https://api.weather.gov/points/${ignLL.lat.toFixed(4)},${ignLL.lng.toFixed(4)}`,{headers:{'User-Agent':'FireCastLPC/4','Accept':'application/geo+json'}});
-    const j1=await r1.json();
-    const r2=await fetch(j1.properties.forecastGridData,{headers:{'User-Agent':'FireCastLPC/4','Accept':'application/geo+json'}});
-    const j2=await r2.json();const p=j2.properties;
-    const gv=(s,d)=>(s&&s.values&&s.values.length)?s.values[0].value:d;
-    const tC=gv(p.temperature,27),tF=Math.round(tC*9/5+32);
-    const rh=Math.round(gv(p.relativeHumidity,15));
-    const wsMph=Math.round(gv(p.windSpeed,24)*.621371);
-    const wdDeg=Math.round(gv(p.windDirection,225));
-    EL('ws').value=wsMph;EL('wd').value=wdDeg;EL('wt').value=tF;EL('wh').value=rh;
+    const r=await(await fetch(`https://api.weather.gov/points/${ignLL.lat.toFixed(4)},${ignLL.lng.toFixed(4)}`,{headers:{'User-Agent':'FireCast/5','Accept':'application/geo+json'}})).json();
+    const g=await(await fetch(r.properties.forecastGridData,{headers:{'User-Agent':'FireCast/5','Accept':'application/geo+json'}})).json();
+    const p=g.properties,gv=(s,d)=>s?.values?.[0]?.value??d;
+    const tC=gv(p.temperature,27),tF=Math.round(tC*9/5+32),rh=Math.round(gv(p.relativeHumidity,15));
+    const wsMph=Math.round(gv(p.windSpeed,24)*.621371),wdD=Math.round(gv(p.windDirection,225));
+    $('ws').value=wsMph;$('wd').value=wdD;$('wt').value=tF;$('wh').value=rh;
     let m;if(rh<=10)m=.03229+.281073*rh-.000578*rh*tF;else if(rh<=50)m=2.22749+.160107*rh-.01478*tF;else m=21.0606+.005565*rh*rh-.00035*rh*tF-.483199*rh;
     m=Math.max(1,Math.min(35,m));
-    EL('f1').value=Math.round(m);EL('f10').value=Math.round(m*1.3);EL('f100').value=Math.round(m*1.8);
-    EL('wxb').className='badge b-ok';EL('wxb').textContent='NWS '+j1.properties.gridId;
-  }catch(e){console.error(e);EL('wxb').className='badge b-err';EL('wxb').textContent='failed'}
+    $('f1').value=Math.round(m);$('f10').value=Math.round(m*1.3);$('f100').value=Math.round(m*1.8);
+    $('wxb').className='badge b-ok';$('wxb').textContent='NWS '+r.properties.gridId;
+  }catch(e){$('wxb').className='badge b-wait';$('wxb').textContent='failed'}
 }
 
-// ═══════════════════════════════════════
-// PERLIN NOISE (proper closure-based)
-// ═══════════════════════════════════════
+// ═══ PERLIN ═══
 function makePerlin(seed){
-  const p=new Uint8Array(512);
-  const q=new Uint8Array(256);
-  for(let i=0;i<256;i++)q[i]=i;
-  let s=seed;
-  for(let i=255;i>0;i--){s=(s*16807)%2147483647;const j=s%(i+1);[q[i],q[j]]=[q[j],q[i]]}
+  const p=new Uint8Array(512),q=new Uint8Array(256);for(let i=0;i<256;i++)q[i]=i;let s=seed;
+  for(let i=255;i>0;i--){s=(s*16807)%2147483647;const j=s%(i+1);[q[i],q[j]]=[q[j],q[i]];}
   for(let i=0;i<512;i++)p[i]=q[i&255];
-  const fade=t=>t*t*t*(t*(t*6-15)+10);
-  const lerp=(a,b,t)=>a+t*(b-a);
-  const grad=(h,x,y)=>{const v=h&3;return((v&1)?-x:x)+((v&2)?-y:y)};
-  return function fbm(x,y,oct){
-    oct=oct||4;let val=0,amp=1,freq=1,mx=0;
-    for(let i=0;i<oct;i++){
-      const X=Math.floor(x*freq)&255,Y=Math.floor(y*freq)&255;
-      const xf=x*freq-Math.floor(x*freq),yf=y*freq-Math.floor(y*freq);
-      const u=fade(xf),v=fade(yf);
-      const n=lerp(lerp(grad(p[p[X]+Y],xf,yf),grad(p[p[X+1]+Y],xf-1,yf),u),
-                   lerp(grad(p[p[X]+Y+1],xf,yf-1),grad(p[p[X+1]+Y+1],xf-1,yf-1),u),v);
-      val+=n*amp;mx+=amp;amp*=.5;freq*=2;
-    }
-    return val/mx;
-  };
+  const fd=t=>t*t*t*(t*(t*6-15)+10),lr=(a,b,t)=>a+t*(b-a),gr=(h,x,y)=>{const v=h&3;return((v&1)?-x:x)+((v&2)?-y:y)};
+  return(x,y,o)=>{o=o||4;let v=0,a=1,f=1,m=0;for(let i=0;i<o;i++){const X=Math.floor(x*f)&255,Y=Math.floor(y*f)&255,xf=x*f-Math.floor(x*f),yf=y*f-Math.floor(y*f),u=fd(xf),w=fd(yf);v+=lr(lr(gr(p[p[X]+Y],xf,yf),gr(p[p[X+1]+Y],xf-1,yf),u),lr(gr(p[p[X]+Y+1],xf,yf-1),gr(p[p[X+1]+Y+1],xf-1,yf-1),u),w)*a;m+=a;a*=.5;f*=2;}return v/m;};
 }
 
-// ═══════════════════════════════════════
-// ROTHERMEL SPREAD MODEL
-// ═══════════════════════════════════════
+// ═══ ROTHERMEL (verified) ═══
 function calcROS(fk,wMph,wDir,m1,m10,m100,mLv,slp,asp){
-  const f=FM[fk];
-  if(!f||f.d<=0)return{ros:0,R0:0,fl:0,az:0};
-  const L=t=>t*2000/43560;
-  const w=[L(f.w1),L(f.w10),L(f.w100)],wl=[L(f.wLH),L(f.wLW)];
+  const f=FM[fk];if(!f||f.d<=0)return{ros:0,R0:0,fl:0,az:0};
+  const L=t=>t*2000/43560,w=[L(f.w1),L(f.w10),L(f.w100)],wl=[L(f.wLH),L(f.wLW)];
   const sv=[f.sv1,109,30],svl=[f.svLH||.001,f.svLW||.001];
   const mf=[m1/100,m10/100,m100/100],ml=[mLv/100,mLv/100];
   const dSA=w.map((a,i)=>a*sv[i]),dT=dSA.reduce((a,b)=>a+b,0);
-  const lSA=wl.map((a,i)=>a*svl[i]),lT=lSA.reduce((a,b)=>a+b,0);
-  const tSA=dT+lT;if(tSA<1e-6)return{ros:0,R0:0,fl:0,az:0};
-  const dF=dSA.map(s=>dT>0?s/dT:0),lF=lSA.map(s=>lT>0?s/lT:0);
-  const fD=dT/tSA,fL=lT/tSA;
-  const sig=fD*dF.reduce((s,a,i)=>s+a*sv[i],0)+fL*lF.reduce((s,a,i)=>s+a*svl[i],0);
-  if(sig<1)return{ros:0,R0:0,fl:0,az:0};
-  const wT=w.reduce((a,b)=>a+b,0)+wl.reduce((a,b)=>a+b,0);
-  const beta=wT/(f.d*32),bo=3.348*Math.pow(sig,-.8189),br=beta/bo;
-  const A=133*Math.pow(sig,-.7913),gMax=Math.pow(sig,1.5)/(495+.0594*Math.pow(sig,1.5));
-  const gam=gMax*Math.pow(br,A)*Math.exp(A*(1-br));
+  const lSA=wl.map((a,i)=>a*svl[i]),lT=lSA.reduce((a,b)=>a+b,0),tSA=dT+lT;
+  if(tSA<1e-6)return{ros:0,R0:0,fl:0,az:0};
+  const dF=dSA.map(s=>dT>0?s/dT:0),lF=lSA.map(s=>lT>0?s/lT:0),fD=dT/tSA,fL=lT/tSA;
+  const sigma=fD*dF.reduce((s,a,i)=>s+a*sv[i],0)+fL*lF.reduce((s,a,i)=>s+a*svl[i],0);
+  if(sigma<1)return{ros:0,R0:0,fl:0,az:0};
+  const wT=w.reduce((a,b)=>a+b,0)+wl.reduce((a,b)=>a+b,0),beta=wT/(f.d*32),bo=3.348*Math.pow(sigma,-.8189),br=beta/bo;
+  const A=133*Math.pow(sigma,-.7913),gMax=Math.pow(sigma,1.5)/(495+.0594*Math.pow(sigma,1.5)),gam=gMax*Math.pow(br,A)*Math.exp(A*(1-br));
   const wnD=w.reduce((s,a,i)=>s+dF[i]*a*.9445,0),wnL=wl.reduce((s,a,i)=>s+lF[i]*a*.9445,0);
-  const mfDw=dF.reduce((s,a,i)=>s+a*mf[i],0),rmD=Math.min(mfDw/f.mx,1);
-  const etD=Math.max(0,1-2.59*rmD+5.11*rmD*rmD-3.52*rmD*rmD*rmD);
-  let etL=1;
-  if(lT>1e-5){const mfLw=lF.reduce((s,a,i)=>s+a*ml[i],0),rmL=Math.min(mfLw/Math.max(f.mx,.3),1);etL=Math.max(0,1-2.59*rmL+5.11*rmL*rmL-3.52*rmL*rmL*rmL)}
-  const etS=.174*Math.pow(.01,-.19);
-  const IR=gam*(wnD*f.h*etD*etS+wnL*f.h*etL*etS);
-  const xi=Math.exp((.792+.681*Math.pow(sig,.5))*(beta+.1))/(192+.2595*sig);
-  const rhoB=wT/f.d,eps=Math.exp(-138/sig);
-  const mfC=fD*mfDw+fL*(lF.reduce((s,a,i)=>s+a*ml[i],0)||0);
-  const Qig=250+1116*mfC,hs=rhoB*eps*Qig;
-  if(hs<.001)return{ros:0,R0:0,fl:0,az:0};
-  const R0=IR*xi/hs;
-  const U=wMph*f.wrf*88;
-  const C=7.47*Math.exp(-.133*Math.pow(sig,.55)),B=.02526*Math.pow(sig,.54),E=.715*Math.exp(-3.59e-4*sig);
+  const mfDw=dF.reduce((s,a,i)=>s+a*mf[i],0),rmD=Math.min(mfDw/f.mx,1),etD=Math.max(0,1-2.59*rmD+5.11*rmD*rmD-3.52*Math.pow(rmD,3));
+  let etL=1;if(lT>1e-5){const mfLw=lF.reduce((s,a,i)=>s+a*ml[i],0),rmL=Math.min(mfLw/Math.max(f.mx,.3),1);etL=Math.max(0,1-2.59*rmL+5.11*rmL*rmL-3.52*Math.pow(rmL,3));}
+  const etS=.174*Math.pow(.01,-.19),IR=gam*(wnD*f.h*etD*etS+wnL*f.h*etL*etS);
+  const xi=Math.exp((.792+.681*Math.pow(sigma,.5))*(beta+.1))/(192+.2595*sigma);
+  const rhoB=wT/f.d,eps=Math.exp(-138/sigma),mfC=fD*mfDw+fL*(lF.reduce((s,a,i)=>s+a*ml[i],0)||0);
+  const hs=rhoB*eps*(250+1116*mfC);if(hs<.001)return{ros:0,R0:0,fl:0,az:0};
+  const R0=IR*xi/hs,U=wMph*f.wrf*88;
+  const C=7.47*Math.exp(-.133*Math.pow(sigma,.55)),B=.02526*Math.pow(sigma,.54),E=.715*Math.exp(-3.59e-4*sigma);
   const phiW=U>0?C*Math.pow(U,B)*Math.pow(br,-E):0;
   const sR=slp*Math.PI/180,phiS=5.275*Math.pow(Math.max(beta,1e-4),-.3)*Math.pow(Math.tan(sR),2);
   const wAz=((wDir+180)%360)*Math.PI/180,sAz=((asp+180)%360)*Math.PI/180;
   const vx=phiW*Math.sin(wAz)+phiS*Math.sin(sAz),vy=phiW*Math.cos(wAz)+phiS*Math.cos(sAz);
-  const phiE=Math.sqrt(vx*vx+vy*vy),maxAz=Math.atan2(vx,vy);
-  const ros=R0*(1+phiE),fli=IR*ros/60,fl=.45*Math.pow(Math.max(fli,.01),.46);
-  return{ros,R0,fl,az:maxAz};
+  const ros=R0*(1+Math.sqrt(vx*vx+vy*vy));
+  return{ros,R0,fl:.45*Math.pow(Math.max(IR*ros/60,.01),.46),az:Math.atan2(vx,vy)};
 }
 
-// ═══════════════════════════════════════
-// MTT FIRE SPREAD
-// ═══════════════════════════════════════
-function spreadFire(n,cellM,fuel,slope,aspect,wS,wD,m1,m10,m100,mLv,durMin){
-  const at=new Float32Array(n*n); at.fill(Infinity);
-  const cellFt=cellM*3.28084;
-  
-  // Pre-compute ROS per cell
+// ═══ MTT (verified) ═══
+function runMTT(n,cellM,fuel,slope,aspect,wS,wD,m1,m10,m100,mLv,durMin){
+  const cellFt=cellM*3.28084,at=new Float32Array(n*n);at.fill(Infinity);
   const cROS=new Float32Array(n*n),cR0=new Float32Array(n*n),cAZ=new Float32Array(n*n),cFL=new Float32Array(n*n);
-  for(let i=0;i<n*n;i++){
-    const r=calcROS(fuel[i],wS,wD,m1,m10,m100,mLv,slope[i],aspect[i]);
-    cROS[i]=r.ros;cR0[i]=r.R0;cAZ[i]=r.az;cFL[i]=r.fl;
-  }
-  
-  // Ellipse eccentricity
-  const ew=wS*.5,LB=Math.max(1,.936*Math.exp(.2566*ew)+.461*Math.exp(-.1548*ew)-.397);
-  const ecc=LB>1.01?Math.sqrt(1-1/(LB*LB)):0;
-  console.log('LB='+LB.toFixed(2)+' ecc='+ecc.toFixed(3));
-  
-  // Heap
+  for(let i=0;i<n*n;i++){const r=calcROS(fuel[i],wS,wD,m1,m10,m100,mLv,slope[i],aspect[i]);cROS[i]=r.ros;cR0[i]=r.R0;cAZ[i]=r.az;cFL[i]=r.fl;}
+  const ew=wS*.5,LB=Math.max(1,.936*Math.exp(.2566*ew)+.461*Math.exp(-.1548*ew)-.397),ecc=LB>1.01?Math.sqrt(1-1/(LB*LB)):0;
   const H=[];
-  const push=(t,r,c)=>{H.push([t,r,c]);let i=H.length-1;while(i>0){const p=(i-1)>>1;if(H[p][0]<=H[i][0])break;[H[p],H[i]]=[H[i],H[p]];i=p}};
-  const pop=()=>{const t=H[0],l=H.pop();if(H.length>0){H[0]=l;let i=0;while(true){let s=i;const a=2*i+1,b=2*i+2;if(a<H.length&&H[a][0]<H[s][0])s=a;if(b<H.length&&H[b][0]<H[s][0])s=b;if(s===i)break;[H[s],H[i]]=[H[i],H[s]];i=s}}return t};
-  
-  // Seed ignition at center
-  const iR=Math.floor(n/2),iC=Math.floor(n/2);
-  at[iR*n+iC]=0;push(0,iR,iC);
-  
-  const vis=new Uint8Array(n*n);
-  const NB=[[-1,0,1],[1,0,1],[0,-1,1],[0,1,1],[-1,-1,1.414],[-1,1,1.414],[1,-1,1.414],[1,1,1.414]];
-  
+  const push=(t,r,c)=>{H.push([t,r,c]);let i=H.length-1;while(i>0){const p=(i-1)>>1;if(H[p][0]<=H[i][0])break;[H[p],H[i]]=[H[i],H[p]];i=p;}};
+  const pop=()=>{const t=H[0],l=H.pop();if(H.length>0){H[0]=l;let i=0;while(1){let s=i;const a=2*i+1,b=2*i+2;if(a<H.length&&H[a][0]<H[s][0])s=a;if(b<H.length&&H[b][0]<H[s][0])s=b;if(s===i)break;[H[s],H[i]]=[H[i],H[s]];i=s;}}return t;};
+  const cr=Math.floor(n/2),cc=Math.floor(n/2);at[cr*n+cc]=0;push(0,cr,cc);
+  const vis=new Uint8Array(n*n),NB=[[-1,0,1],[1,0,1],[0,-1,1],[0,1,1],[-1,-1,1.414],[-1,1,1.414],[1,-1,1.414],[1,1,1.414]];
   while(H.length>0){
-    const[t,r,c]=pop();
-    const idx=r*n+c;
-    if(vis[idx])continue;
-    if(t>durMin)continue;
-    vis[idx]=1;
-    if(cROS[idx]<=0)continue;
-    
-    for(const[dr,dc,dm]of NB){
-      const nr=r+dr,nc=c+dc;
-      if(nr<0||nr>=n||nc<0||nc>=n)continue;
-      const ni=nr*n+nc;
-      if(vis[ni]||cROS[ni]<=0)continue;
-      
-      // Direction of travel
-      const travelAz=Math.atan2(dc,-dr);
-      
-      // Directional ROS with proper angle wrapping
-      function dROS(headROS,backROS,cellAz){
-        if(ecc<.01)return headROS;
-        let ad=travelAz-cellAz;
-        while(ad>Math.PI)ad-=2*Math.PI;
-        while(ad<-Math.PI)ad+=2*Math.PI;
-        const den=1-ecc*Math.cos(ad);
-        if(den<.05)return headROS;
-        const r=headROS*(1-ecc)/den;
-        return Math.max(backROS*.3,Math.min(r,headROS));
-      }
-      
-      const r1=dROS(cROS[idx],cR0[idx],cAZ[idx]);
-      const r2=dROS(cROS[ni],cR0[ni],cAZ[ni]);
-      const avg=(r1+r2)/2;
-      if(avg<=0||!isFinite(avg))continue;
-      
-      const tt=cellFt*dm/avg;
-      if(!isFinite(tt)||tt<=0)continue;
-      const na=t+tt;
-      if(na<at[ni]&&na<=durMin){at[ni]=na;push(na,nr,nc)}
+    const[t,r,c]=pop();const idx=r*n+c;if(vis[idx]||t>durMin)continue;vis[idx]=1;if(cROS[idx]<=0)continue;
+    for(const[dr,dc,dm]of NB){const nr=r+dr,nc=c+dc;if(nr<0||nr>=n||nc<0||nc>=n)continue;const ni=nr*n+nc;if(vis[ni]||cROS[ni]<=0)continue;
+      const tAz=Math.atan2(dc,-dr);
+      function dR(hr,r0,az){if(ecc<.01)return hr;let ad=tAz-az;while(ad>Math.PI)ad-=2*Math.PI;while(ad<-Math.PI)ad+=2*Math.PI;const d=1-ecc*Math.cos(ad);if(d<.05)return hr;return Math.max(r0*.3,Math.min(hr*(1-ecc)/d,hr));}
+      const avg=(dR(cROS[idx],cR0[idx],cAZ[idx])+dR(cROS[ni],cR0[ni],cAZ[ni]))/2;
+      if(avg<=0||!isFinite(avg))continue;const tt=cellFt*dm/avg;if(!isFinite(tt)||tt<=0)continue;
+      const na=t+tt;if(na<at[ni]&&na<=durMin){at[ni]=na;push(na,nr,nc);}
     }
   }
-  
-  let burned=0;for(let i=0;i<n*n;i++)if(isFinite(at[i]))burned++;
-  console.log('Burned cells:',burned,'/',n*n);
-  
   return{at,cROS,cFL};
 }
 
-// ═══════════════════════════════════════
-// RENDERER — Leaflet vector rectangles
-// Uses L.canvas renderer for performance
-// ═══════════════════════════════════════
-const HOUR_COLORS=[
-  '#FFFF50', // 1 bright yellow
-  '#FFD620', // 2 gold
-  '#FFA500', // 3 orange
-  '#FF6400', // 4 dark orange
-  '#E6370F', // 5 red-orange
-  '#CC1E14', // 6 red
-  '#A00F14', // 7 dark red
-  '#780A0F', // 8 crimson
-  '#5A050A', // 9
-  '#410308', // 10
-  '#2D0205', // 11
-  '#1E0103', // 12
-];
+// ═══ COLORS ═══
+const HOUR_CLR=['#FFFF50','#FFD620','#FFA500','#FF6400','#E6370F','#CC1E14','#A00F14','#780A0F','#5A050A','#410308','#2D0205','#1E0103'];
 
-const HEAT_COLORS=['#FFFF78','#FFF03C','#FFD21E','#FFAF0F','#FF8C00','#FA6400','#F04105','#E1280F','#C81914','#AF0F19','#960A14','#7D0811','#64050C','#4B0308','#320105'];
-
-let fireLayer=null,gridData=null,durStore=6,viewMode='iso';
-const canvasRenderer=L.canvas({padding:0.5});
-
-function clearFire(){
-  if(fireLayer){map.removeLayer(fireLayer);fireLayer=null}
-}
-
-function renderFire(n,cellM,lat,lng,at,durHrs,mode){
-  clearFire();
-  const durMin=durHrs*60;
-  const mLat=111320,mLng=mLat*Math.cos(lat*Math.PI/180);
-  const dLat=cellM/mLat,dLng=cellM/mLng;
-  
-  fireLayer=L.layerGroup();
-  let count=0;
-  
-  for(let r=0;r<n;r++){
-    for(let c=0;c<n;c++){
-      const a=at[r*n+c];
-      if(!isFinite(a)||a<0||a>durMin)continue;
-      
-      let color;
-      if(mode==='iso'){
-        const hr=Math.min(Math.floor(a/60),durHrs-1);
-        color=HOUR_COLORS[Math.min(hr,HOUR_COLORS.length-1)];
-      }else{
-        const t=Math.min(a/durMin,1);
-        const idx=t*(HEAT_COLORS.length-1);
-        const lo=Math.floor(idx);
-        color=HEAT_COLORS[Math.min(lo,HEAT_COLORS.length-1)];
-      }
-      
-      const cellLat=lat+((n/2-r)*cellM)/mLat;
-      const cellLng=lng+((c-n/2)*cellM)/mLng;
-      
-      const rect=L.rectangle(
-        [[cellLat,cellLng],[cellLat-dLat,cellLng+dLng]],
-        {color:color,weight:0,fillColor:color,fillOpacity:0.75,renderer:canvasRenderer}
-      );
-      fireLayer.addLayer(rect);
-      count++;
-    }
-  }
-  
-  // Add outer perimeter outline
-  // Find bounding cells and draw perimeter
-  let minR=n,maxR=0,minC=n,maxC=0;
-  for(let r=0;r<n;r++) for(let c=0;c<n;c++){
-    if(isFinite(at[r*n+c])&&at[r*n+c]<=durMin){
-      if(r<minR)minR=r;if(r>maxR)maxR=r;if(c<minC)minC=c;if(c>maxC)maxC=c;
-    }
-  }
-  
-  fireLayer.addTo(map);
-  console.log('Rendered',count,'fire cells');
-  
-  // Legend
-  const el=EL('lgdi');el.innerHTML='';
-  EL('lgdh').textContent=mode==='iso'?'Hourly Spread':'Arrival Time';
-  const cnt=Math.min(durHrs,HOUR_COLORS.length);
-  for(let h=0;h<cnt;h++){
-    const c=mode==='iso'?HOUR_COLORS[h]:HEAT_COLORS[Math.floor(h/cnt*HEAT_COLORS.length)];
-    el.innerHTML+=`<div class="lgi"><span class="lgs" style="background:${c}"></span>Hour ${h+1}</div>`;
-  }
-  EL('lgd').style.display='block';
-}
-
-function setView(m){
-  viewMode=m;
-  EL('viso').className=m==='iso'?'on':'';
-  EL('vheat').className=m==='heat'?'on':'';
-  if(gridData)renderFire(gridData.n,gridData.cellM,gridData.lat,gridData.lng,gridData.at,durStore,m);
-}
-
-// ═══════════════════════════════════════
-// MAP
-// ═══════════════════════════════════════
+// ═══ MAP ═══
 const map=L.map('map',{center:[37.28,-107.88],zoom:12,preferCanvas:true});
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri',maxZoom:19}).addTo(map);
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,opacity:.6}).addTo(map);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,opacity:.55}).addTo(map);
+const canvasR=L.canvas({padding:.5});
 
-let ignMk=null,ignLL=null,placing=false;
-function startPlace(){placing=true;EL('mapc').classList.add('placing');EL('banner').classList.add('vis');EL('bp').classList.add('on')}
-function stopPlace(){placing=false;EL('mapc').classList.remove('placing');EL('banner').classList.remove('vis');EL('bp').classList.remove('on')}
-map.on('click',e=>{if(placing){setIgn(e.latlng);stopPlace()}});
-function applyCoords(){const a=parseFloat(EL('ilat').value),b=parseFloat(EL('ilng').value);if(!isNaN(a)&&!isNaN(b))setIgn(L.latLng(a,b))}
-function setIgn(ll){
-  ignLL=ll;if(ignMk)map.removeLayer(ignMk);
-  ignMk=L.circleMarker(ll,{radius:6,fillColor:'#f97316',fillOpacity:1,color:'#fff',weight:2}).addTo(map);
-  EL('igd').textContent=`${ll.lat.toFixed(5)}, ${ll.lng.toFixed(5)}`;
-  EL('ilat').value=ll.lat.toFixed(5);EL('ilng').value=ll.lng.toFixed(5);
-  setStatus('ready','Ignition set — fetching weather...');fetchWx();
-}
-function clearAll(){clearFire();gridData=null;EL('rpan').classList.remove('vis');EL('lgd').style.display='none';EL('prog').classList.remove('on');EL('vsec').style.display='none';setStatus('ready','Cleared')}
+let ignLL=null,ignMk=null,placing=false,fireGroup=null;
 
-// ═══════════════════════════════════════
-// RUN
-// ═══════════════════════════════════════
+function startPlace(){placing=true;$('mc').classList.add('placing');$('ban').classList.add('vis');$('bp').classList.add('on');}
+function stopPlace(){placing=false;$('mc').classList.remove('placing');$('ban').classList.remove('vis');$('bp').classList.remove('on');}
+map.on('click',e=>{if(placing){ignLL=e.latlng;if(ignMk)map.removeLayer(ignMk);ignMk=L.circleMarker(ignLL,{radius:5,fillColor:'#f97316',fillOpacity:1,color:'#fff',weight:2}).addTo(map);$('igd').textContent=ignLL.lat.toFixed(5)+', '+ignLL.lng.toFixed(5);stopPlace();st('ready','Ignition set — fetching wx');fetchNWS();}});
+
+function clearFire(){if(fireGroup){map.removeLayer(fireGroup);fireGroup=null;}$('rpn').classList.remove('vis');$('lgd').style.display='none';st('ready','Cleared');}
+
+// ═══ RUN ═══
 async function runSim(){
-  if(!ignLL){alert('Place ignition first.');return}
-  clearAll();setStatus('run','Building grid...');
-  EL('prog').classList.add('on');setProg(5);
-  await new Promise(r=>setTimeout(r,50));
+  if(!ignLL){alert('Click map to place ignition first.');return;}
+  clearFire();st('run','Building grid...');$('runBtn').disabled=true;pg(5);
+  await new Promise(r=>setTimeout(r,30));
 
-  const cellM=parseInt(EL('res').value),extKm=parseInt(EL('ext').value);
-  const src=EL('tsrc').value,fuelKey=EL('ffm').value;
-  const wS=+EL('ws').value,wD=+EL('wd').value;
-  const m1=+EL('f1').value,m10=+EL('f10').value,m100=+EL('f100').value,mLv=+EL('flv').value;
-  const dH=+EL('dur').value;durStore=dH;
+  const cellM=+$('res').value,extKm=+$('ext').value,fuelKey=$('ffm').value,src=$('tsrc').value;
+  const wS=+$('ws').value,wD=+$('wd').value,m1=+$('f1').value,m10=+$('f10').value,m100=+$('f100').value,mLv=+$('flv').value,dH=+$('dur').value;
+  const n=Math.min(Math.ceil(extKm*2000/cellM),160);
 
-  const n=Math.min(Math.ceil(extKm*2000/cellM),180);
-  console.log('Grid:',n,'x',n);
-  
   // Build terrain
-  const elev=new Float32Array(n*n),slope=new Float32Array(n*n),aspect=new Float32Array(n*n);
-  const fuel=new Array(n*n);
-  for(let i=0;i<n*n;i++)fuel[i]=fuelKey;
+  const elev=new Float32Array(n*n),slope=new Float32Array(n*n),aspect=new Float32Array(n*n),fuel=new Array(n*n).fill(fuelKey);
 
   if(src==='synth'){
-    const pn1=makePerlin(42),pn2=makePerlin(137);
-    const base=2100;
+    const pn=makePerlin(42);const base=2100;
     for(let r=0;r<n;r++)for(let c=0;c<n;c++){
       const i=r*n+c;
-      elev[i]=base+pn1(c*.0008,r*.0008,4)*400+pn1(c*.003,r*.003,3)*100+Math.sin((c+r)*.015)*150;
-      const fn=pn2(c*.005,r*.005,3);
-      if(fn<-.4)fuel[i]='NB';
-      else if(elev[i]<base-100)fuel[i]='GR2';
-      else if(elev[i]>base+200)fuel[i]='TL3';
+      elev[i]=base+pn(c*.008,r*.008,4)*300+Math.sin((c+r)*.05)*100;
+      // Only assign NB in a river-like corridor through the middle, not randomly scattered
+      const distFromCenter=Math.abs(c-n/2);
+      if(distFromCenter<3&&r>n*.3&&r<n*.7)fuel[i]='NB'; // narrow river
+      else if(elev[i]<base-80)fuel[i]='GR2';
+      else if(elev[i]>base+150)fuel[i]='TL3';
     }
   }
-  
+
   // Slope/aspect
   for(let r=1;r<n-1;r++)for(let c=1;c<n-1;c++){
     const i=r*n+c,dx=(elev[i+1]-elev[i-1])/(2*cellM),dy=(elev[(r+1)*n+c]-elev[(r-1)*n+c])/(2*cellM);
@@ -454,43 +253,69 @@ async function runSim(){
     let a=Math.atan2(-dx,dy)*180/Math.PI;if(a<0)a+=360;aspect[i]=a;
   }
 
-  setProg(25);setStatus('run',`Grid ${n}×${n} — running MTT...`);
-  await new Promise(r=>setTimeout(r,50));
-
-  // Test ROS
-  const test=calcROS(fuelKey,wS,wD,m1,m10,m100,mLv,10,180);
-  console.log('Test ROS:',test.ros.toFixed(1),'ft/min, R0:',test.R0.toFixed(2));
+  pg(30);st('run','Running MTT ('+n+'×'+n+')...');
+  await new Promise(r=>setTimeout(r,30));
 
   const t0=performance.now();
-  const result=spreadFire(n,cellM,fuel,slope,aspect,wS,wD,m1,m10,m100,mLv,dH*60);
+  const result=runMTT(n,cellM,fuel,slope,aspect,wS,wD,m1,m10,m100,mLv,dH*60);
   const elapsed=((performance.now()-t0)/1000).toFixed(2);
 
-  setProg(70);setStatus('run','Rendering...');
-  await new Promise(r=>setTimeout(r,50));
+  pg(70);st('run','Rendering...');
+  await new Promise(r=>setTimeout(r,30));
 
-  gridData={n,cellM,lat:ignLL.lat,lng:ignLL.lng,at:result.at,cROS:result.cROS,cFL:result.cFL};
-  renderFire(n,cellM,ignLL.lat,ignLL.lng,result.at,dH,viewMode);
+  // Render fire cells as Leaflet rectangles
+  const mLat=111320,mLng=mLat*Math.cos(ignLL.lat*Math.PI/180);
+  const dLat=cellM/mLat,dLng=cellM/mLng;
+  const durMin=dH*60;
+
+  fireGroup=L.layerGroup();
+  let burned=0,maxR=0,maxFL=0;
+
+  for(let r=0;r<n;r++){
+    for(let c=0;c<n;c++){
+      const a=result.at[r*n+c];
+      if(!isFinite(a)||a<0||a>durMin)continue;
+
+      const hr=Math.min(Math.floor(a/60),dH-1);
+      const color=HOUR_CLR[Math.min(hr,HOUR_CLR.length-1)];
+      const cellLat=ignLL.lat+((n/2-r)*cellM)/mLat;
+      const cellLng=ignLL.lng+((c-n/2)*cellM)/mLng;
+
+      L.rectangle([[cellLat,cellLng],[cellLat-dLat,cellLng+dLng]],{
+        color:'#1a0500',weight:.5,fillColor:color,fillOpacity:.7,renderer:canvasR
+      }).addTo(fireGroup);
+
+      burned++;
+      if(result.cROS[r*n+c]>maxR)maxR=result.cROS[r*n+c];
+      if(result.cFL[r*n+c]>maxFL)maxFL=result.cFL[r*n+c];
+    }
+  }
+
+  fireGroup.addTo(map);
 
   // Fit bounds
-  const mLat=111320,mLng=mLat*Math.cos(ignLL.lat*Math.PI/180);
   const hLat=(n/2*cellM)/mLat,hLng=(n/2*cellM)/mLng;
-  map.fitBounds([[ignLL.lat+hLat,ignLL.lng-hLng],[ignLL.lat-hLat,ignLL.lng+hLng]],{padding:[30,30]});
+  map.fitBounds([[ignLL.lat+hLat,ignLL.lng-hLng],[ignLL.lat-hLat,ignLL.lng+hLng]],{padding:[20,20]});
 
-  // Stats
-  const dM=dH*60;let burned=0,maxR=0,maxFL=0;
-  for(let i=0;i<n*n;i++){if(isFinite(result.at[i])&&result.at[i]<=dM){burned++;if(result.cROS[i]>maxR)maxR=result.cROS[i];if(result.cFL[i]>maxFL)maxFL=result.cFL[i]}}
+  // Results panel
   const acres=burned*cellM*cellM/4046.86,rch=maxR/66*60;
-
-  EL('rcon').innerHTML=`<div class="ir"><span class="l">Grid</span><span class="v">${n}×${n}@${cellM}m</span></div>
+  $('rc').innerHTML=`<div class="ir"><span class="l">Grid</span><span class="v">${n}×${n}@${cellM}m</span></div>
     <div class="ir"><span class="l">Solve</span><span class="v">${elapsed}s</span></div><div class="hr"></div>
     <div class="ir"><span class="l">Burned</span><span class="v">${acres.toFixed(0)} ac</span></div>
     <div class="ir"><span class="l">Max ROS</span><span class="v">${rch.toFixed(1)} ch/hr</span></div>
-    <div class="ir"><span class="l">Max flame</span><span class="v">${maxFL.toFixed(1)} ft</span></div><div class="hr"></div>
+    <div class="ir"><span class="l">Flame</span><span class="v">${maxFL.toFixed(1)} ft</span></div><div class="hr"></div>
     <div class="ir"><span class="l">Wind</span><span class="v">${wS}mph@${wD}°</span></div>
-    <div class="ir"><span class="l">1hr FM</span><span class="v">${m1}%</span></div>`;
-  EL('rpan').classList.add('vis');EL('vsec').style.display='block';
-  setProg(100);setStatus('ready',`Done — ${acres.toFixed(0)}ac, ${rch.toFixed(1)}ch/hr`);
-  setTimeout(()=>EL('prog').classList.remove('on'),1500);
+    <div class="ir"><span class="l">Fuel</span><span class="v">${fuelKey}</span></div>`;
+  $('rpn').classList.add('vis');
+
+  // Legend
+  const lgi=$('lgi');lgi.innerHTML='';
+  for(let h=0;h<Math.min(dH,HOUR_CLR.length);h++)
+    lgi.innerHTML+=`<div class="li"><span class="ls" style="background:${HOUR_CLR[h]}"></span>Hr ${h+1}</div>`;
+  $('lgd').style.display='block';
+
+  pg(100);st('ready',`${acres.toFixed(0)}ac · ${rch.toFixed(1)}ch/hr · ${elapsed}s`);
+  $('runBtn').disabled=false;
 }
 </script>
 </body>
