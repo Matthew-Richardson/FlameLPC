@@ -4,319 +4,1376 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FireCast LPC</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:system-ui,-apple-system,sans-serif;background:#0a0e17;color:#e0e8f5;height:100vh;overflow:hidden;display:flex}
-.sb{width:340px;min-width:340px;height:100vh;background:#0d1424;border-right:1px solid #1e2d4a;display:flex;flex-direction:column}
-.sb-h{padding:14px 18px 10px;border-bottom:1px solid #1e2d4a}
-.sb-h h1{font-size:15px;font-weight:700;display:flex;align-items:center;gap:7px}
-.sb-h span.logo{width:22px;height:22px;background:linear-gradient(135deg,#f97316,#ef4444);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px}
-.sb-h p{font-size:10px;color:#4a5c7a;margin-top:2px;font-family:monospace}
-.sb-b{flex:1;overflow-y:auto;padding:12px 18px 18px}
-.s{margin-bottom:12px}
-.st{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#4a5c7a;margin-bottom:6px;display:flex;align-items:center;gap:6px}
-.fg{margin-bottom:7px}
-.fg label{display:block;font-size:10.5px;font-weight:500;color:#7d8faa;margin-bottom:2px}
-.fg .u{color:#4a5c7a;font-size:9px}
-input[type=number],select{width:100%;padding:6px 8px;background:#070b14;border:1px solid #1e2d4a;border-radius:3px;color:#e0e8f5;font-family:monospace;font-size:12px;outline:0}
-input:focus,select:focus{border-color:#f97316}
-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' fill='%234a5c7a'%3E%3Cpath d='M4 6L.5 1.5h7z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:22px;font-family:system-ui;font-size:11px}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
-.btn{width:100%;padding:9px;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px}
-.btn-p{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff}
-.btn-p:hover{box-shadow:0 3px 12px rgba(249,115,22,.3)}
-.btn-p:disabled{opacity:.4;cursor:wait}
-.btn-s{background:#141e35;color:#7d8faa;border:1px solid #1e2d4a}
-.btn-s:hover{border-color:#4a5c7a;color:#e0e8f5}
-.btn-s.on{border-color:#f97316;color:#f97316}
-.brow{display:flex;gap:5px}.brow .btn{flex:1}
-.dv{height:1px;background:#1e2d4a;margin:10px 0}
-.badge{display:inline-flex;padding:1px 5px;border-radius:3px;font-size:7.5px;font-weight:600;font-family:monospace}
-.b-ok{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
-.b-wait{background:rgba(234,179,8,.12);color:#facc15;border:1px solid rgba(234,179,8,.2)}
-.prog{width:100%;height:2px;background:#1e2d4a;border-radius:1px;margin:6px 0;overflow:hidden}
-.pf{height:100%;background:#f97316;width:0%;transition:width .1s}
-.sb-f{padding:8px 18px;border-top:1px solid #1e2d4a;font-size:9.5px;font-family:monospace;color:#4a5c7a;display:flex;align-items:center;gap:5px}
-.dot{width:5px;height:5px;border-radius:50%;background:#22c55e;flex-shrink:0}
-.dot.run{background:#f97316;animation:p 1s ease infinite}
-@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
-.mc{flex:1;position:relative}
-#map{width:100%;height:100%;background:#070b14}
-.leaflet-container{background:#070b14}
-.leaflet-control-zoom a{background:#141e35!important;color:#e0e8f5!important;border-color:#1e2d4a!important}
-.leaflet-control-attribution{background:rgba(7,11,20,.85)!important;color:#4a5c7a!important;font-size:9px!important}
-.leaflet-control-attribution a{color:#7d8faa!important}
-.banner{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:900;background:rgba(249,115,22,.92);color:#fff;padding:7px 20px;border-radius:50px;font-size:12px;font-weight:600;pointer-events:none;display:none;white-space:nowrap}
-.banner.vis{display:block}
-.placing #map{cursor:crosshair!important}
-.ov{position:absolute;z-index:800;pointer-events:none}
-.rpn{top:10px;right:10px;background:rgba(13,20,36,.93);backdrop-filter:blur(8px);border:1px solid #1e2d4a;border-radius:5px;padding:12px 14px;pointer-events:auto;display:none;min-width:190px}
-.rpn.vis{display:block}
-.rpn h3{font-size:7.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#4a5c7a;margin-bottom:6px}
-.ir{display:flex;justify-content:space-between;font-size:10.5px;margin-bottom:3px}
-.ir .l{color:#7d8faa}.ir .v{color:#e0e8f5;font-family:monospace;font-weight:500;font-size:10px}
-.hr{height:1px;background:#1e2d4a;margin:5px 0}
-.lgd{bottom:20px;right:10px;background:rgba(13,20,36,.93);backdrop-filter:blur(8px);border:1px solid #1e2d4a;border-radius:5px;padding:10px 12px;pointer-events:auto;display:none;min-width:130px}
-.lgd h3{font-size:7.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#4a5c7a;margin-bottom:5px}
-.li{display:flex;align-items:center;gap:6px;font-size:9.5px;color:#7d8faa;margin-bottom:2px;font-family:monospace}
-.ls{width:14px;height:8px;border-radius:1px;flex-shrink:0}
-.ref{font-size:8px;color:#3a4d6a;font-family:monospace;line-height:1.4;padding:6px 8px;background:#070b14;border-radius:3px;border-left:2px solid #1e2d4a}
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0c0e12;
+    --panel: #14171e;
+    --border: #252a35;
+    --text: #d4dae6;
+    --dim: #6b7a94;
+    --accent: #f97316;
+    --accent-glow: #f9731640;
+    --danger: #ef4444;
+    --success: #22c55e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ─── Header ─── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    z-index: 1000;
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--dim); font-weight: 400; }
+  .badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .badge-dev { background: #f9731620; color: var(--accent); border: 1px solid #f9731640; }
+
+  /* ─── Main layout ─── */
+  .main { display: flex; flex: 1; min-height: 0; }
+
+  /* ─── Sidebar ─── */
+  .sidebar {
+    width: 340px;
+    flex-shrink: 0;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .section {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--dim);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .field { margin-bottom: 8px; }
+  .field label {
+    display: block;
+    font-size: 11px;
+    color: var(--dim);
+    margin-bottom: 3px;
+    font-weight: 500;
+  }
+  .field input, .field select {
+    width: 100%;
+    padding: 7px 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+  }
+
+  .row { display: flex; gap: 8px; }
+  .row .field { flex: 1; }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: #fb923c; }
+  .btn-primary:disabled {
+    background: #f9731640;
+    cursor: wait;
+  }
+
+  /* ─── Status log ─── */
+  .log-panel {
+    flex: 1;
+    min-height: 100px;
+    overflow-y: auto;
+    padding: 10px 16px;
+  }
+  .log-line {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    line-height: 1.6;
+    color: var(--dim);
+  }
+  .log-line.info { color: var(--text); }
+  .log-line.warn { color: #facc15; }
+  .log-line.error { color: var(--danger); }
+  .log-line.ok { color: var(--success); }
+  .log-line .ts { color: #3b4a61; margin-right: 6px; }
+
+  /* ─── Map ─── */
+  .map-wrap { flex: 1; position: relative; }
+  #map { width: 100%; height: 100%; background: var(--bg); }
+
+  /* ─── Legend overlay ─── */
+  .legend-box {
+    position: absolute;
+    bottom: 30px;
+    right: 14px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    z-index: 800;
+    font-size: 11px;
+    min-width: 120px;
+    display: none;
+  }
+  .legend-box.active { display: block; }
+  .legend-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .legend-row { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+  .legend-swatch { width: 18px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .legend-label { color: var(--text); font-size: 11px; }
+
+  /* ─── Stats bar ─── */
+  .stats-bar {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 18px;
+    z-index: 800;
+    display: none;
+    gap: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+  .stats-bar.active { display: flex; }
+  .stat-item { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+  .stat-val { color: var(--accent); font-weight: 700; font-size: 14px; }
+  .stat-lbl { color: var(--dim); font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ─── Progress indicator ─── */
+  .progress-wrap {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 8px;
+    display: none;
+  }
+  .progress-wrap.active { display: block; }
+  .progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.3s;
+  }
+
+  /* Leaflet overrides */
+  .leaflet-control-attribution { font-size: 9px !important; }
+  .leaflet-control-zoom a {
+    background: var(--panel) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+  }
+
+  /* Click marker */
+  .ignition-icon {
+    display: flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px;
+    background: var(--accent);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    font-size: 12px;
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
 </style>
 </head>
 <body>
-<div class="sb">
-  <div class="sb-h"><h1><span class="logo">🔥</span>FireCast LPC</h1><p>Rothermel MTT · LANDFIRE · NWS</p></div>
-  <div class="sb-b">
-    <div class="s"><div class="st">Ignition</div>
-      <div class="brow"><button class="btn btn-s" id="bp" onclick="startPlace()">📍 Click Map</button></div>
-      <div id="igd" style="font-size:10px;font-family:monospace;color:#4a5c7a;margin-top:4px;min-height:14px"></div>
-    </div><div class="dv"></div>
-    <div class="s"><div class="st">Weather <span class="badge b-wait" id="wxb">awaiting</span></div>
-      <div class="g2"><div class="fg"><label>Wind <span class="u">mph@20ft</span></label><input type="number" id="ws" value="15"></div><div class="fg"><label>From <span class="u">°</span></label><input type="number" id="wd" value="225" step="15"></div></div>
-      <div class="g2"><div class="fg"><label>Temp <span class="u">°F</span></label><input type="number" id="wt" value="85"></div><div class="fg"><label>RH <span class="u">%</span></label><input type="number" id="wh" value="12"></div></div>
-      <div class="g3"><div class="fg"><label>1hr FM%</label><input type="number" id="f1" value="4"></div><div class="fg"><label>10hr</label><input type="number" id="f10" value="6"></div><div class="fg"><label>100hr</label><input type="number" id="f100" value="9"></div></div>
-      <div class="fg"><label>Live FM <span class="u">%</span></label><input type="number" id="flv" value="70" step="5"></div>
-      <button class="btn btn-s" onclick="fetchNWS()" style="font-size:10px">🔄 Fetch NWS</button>
-    </div><div class="dv"></div>
-    <div class="s"><div class="st">Landscape</div>
-      <div class="g2">
-        <div class="fg"><label>Resolution</label><select id="res"><option value="120" selected>120m</option><option value="90">90m</option></select></div>
-        <div class="fg"><label>Extent</label><select id="ext"><option value="4">4km</option><option value="5" selected>5km</option><option value="7">7km</option></select></div>
-      </div>
-      <div class="fg"><label>Terrain</label><select id="tsrc"><option value="synth" selected>Synthetic terrain</option><option value="flat">Flat / Uniform</option></select></div>
-      <div class="fg"><label>Fuel Model</label><select id="ffm"><option value="GR2">GR2 — Dry grass</option><option value="GS2">GS2 — Grass-shrub</option><option value="SH5" selected>SH5 — High load shrub</option><option value="TU1">TU1 — Timber-grass-shrub</option><option value="TL3">TL3 — Conifer litter</option><option value="TL5">TL5 — Heavy conifer litter</option></select></div>
-    </div><div class="dv"></div>
-    <div class="s"><div class="st">Simulation</div>
-      <div class="fg"><label>Duration <span class="u">(hours)</span></label><input type="number" id="dur" value="6" min="1" max="12"></div>
-      <button class="btn btn-p" id="runBtn" onclick="runSim()" style="margin-top:6px">▶ Run Spread Model</button>
-      <div class="prog"><div class="pf" id="pf"></div></div>
-      <button class="btn btn-s" onclick="clearFire()" style="margin-top:4px">Clear</button>
-    </div><div class="dv"></div>
-    <div class="ref">Rothermel 1972 · Albini 1976 · MTT Finney 2002<br>Scott &amp; Burgan FBFM40 · Simard 1968<br>⚠ Planning only. Not operational.</div>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">🔥 FireCast <span>LPC</span></div>
+    <div class="badge badge-dev">DEV</div>
   </div>
-  <div class="sb-f"><span class="dot" id="dot"></span><span id="stxt">Click map to set ignition</span></div>
 </div>
-<div class="mc" id="mc">
-  <div id="map"></div>
-  <div class="banner" id="ban">Click map to place ignition</div>
-  <div class="ov rpn" id="rpn"><h3>Results</h3><div id="rc"></div></div>
-  <div class="ov lgd" id="lgd"><h3>Hourly Spread</h3><div id="lgi"></div></div>
+
+<div class="main">
+  <div class="sidebar">
+    <!-- Ignition -->
+    <div class="section">
+      <div class="section-title">Ignition Point</div>
+      <p style="font-size:11px;color:var(--dim);margin-bottom:8px;">Click the map to set ignition, or enter coordinates:</p>
+      <div class="row">
+        <div class="field"><label>Latitude</label><input type="number" id="lat" value="37.2750" step="0.001"></div>
+        <div class="field"><label>Longitude</label><input type="number" id="lng" value="-107.8800" step="0.001"></div>
+      </div>
+    </div>
+
+    <!-- Grid config -->
+    <div class="section">
+      <div class="section-title">Grid Configuration</div>
+      <div class="row">
+        <div class="field"><label>Grid Size</label>
+          <select id="gridsize">
+            <option value="60">60 × 60 (fast)</option>
+            <option value="80">80 × 80</option>
+            <option value="100" selected>100 × 100</option>
+            <option value="120">120 × 120</option>
+            <option value="150">150 × 150 (slow)</option>
+          </select>
+        </div>
+        <div class="field"><label>Cell (m)</label><input type="number" id="cellsize" value="90" min="30" max="200" step="10"></div>
+      </div>
+      <div class="field"><label>Duration (hours)</label><input type="number" id="dur" value="6" min="1" max="12"></div>
+    </div>
+
+    <!-- Weather -->
+    <div class="section">
+      <div class="section-title">Weather</div>
+      <div class="row">
+        <div class="field"><label>Wind Speed (mph)</label><input type="number" id="ws" value="15" min="0" max="60"></div>
+        <div class="field"><label>Wind From (°)</label><input type="number" id="wd" value="225" min="0" max="360" step="5"></div>
+      </div>
+    </div>
+
+    <!-- Fuel Moisture -->
+    <div class="section">
+      <div class="section-title">Fuel Moisture</div>
+      <div class="row">
+        <div class="field"><label>1hr (%)</label><input type="number" id="f1" value="4" min="1" max="30"></div>
+        <div class="field"><label>10hr</label><input type="number" id="f10" value="6"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>100hr</label><input type="number" id="f100" value="9"></div>
+        <div class="field"><label>Live Herb (%)</label><input type="number" id="flv" value="70"></div>
+      </div>
+    </div>
+
+    <!-- Run -->
+    <div class="section">
+      <button class="btn btn-primary" id="runBtn" onclick="runFireCast()">▶ &nbsp;Run FireCast</button>
+      <div class="progress-wrap" id="progress"><div class="progress-bar" id="pbar"></div></div>
+    </div>
+
+    <!-- Log -->
+    <div class="log-panel" id="log"></div>
+  </div>
+
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-item"><span class="stat-val" id="stAcres">—</span><span class="stat-lbl">Acres</span></div>
+      <div class="stat-item"><span class="stat-val" id="stROS">—</span><span class="stat-lbl">Max ch/hr</span></div>
+      <div class="stat-item"><span class="stat-val" id="stSolve">—</span><span class="stat-lbl">Solve (s)</span></div>
+      <div class="stat-item"><span class="stat-val" id="stCells">—</span><span class="stat-lbl">Burned</span></div>
+    </div>
+    <div class="legend-box" id="legendBox">
+      <div class="legend-title">Arrival Hour</div>
+      <div id="legendContent"></div>
+    </div>
+  </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
-const $=id=>document.getElementById(id);
-function st(s,t){$('dot').className='dot'+(s==='run'?' run':'');$('stxt').textContent=t}
-function pg(p){$('pf').style.width=p+'%'}
+// ═══════════════════════════════════════
+// MAP INIT
+// ═══════════════════════════════════════
+const map = L.map('map', {
+  center: [37.275, -107.88],
+  zoom: 12,
+  zoomControl: true
+});
 
-// ═══ FUEL MODELS ═══
-const FM={
-GR2:{w1:.1,w10:0,w100:0,wLH:1,wLW:0,sv1:2000,svLH:1800,svLW:0,d:1,mx:.15,h:8000,wrf:.6},
-GS1:{w1:.2,w10:0,w100:0,wLH:.5,wLW:.65,sv1:2000,svLH:1800,svLW:1800,d:.9,mx:.15,h:8000,wrf:.55},
-GS2:{w1:.5,w10:.5,w100:0,wLH:.6,wLW:1,sv1:2000,svLH:1800,svLW:1800,d:1.5,mx:.15,h:8000,wrf:.55},
-SH5:{w1:3.6,w10:2.1,w100:0,wLH:0,wLW:2.9,sv1:750,svLH:0,svLW:1600,d:6,mx:.15,h:8000,wrf:.5},
-TU1:{w1:.2,w10:.9,w100:1.5,wLH:.2,wLW:.9,sv1:2000,svLH:1800,svLW:1600,d:.6,mx:.2,h:8000,wrf:.4},
-TL3:{w1:.5,w10:2.2,w100:2.8,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.3,mx:.2,h:8000,wrf:.4},
-TL5:{w1:1.15,w10:2.5,w100:4.4,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.6,mx:.25,h:8000,wrf:.4},
-NB:{w1:0,w10:0,w100:0,wLH:0,wLW:0,sv1:0,svLH:0,svLW:0,d:0,mx:0,h:0,wrf:0}};
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OSM &amp; CARTO',
+  maxZoom: 19
+}).addTo(map);
 
-// ═══ NWS ═══
-async function fetchNWS(){
-  if(!ignLL)return;
-  $('wxb').className='badge b-wait';$('wxb').textContent='...';
-  try{
-    const r=await(await fetch(`https://api.weather.gov/points/${ignLL.lat.toFixed(4)},${ignLL.lng.toFixed(4)}`,{headers:{'User-Agent':'FireCast/5','Accept':'application/geo+json'}})).json();
-    const g=await(await fetch(r.properties.forecastGridData,{headers:{'User-Agent':'FireCast/5','Accept':'application/geo+json'}})).json();
-    const p=g.properties,gv=(s,d)=>s?.values?.[0]?.value??d;
-    const tC=gv(p.temperature,27),tF=Math.round(tC*9/5+32),rh=Math.round(gv(p.relativeHumidity,15));
-    const wsMph=Math.round(gv(p.windSpeed,24)*.621371),wdD=Math.round(gv(p.windDirection,225));
-    $('ws').value=wsMph;$('wd').value=wdD;$('wt').value=tF;$('wh').value=rh;
-    let m;if(rh<=10)m=.03229+.281073*rh-.000578*rh*tF;else if(rh<=50)m=2.22749+.160107*rh-.01478*tF;else m=21.0606+.005565*rh*rh-.00035*rh*tF-.483199*rh;
-    m=Math.max(1,Math.min(35,m));
-    $('f1').value=Math.round(m);$('f10').value=Math.round(m*1.3);$('f100').value=Math.round(m*1.8);
-    $('wxb').className='badge b-ok';$('wxb').textContent='NWS '+r.properties.gridId;
-  }catch(e){$('wxb').className='badge b-wait';$('wxb').textContent='failed'}
+let ignitionMarker = null;
+let contourLayers = [];
+
+const ignitionIcon = L.divIcon({
+  className: '',
+  html: '<div class="ignition-icon">🔥</div>',
+  iconSize: [24, 24],
+  iconAnchor: [12, 12]
+});
+
+map.on('click', function(e) {
+  document.getElementById('lat').value = e.latlng.lat.toFixed(4);
+  document.getElementById('lng').value = e.latlng.lng.toFixed(4);
+  setIgnitionMarker(e.latlng.lat, e.latlng.lng);
+});
+
+function setIgnitionMarker(lat, lng) {
+  if (ignitionMarker) map.removeLayer(ignitionMarker);
+  ignitionMarker = L.marker([lat, lng], { icon: ignitionIcon }).addTo(map);
 }
 
-// ═══ PERLIN ═══
-function makePerlin(seed){
-  const p=new Uint8Array(512),q=new Uint8Array(256);for(let i=0;i<256;i++)q[i]=i;let s=seed;
-  for(let i=255;i>0;i--){s=(s*16807)%2147483647;const j=s%(i+1);[q[i],q[j]]=[q[j],q[i]];}
-  for(let i=0;i<512;i++)p[i]=q[i&255];
-  const fd=t=>t*t*t*(t*(t*6-15)+10),lr=(a,b,t)=>a+t*(b-a),gr=(h,x,y)=>{const v=h&3;return((v&1)?-x:x)+((v&2)?-y:y)};
-  return(x,y,o)=>{o=o||4;let v=0,a=1,f=1,m=0;for(let i=0;i<o;i++){const X=Math.floor(x*f)&255,Y=Math.floor(y*f)&255,xf=x*f-Math.floor(x*f),yf=y*f-Math.floor(y*f),u=fd(xf),w=fd(yf);v+=lr(lr(gr(p[p[X]+Y],xf,yf),gr(p[p[X+1]+Y],xf-1,yf),u),lr(gr(p[p[X]+Y+1],xf,yf-1),gr(p[p[X+1]+Y+1],xf-1,yf-1),u),w)*a;m+=a;a*=.5;f*=2;}return v/m;};
+// ═══════════════════════════════════════
+// LOGGING
+// ═══════════════════════════════════════
+function log(msg, cls = '') {
+  const el = document.getElementById('log');
+  const ts = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  el.innerHTML += `<div class="log-line ${cls}"><span class="ts">${ts}</span>${msg}</div>`;
+  el.scrollTop = el.scrollHeight;
 }
 
-// ═══ ROTHERMEL (verified) ═══
-function calcROS(fk,wMph,wDir,m1,m10,m100,mLv,slp,asp){
-  const f=FM[fk];if(!f||f.d<=0)return{ros:0,R0:0,fl:0,az:0};
-  const L=t=>t*2000/43560,w=[L(f.w1),L(f.w10),L(f.w100)],wl=[L(f.wLH),L(f.wLW)];
-  const sv=[f.sv1,109,30],svl=[f.svLH||.001,f.svLW||.001];
-  const mf=[m1/100,m10/100,m100/100],ml=[mLv/100,mLv/100];
-  const dSA=w.map((a,i)=>a*sv[i]),dT=dSA.reduce((a,b)=>a+b,0);
-  const lSA=wl.map((a,i)=>a*svl[i]),lT=lSA.reduce((a,b)=>a+b,0),tSA=dT+lT;
-  if(tSA<1e-6)return{ros:0,R0:0,fl:0,az:0};
-  const dF=dSA.map(s=>dT>0?s/dT:0),lF=lSA.map(s=>lT>0?s/lT:0),fD=dT/tSA,fL=lT/tSA;
-  const sigma=fD*dF.reduce((s,a,i)=>s+a*sv[i],0)+fL*lF.reduce((s,a,i)=>s+a*svl[i],0);
-  if(sigma<1)return{ros:0,R0:0,fl:0,az:0};
-  const wT=w.reduce((a,b)=>a+b,0)+wl.reduce((a,b)=>a+b,0),beta=wT/(f.d*32),bo=3.348*Math.pow(sigma,-.8189),br=beta/bo;
-  const A=133*Math.pow(sigma,-.7913),gMax=Math.pow(sigma,1.5)/(495+.0594*Math.pow(sigma,1.5)),gam=gMax*Math.pow(br,A)*Math.exp(A*(1-br));
-  const wnD=w.reduce((s,a,i)=>s+dF[i]*a*.9445,0),wnL=wl.reduce((s,a,i)=>s+lF[i]*a*.9445,0);
-  const mfDw=dF.reduce((s,a,i)=>s+a*mf[i],0),rmD=Math.min(mfDw/f.mx,1),etD=Math.max(0,1-2.59*rmD+5.11*rmD*rmD-3.52*Math.pow(rmD,3));
-  let etL=1;if(lT>1e-5){const mfLw=lF.reduce((s,a,i)=>s+a*ml[i],0),rmL=Math.min(mfLw/Math.max(f.mx,.3),1);etL=Math.max(0,1-2.59*rmL+5.11*rmL*rmL-3.52*Math.pow(rmL,3));}
-  const etS=.174*Math.pow(.01,-.19),IR=gam*(wnD*f.h*etD*etS+wnL*f.h*etL*etS);
-  const xi=Math.exp((.792+.681*Math.pow(sigma,.5))*(beta+.1))/(192+.2595*sigma);
-  const rhoB=wT/f.d,eps=Math.exp(-138/sigma),mfC=fD*mfDw+fL*(lF.reduce((s,a,i)=>s+a*ml[i],0)||0);
-  const hs=rhoB*eps*(250+1116*mfC);if(hs<.001)return{ros:0,R0:0,fl:0,az:0};
-  const R0=IR*xi/hs,U=wMph*f.wrf*88;
-  const C=7.47*Math.exp(-.133*Math.pow(sigma,.55)),B=.02526*Math.pow(sigma,.54),E=.715*Math.exp(-3.59e-4*sigma);
-  const phiW=U>0?C*Math.pow(U,B)*Math.pow(br,-E):0;
-  const sR=slp*Math.PI/180,phiS=5.275*Math.pow(Math.max(beta,1e-4),-.3)*Math.pow(Math.tan(sR),2);
-  const wAz=((wDir+180)%360)*Math.PI/180,sAz=((asp+180)%360)*Math.PI/180;
-  const vx=phiW*Math.sin(wAz)+phiS*Math.sin(sAz),vy=phiW*Math.cos(wAz)+phiS*Math.cos(sAz);
-  const ros=R0*(1+Math.sqrt(vx*vx+vy*vy));
-  return{ros,R0,fl:.45*Math.pow(Math.max(IR*ros/60,.01),.46),az:Math.atan2(vx,vy)};
+function setProgress(pct) {
+  const wrap = document.getElementById('progress');
+  wrap.classList.toggle('active', pct > 0 && pct < 100);
+  document.getElementById('pbar').style.width = pct + '%';
 }
 
-// ═══ MTT (verified) ═══
-function runMTT(n,cellM,fuel,slope,aspect,wS,wD,m1,m10,m100,mLv,durMin){
-  const cellFt=cellM*3.28084,at=new Float32Array(n*n);at.fill(Infinity);
-  const cROS=new Float32Array(n*n),cR0=new Float32Array(n*n),cAZ=new Float32Array(n*n),cFL=new Float32Array(n*n);
-  for(let i=0;i<n*n;i++){const r=calcROS(fuel[i],wS,wD,m1,m10,m100,mLv,slope[i],aspect[i]);cROS[i]=r.ros;cR0[i]=r.R0;cAZ[i]=r.az;cFL[i]=r.fl;}
-  const ew=wS*.5,LB=Math.max(1,.936*Math.exp(.2566*ew)+.461*Math.exp(-.1548*ew)-.397),ecc=LB>1.01?Math.sqrt(1-1/(LB*LB)):0;
-  const H=[];
-  const push=(t,r,c)=>{H.push([t,r,c]);let i=H.length-1;while(i>0){const p=(i-1)>>1;if(H[p][0]<=H[i][0])break;[H[p],H[i]]=[H[i],H[p]];i=p;}};
-  const pop=()=>{const t=H[0],l=H.pop();if(H.length>0){H[0]=l;let i=0;while(1){let s=i;const a=2*i+1,b=2*i+2;if(a<H.length&&H[a][0]<H[s][0])s=a;if(b<H.length&&H[b][0]<H[s][0])s=b;if(s===i)break;[H[s],H[i]]=[H[i],H[s]];i=s;}}return t;};
-  const cr=Math.floor(n/2),cc=Math.floor(n/2);at[cr*n+cc]=0;push(0,cr,cc);
-  const vis=new Uint8Array(n*n),NB=[[-1,0,1],[1,0,1],[0,-1,1],[0,1,1],[-1,-1,1.414],[-1,1,1.414],[1,-1,1.414],[1,1,1.414]];
-  while(H.length>0){
-    const[t,r,c]=pop();const idx=r*n+c;if(vis[idx]||t>durMin)continue;vis[idx]=1;if(cROS[idx]<=0)continue;
-    for(const[dr,dc,dm]of NB){const nr=r+dr,nc=c+dc;if(nr<0||nr>=n||nc<0||nc>=n)continue;const ni=nr*n+nc;if(vis[ni]||cROS[ni]<=0)continue;
-      const tAz=Math.atan2(dc,-dr);
-      function dR(hr,r0,az){if(ecc<.01)return hr;let ad=tAz-az;while(ad>Math.PI)ad-=2*Math.PI;while(ad<-Math.PI)ad+=2*Math.PI;const d=1-ecc*Math.cos(ad);if(d<.05)return hr;return Math.max(r0*.3,Math.min(hr*(1-ecc)/d,hr));}
-      const avg=(dR(cROS[idx],cR0[idx],cAZ[idx])+dR(cROS[ni],cR0[ni],cAZ[ni]))/2;
-      if(avg<=0||!isFinite(avg))continue;const tt=cellFt*dm/avg;if(!isFinite(tt)||tt<=0)continue;
-      const na=t+tt;if(na<at[ni]&&na<=durMin){at[ni]=na;push(na,nr,nc);}
-    }
-  }
-  return{at,cROS,cFL};
-}
+// ═══════════════════════════════════════
+// FBFM40 FUEL MODEL MAPPING
+// ═══════════════════════════════════════
+const FBFM40_MAP = {
+  // Grass
+  101:'GR1',102:'GR2',103:'GR3',104:'GR4',105:'GR5',106:'GR6',107:'GR7',108:'GR8',109:'GR9',
+  // Grass-Shrub
+  121:'GS1',122:'GS2',123:'GS3',124:'GS4',
+  // Shrub
+  141:'SH1',142:'SH2',143:'SH3',144:'SH4',145:'SH5',146:'SH6',147:'SH7',148:'SH8',149:'SH9',
+  // Timber-Understory
+  161:'TU1',162:'TU2',163:'TU3',164:'TU4',165:'TU5',
+  // Timber Litter
+  181:'TL1',182:'TL2',183:'TL3',184:'TL4',185:'TL5',186:'TL6',187:'TL7',188:'TL8',189:'TL9',
+  // Slash-Blowdown
+  201:'SB1',202:'SB2',203:'SB3',204:'SB4',
+  // Non-burnable
+  91:'NB',92:'NB',93:'NB',98:'NB',99:'NB',
+  // Anderson 13
+  1:'FM1',2:'FM2',3:'FM3',4:'FM4',5:'FM5',6:'FM6',7:'FM7',8:'FM8',9:'FM9',10:'FM10',11:'FM11',12:'FM12',13:'FM13',
+};
 
-// ═══ COLORS ═══
-const HOUR_CLR=['#FFFF50','#FFD620','#FFA500','#FF6400','#E6370F','#CC1E14','#A00F14','#780A0F','#5A050A','#410308','#2D0205','#1E0103'];
+// ═══════════════════════════════════════
+// FUEL MODELS (from verified grid test + extended)
+// ═══════════════════════════════════════
+const FM = {
+  GR1:{w1:.1,w10:0,w100:0,wLH:.3,wLW:0,sv1:2200,svLH:2000,svLW:0,d:.4,mx:.15,h:8000,wrf:.6},
+  GR2:{w1:.1,w10:0,w100:0,wLH:1,wLW:0,sv1:2000,svLH:1800,svLW:0,d:1,mx:.15,h:8000,wrf:.6},
+  GR3:{w1:.1,w10:.4,w100:0,wLH:1.5,wLW:0,sv1:1500,svLH:1300,svLW:0,d:2,mx:.3,h:8000,wrf:.6},
+  GR4:{w1:.25,w10:0,w100:0,wLH:1.9,wLW:0,sv1:2000,svLH:1800,svLW:0,d:2,mx:.15,h:8000,wrf:.6},
+  GR5:{w1:.4,w10:0,w100:0,wLH:2.5,wLW:0,sv1:1800,svLH:1600,svLW:0,d:1.5,mx:.4,h:8000,wrf:.6},
+  GR6:{w1:.1,w10:0,w100:0,wLH:3.4,wLW:0,sv1:2200,svLH:2000,svLW:0,d:1.5,mx:.4,h:9000,wrf:.6},
+  GR7:{w1:1,w10:0,w100:0,wLH:5.4,wLW:0,sv1:2000,svLH:1800,svLW:0,d:3,mx:.15,h:8000,wrf:.6},
+  GR8:{w1:.5,w10:1,w100:0,wLH:7.3,wLW:0,sv1:1500,svLH:1300,svLW:0,d:4,mx:.3,h:8000,wrf:.6},
+  GR9:{w1:1,w10:1,w100:0,wLH:9,wLW:0,sv1:1800,svLH:1600,svLW:0,d:5,mx:.4,h:8000,wrf:.6},
+  GS1:{w1:.2,w10:0,w100:0,wLH:.5,wLW:.65,sv1:2000,svLH:1800,svLW:1800,d:.9,mx:.15,h:8000,wrf:.55},
+  GS2:{w1:.5,w10:.5,w100:0,wLH:.6,wLW:1,sv1:2000,svLH:1800,svLW:1800,d:1.5,mx:.15,h:8000,wrf:.55},
+  GS3:{w1:.3,w10:.25,w100:0,wLH:1.45,wLW:1.25,sv1:1800,svLH:1600,svLW:1600,d:1.8,mx:.4,h:8000,wrf:.55},
+  GS4:{w1:1.9,w10:.3,w100:.1,wLH:3.4,wLW:7.1,sv1:1800,svLH:1600,svLW:1600,d:2.1,mx:.4,h:8000,wrf:.55},
+  SH1:{w1:.25,w10:.25,w100:0,wLH:.15,wLW:1.3,sv1:2000,svLH:1800,svLW:1600,d:1,mx:.15,h:8000,wrf:.5},
+  SH2:{w1:1.35,w10:2.4,w100:.75,wLH:0,wLW:3.85,sv1:2000,svLH:0,svLW:1600,d:1,mx:.15,h:8000,wrf:.5},
+  SH3:{w1:.45,w10:3,w100:0,wLH:0,wLW:6.2,sv1:1600,svLH:0,svLW:1400,d:2.4,mx:.4,h:8000,wrf:.5},
+  SH4:{w1:.85,w10:1.15,w100:.2,wLH:0,wLW:2.55,sv1:2000,svLH:1800,svLW:1600,d:3,mx:.3,h:8000,wrf:.5},
+  SH5:{w1:3.6,w10:2.1,w100:0,wLH:0,wLW:2.9,sv1:750,svLH:0,svLW:1600,d:6,mx:.15,h:8000,wrf:.5},
+  SH6:{w1:2.9,w10:1.45,w100:0,wLH:0,wLW:1.4,sv1:750,svLH:0,svLW:1600,d:2,mx:.3,h:8000,wrf:.5},
+  SH7:{w1:3.5,w10:5.3,w100:2.2,wLH:0,wLW:3.4,sv1:750,svLH:0,svLW:1600,d:6,mx:.15,h:8000,wrf:.5},
+  SH8:{w1:2,w10:3,w100:1,wLH:0,wLW:4,sv1:750,svLH:0,svLW:1600,d:3,mx:.4,h:8000,wrf:.5},
+  SH9:{w1:4.5,w10:2.45,w100:0,wLH:1.55,wLW:7,sv1:750,svLH:1800,svLW:1500,d:4.4,mx:.4,h:8000,wrf:.5},
+  TU1:{w1:.2,w10:.9,w100:1.5,wLH:.2,wLW:.9,sv1:2000,svLH:1800,svLW:1600,d:.6,mx:.2,h:8000,wrf:.4},
+  TU2:{w1:.95,w10:1.8,w100:1.25,wLH:0,wLW:.2,sv1:2000,svLH:0,svLW:1600,d:1,mx:.3,h:8000,wrf:.4},
+  TU3:{w1:1.1,w10:.15,w100:.25,wLH:.65,wLW:1.1,sv1:1800,svLH:1600,svLW:1400,d:1.3,mx:.3,h:8000,wrf:.4},
+  TU4:{w1:4.5,w10:0,w100:0,wLH:0,wLW:2,sv1:2300,svLH:0,svLW:2000,d:.5,mx:.12,h:8000,wrf:.4},
+  TU5:{w1:4,w10:4,w100:3,wLH:0,wLW:3,sv1:1500,svLH:0,svLW:750,d:1,mx:.25,h:8000,wrf:.4},
+  TL1:{w1:1,w10:2.2,w100:3.6,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.2,mx:.3,h:8000,wrf:.4},
+  TL2:{w1:1.4,w10:2.3,w100:2.2,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.2,mx:.25,h:8000,wrf:.4},
+  TL3:{w1:.5,w10:2.2,w100:2.8,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.3,mx:.2,h:8000,wrf:.4},
+  TL4:{w1:.5,w10:1.5,w100:4.2,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.4,mx:.25,h:8000,wrf:.4},
+  TL5:{w1:1.15,w10:2.5,w100:4.4,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.6,mx:.25,h:8000,wrf:.4},
+  TL6:{w1:2.4,w10:1.2,w100:1.2,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.3,mx:.25,h:8000,wrf:.4},
+  TL7:{w1:.3,w10:1.4,w100:8.1,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.4,mx:.25,h:8000,wrf:.4},
+  TL8:{w1:5.8,w10:1.4,w100:1.1,wLH:0,wLW:0,sv1:1800,svLH:0,svLW:0,d:.3,mx:.35,h:8000,wrf:.4},
+  TL9:{w1:6.65,w10:3.3,w100:4.15,wLH:0,wLW:0,sv1:1800,svLH:0,svLW:0,d:.6,mx:.35,h:8000,wrf:.4},
+  SB1:{w1:1.5,w10:3,w100:11,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:1,mx:.25,h:8000,wrf:.4},
+  SB2:{w1:4.5,w10:4.25,w100:4,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:1,mx:.25,h:8000,wrf:.4},
+  SB3:{w1:5.5,w10:2.75,w100:3,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:1.2,mx:.25,h:8000,wrf:.4},
+  SB4:{w1:5.25,w10:3.5,w100:5.25,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:2.7,mx:.25,h:8000,wrf:.4},
+  // Anderson 13 (legacy fallback)
+  FM1:{w1:.74,w10:0,w100:0,wLH:0,wLW:0,sv1:3500,svLH:0,svLW:0,d:1,mx:.12,h:8000,wrf:.6},
+  FM2:{w1:2,w10:1,w100:.5,wLH:.5,wLW:0,sv1:3000,svLH:1500,svLW:0,d:1,mx:.15,h:8000,wrf:.6},
+  FM3:{w1:3,w10:0,w100:0,wLH:0,wLW:0,sv1:1500,svLH:0,svLW:0,d:2.5,mx:.25,h:8000,wrf:.6},
+  FM4:{w1:5,w10:4,w100:2,wLH:5,wLW:0,sv1:2000,svLH:1500,svLW:0,d:6,mx:.2,h:8000,wrf:.5},
+  FM5:{w1:1,w10:.5,w100:0,wLH:2,wLW:0,sv1:2000,svLH:1500,svLW:0,d:2,mx:.2,h:8000,wrf:.5},
+  FM6:{w1:1.5,w10:2.5,w100:2,wLH:0,wLW:0,sv1:1750,svLH:0,svLW:0,d:2.5,mx:.25,h:8000,wrf:.5},
+  FM7:{w1:1.13,w10:1.87,w100:1.5,wLH:0,wLW:.37,sv1:1750,svLH:0,svLW:1550,d:2.5,mx:.4,h:8000,wrf:.5},
+  FM8:{w1:1.5,w10:1,w100:2.5,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.2,mx:.3,h:8000,wrf:.4},
+  FM9:{w1:2.92,w10:.41,w100:.15,wLH:0,wLW:0,sv1:2500,svLH:0,svLW:0,d:.2,mx:.25,h:8000,wrf:.4},
+  FM10:{w1:3,w10:2,w100:5,wLH:2,wLW:0,sv1:2000,svLH:1500,svLW:0,d:1,mx:.25,h:8000,wrf:.4},
+  FM11:{w1:1.5,w10:4.51,w100:5.51,wLH:0,wLW:0,sv1:1500,svLH:0,svLW:0,d:1,mx:.15,h:8000,wrf:.4},
+  FM12:{w1:4,w10:14.03,w100:16.53,wLH:0,wLW:0,sv1:1500,svLH:0,svLW:0,d:2.3,mx:.2,h:8000,wrf:.4},
+  FM13:{w1:7,w10:23.04,w100:28.05,wLH:0,wLW:0,sv1:1500,svLH:0,svLW:0,d:3,mx:.25,h:8000,wrf:.4},
+  NB:{w1:0,w10:0,w100:0,wLH:0,wLW:0,sv1:0,svLH:0,svLW:0,d:0,mx:0,h:0,wrf:0},
+};
 
-// ═══ MAP ═══
-const map=L.map('map',{center:[37.28,-107.88],zoom:12,preferCanvas:true});
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Esri',maxZoom:19}).addTo(map);
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,opacity:.55}).addTo(map);
-const canvasR=L.canvas({padding:.5});
+// ═══════════════════════════════════════
+// DATA FETCHING — LANDFIRE & 3DEP
+// ═══════════════════════════════════════
 
-let ignLL=null,ignMk=null,placing=false,fireGroup=null;
+/**
+ * Build grid of lat/lng points centered on ignition
+ */
+function buildGrid(lat, lng, n, cellM) {
+  const mPerDegLat = 111320;
+  const mPerDegLng = 111320 * Math.cos(lat * Math.PI / 180);
+  const halfExtentLat = (n / 2) * cellM / mPerDegLat;
+  const halfExtentLng = (n / 2) * cellM / mPerDegLng;
 
-function startPlace(){placing=true;$('mc').classList.add('placing');$('ban').classList.add('vis');$('bp').classList.add('on');}
-function stopPlace(){placing=false;$('mc').classList.remove('placing');$('ban').classList.remove('vis');$('bp').classList.remove('on');}
-map.on('click',e=>{if(placing){ignLL=e.latlng;if(ignMk)map.removeLayer(ignMk);ignMk=L.circleMarker(ignLL,{radius:5,fillColor:'#f97316',fillOpacity:1,color:'#fff',weight:2}).addTo(map);$('igd').textContent=ignLL.lat.toFixed(5)+', '+ignLL.lng.toFixed(5);stopPlace();st('ready','Ignition set — fetching wx');fetchNWS();}});
-
-function clearFire(){if(fireGroup){map.removeLayer(fireGroup);fireGroup=null;}$('rpn').classList.remove('vis');$('lgd').style.display='none';st('ready','Cleared');}
-
-// ═══ RUN ═══
-async function runSim(){
-  if(!ignLL){alert('Click map to place ignition first.');return;}
-  clearFire();st('run','Building grid...');$('runBtn').disabled=true;pg(5);
-  await new Promise(r=>setTimeout(r,30));
-
-  const cellM=+$('res').value,extKm=+$('ext').value,fuelKey=$('ffm').value,src=$('tsrc').value;
-  const wS=+$('ws').value,wD=+$('wd').value,m1=+$('f1').value,m10=+$('f10').value,m100=+$('f100').value,mLv=+$('flv').value,dH=+$('dur').value;
-  const n=Math.min(Math.ceil(extKm*2000/cellM),160);
-
-  // Build terrain
-  const elev=new Float32Array(n*n),slope=new Float32Array(n*n),aspect=new Float32Array(n*n),fuel=new Array(n*n).fill(fuelKey);
-
-  if(src==='synth'){
-    const pn=makePerlin(42);const base=2100;
-    for(let r=0;r<n;r++)for(let c=0;c<n;c++){
-      const i=r*n+c;
-      elev[i]=base+pn(c*.008,r*.008,4)*300+Math.sin((c+r)*.05)*100;
-      // Only assign NB in a river-like corridor through the middle, not randomly scattered
-      const distFromCenter=Math.abs(c-n/2);
-      if(distFromCenter<3&&r>n*.3&&r<n*.7)fuel[i]='NB'; // narrow river
-      else if(elev[i]<base-80)fuel[i]='GR2';
-      else if(elev[i]>base+150)fuel[i]='TL3';
-    }
-  }
-
-  // Slope/aspect
-  for(let r=1;r<n-1;r++)for(let c=1;c<n-1;c++){
-    const i=r*n+c,dx=(elev[i+1]-elev[i-1])/(2*cellM),dy=(elev[(r+1)*n+c]-elev[(r-1)*n+c])/(2*cellM);
-    slope[i]=Math.atan(Math.sqrt(dx*dx+dy*dy))*180/Math.PI;
-    let a=Math.atan2(-dx,dy)*180/Math.PI;if(a<0)a+=360;aspect[i]=a;
-  }
-
-  pg(30);st('run','Running MTT ('+n+'×'+n+')...');
-  await new Promise(r=>setTimeout(r,30));
-
-  const t0=performance.now();
-  const result=runMTT(n,cellM,fuel,slope,aspect,wS,wD,m1,m10,m100,mLv,dH*60);
-  const elapsed=((performance.now()-t0)/1000).toFixed(2);
-
-  pg(70);st('run','Rendering...');
-  await new Promise(r=>setTimeout(r,30));
-
-  // Render fire cells as Leaflet rectangles
-  const mLat=111320,mLng=mLat*Math.cos(ignLL.lat*Math.PI/180);
-  const dLat=cellM/mLat,dLng=cellM/mLng;
-  const durMin=dH*60;
-
-  fireGroup=L.layerGroup();
-  let burned=0,maxR=0,maxFL=0;
-
-  for(let r=0;r<n;r++){
-    for(let c=0;c<n;c++){
-      const a=result.at[r*n+c];
-      if(!isFinite(a)||a<0||a>durMin)continue;
-
-      const hr=Math.min(Math.floor(a/60),dH-1);
-      const color=HOUR_CLR[Math.min(hr,HOUR_CLR.length-1)];
-      const cellLat=ignLL.lat+((n/2-r)*cellM)/mLat;
-      const cellLng=ignLL.lng+((c-n/2)*cellM)/mLng;
-
-      L.rectangle([[cellLat,cellLng],[cellLat-dLat,cellLng+dLng]],{
-        color:'#1a0500',weight:.5,fillColor:color,fillOpacity:.7,renderer:canvasR
-      }).addTo(fireGroup);
-
-      burned++;
-      if(result.cROS[r*n+c]>maxR)maxR=result.cROS[r*n+c];
-      if(result.cFL[r*n+c]>maxFL)maxFL=result.cFL[r*n+c];
+  const points = [];
+  const lats = [];
+  const lngs = [];
+  for (let r = 0; r < n; r++) {
+    for (let c = 0; c < n; c++) {
+      const pLat = (lat + halfExtentLat) - r * (cellM / mPerDegLat);
+      const pLng = (lng - halfExtentLng) + c * (cellM / mPerDegLng);
+      points.push([pLng, pLat]); // GeoJSON order: [lng, lat]
+      lats.push(pLat);
+      lngs.push(pLng);
     }
   }
 
-  fireGroup.addTo(map);
+  return {
+    points, lats, lngs,
+    bounds: {
+      south: lat - halfExtentLat,
+      north: lat + halfExtentLat,
+      west: lng - halfExtentLng,
+      east: lng + halfExtentLng
+    }
+  };
+}
 
-  // Fit bounds
-  const hLat=(n/2*cellM)/mLat,hLng=(n/2*cellM)/mLng;
-  map.fitBounds([[ignLL.lat+hLat,ignLL.lng-hLng],[ignLL.lat-hLat,ignLL.lng+hLng]],{padding:[20,20]});
+/**
+ * Query USGS 3DEP via getSamples multipoint endpoint
+ * Chunks into batches to avoid URL length limits
+ */
+async function fetch3DEP(points, n) {
+  log('Fetching USGS 3DEP elevation...');
+  const BATCH = 500;
+  const elev = new Float32Array(n * n);
+  elev.fill(NaN);
+  let fetched = 0;
 
-  // Results panel
-  const acres=burned*cellM*cellM/4046.86,rch=maxR/66*60;
-  $('rc').innerHTML=`<div class="ir"><span class="l">Grid</span><span class="v">${n}×${n}@${cellM}m</span></div>
-    <div class="ir"><span class="l">Solve</span><span class="v">${elapsed}s</span></div><div class="hr"></div>
-    <div class="ir"><span class="l">Burned</span><span class="v">${acres.toFixed(0)} ac</span></div>
-    <div class="ir"><span class="l">Max ROS</span><span class="v">${rch.toFixed(1)} ch/hr</span></div>
-    <div class="ir"><span class="l">Flame</span><span class="v">${maxFL.toFixed(1)} ft</span></div><div class="hr"></div>
-    <div class="ir"><span class="l">Wind</span><span class="v">${wS}mph@${wD}°</span></div>
-    <div class="ir"><span class="l">Fuel</span><span class="v">${fuelKey}</span></div>`;
-  $('rpn').classList.add('vis');
+  for (let start = 0; start < points.length; start += BATCH) {
+    const batch = points.slice(start, start + BATCH);
+    const mp = {
+      geometryType: 'esriGeometryMultipoint',
+      geometry: {
+        points: batch,
+        spatialReference: { wkid: 4326 }
+      },
+      returnFirstValueOnly: true,
+      f: 'json'
+    };
+
+    const url = 'https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/getSamples';
+    const params = new URLSearchParams();
+    params.set('geometry', JSON.stringify(mp.geometry));
+    params.set('geometryType', mp.geometryType);
+    params.set('returnFirstValueOnly', 'true');
+    params.set('f', 'json');
+
+    try {
+      const resp = await fetch(url + '?' + params.toString());
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+
+      if (data.samples) {
+        data.samples.forEach((s, i) => {
+          const idx = start + i;
+          if (idx < elev.length) {
+            const v = parseFloat(s.value);
+            elev[idx] = (isNaN(v) || v < -100) ? NaN : v;
+          }
+        });
+        fetched += data.samples.length;
+      }
+    } catch (e) {
+      log(`  3DEP batch error (${start}): ${e.message}`, 'warn');
+    }
+
+    setProgress(10 + 25 * Math.min(1, (start + BATCH) / points.length));
+  }
+
+  // Fill NaN gaps with neighbor average
+  let gaps = 0;
+  for (let i = 0; i < elev.length; i++) if (isNaN(elev[i])) gaps++;
+  if (gaps > 0 && gaps < elev.length * 0.8) {
+    for (let pass = 0; pass < 3; pass++) {
+      for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+          const i = r * n + c;
+          if (!isNaN(elev[i])) continue;
+          let sum = 0, cnt = 0;
+          for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+            const nr = r+dr, nc = c+dc;
+            if (nr >= 0 && nr < n && nc >= 0 && nc < n) {
+              const v = elev[nr*n+nc];
+              if (!isNaN(v)) { sum += v; cnt++; }
+            }
+          }
+          if (cnt > 0) elev[i] = sum / cnt;
+        }
+      }
+    }
+  }
+
+  let finalGaps = 0;
+  for (let i = 0; i < elev.length; i++) if (isNaN(elev[i])) finalGaps++;
+  log(`  3DEP: ${fetched} samples, ${finalGaps} gaps remaining`, fetched > 0 ? 'ok' : 'warn');
+  return elev;
+}
+
+/**
+ * Query LANDFIRE FBFM40 via identify (per-point) with batching
+ * Uses the LANDFIRE ImageServer identify endpoint
+ */
+async function fetchLANDFIRE(points, n) {
+  log('Fetching LANDFIRE FBFM40 fuel data...');
+  const fuel = new Array(n * n).fill('NB');
+
+  // LANDFIRE FBFM40 identify endpoint
+  const baseUrl = 'https://lfps.usgs.gov/arcgis/rest/services/LandfireProductService/GPServer/LandfireProductService/execute';
+
+  // Use the raster identify approach via the ImageServer
+  const imgUrl = 'https://landfire.cr.usgs.gov/arcgis/rest/services/Landfire/US_200/MapServer/identify';
+
+  // Batch via multipoint getSamples on the FBFM40 layer
+  const fbfm40Url = 'https://landfire.cr.usgs.gov/arcgis/rest/services/Landfire/US_200/MapServer/19';
+
+  // Try getSamples on the ImageServer version
+  const sampleUrl = 'https://landfire.cr.usgs.gov/arcgis/rest/services/Landfire/US_210BPS/ImageServer/getSamples';
+
+  // More reliable: use the Export Image approach — sample the raster directly
+  // We'll query the FBFM40 raster at pixel resolution for our grid extent
+  const BATCH = 500;
+  let fetched = 0;
+
+  // Approach: use ArcGIS identify with multipoint
+  for (let start = 0; start < points.length; start += BATCH) {
+    const batch = points.slice(start, start + BATCH);
+
+    // Query each point via identify on the FBFM40 map service layer 19
+    // Batch by querying the export image endpoint and reading pixel values
+    // Fall back to individual identify calls in smaller sub-batches
+    const subBatch = 50;
+    const promises = [];
+
+    for (let si = 0; si < batch.length; si += subBatch) {
+      const sub = batch.slice(si, si + subBatch);
+      promises.push(identifyFBFM40Batch(sub, start + si, fuel));
+    }
+
+    const results = await Promise.allSettled(promises);
+    for (const r of results) {
+      if (r.status === 'fulfilled') fetched += r.value;
+    }
+
+    setProgress(35 + 25 * Math.min(1, (start + BATCH) / points.length));
+  }
+
+  // Stats
+  const counts = {};
+  for (const f of fuel) counts[f] = (counts[f] || 0) + 1;
+  const top3 = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0,3).map(e => `${e[0]}:${e[1]}`).join(' ');
+  log(`  FBFM40: ${fetched} identified — ${top3}`, fetched > 0 ? 'ok' : 'warn');
+
+  return fuel;
+}
+
+async function identifyFBFM40Batch(points, startIdx, fuel) {
+  let count = 0;
+
+  // Use the LANDFIRE map service identify
+  const url = 'https://landfire.cr.usgs.gov/arcgis/rest/services/Landfire/US_200/MapServer/identify';
+
+  // Run in parallel with small concurrency
+  const tasks = points.map(async (pt, i) => {
+    try {
+      const params = new URLSearchParams({
+        geometry: JSON.stringify({x: pt[0], y: pt[1]}),
+        geometryType: 'esriGeometryPoint',
+        sr: '4326',
+        layers: 'all:19',
+        tolerance: '1',
+        mapExtent: `${pt[0]-0.001},${pt[1]-0.001},${pt[0]+0.001},${pt[1]+0.001}`,
+        imageDisplay: '100,100,96',
+        returnGeometry: 'false',
+        f: 'json'
+      });
+
+      const resp = await fetch(url + '?' + params.toString());
+      if (!resp.ok) return;
+      const data = await resp.json();
+
+      if (data.results && data.results.length > 0) {
+        const val = parseInt(data.results[0].attributes?.['Pixel Value'] || data.results[0].value);
+        if (!isNaN(val) && FBFM40_MAP[val]) {
+          fuel[startIdx + i] = FBFM40_MAP[val];
+          count++;
+        } else if (!isNaN(val)) {
+          // Unknown code → NB
+          fuel[startIdx + i] = 'NB';
+          count++;
+        }
+      }
+    } catch(e) { /* skip */ }
+  });
+
+  // Throttle: 10 concurrent
+  for (let i = 0; i < tasks.length; i += 10) {
+    await Promise.allSettled(tasks.slice(i, i + 10));
+    await new Promise(r => setTimeout(r, 50)); // rate limit courtesy
+  }
+
+  return count;
+}
+
+/**
+ * Fallback: generate fuel from elevation-based heuristics when LANDFIRE fails
+ */
+function fallbackFuel(elev, n) {
+  log('  Using elevation-based fuel heuristics (LANDFIRE fallback)', 'warn');
+  const fuel = new Array(n * n);
+  for (let i = 0; i < n * n; i++) {
+    const e = elev[i];
+    if (isNaN(e)) { fuel[i] = 'NB'; continue; }
+    if (e > 3500) fuel[i] = 'NB';       // alpine
+    else if (e > 3000) fuel[i] = 'GR2';  // alpine meadow
+    else if (e > 2700) fuel[i] = 'TL3';  // spruce-fir
+    else if (e > 2400) fuel[i] = 'TU1';  // mixed conifer
+    else if (e > 2100) fuel[i] = 'SH5';  // oak/mountain shrub
+    else if (e > 1800) fuel[i] = 'GS2';  // piñon-juniper
+    else fuel[i] = 'SH1';                // sage/desert shrub
+  }
+  return fuel;
+}
+
+
+// ═══════════════════════════════════════
+// SLOPE/ASPECT FROM DEM
+// ═══════════════════════════════════════
+function computeTerrain(elev, n, cellM) {
+  const slope = new Float32Array(n * n);
+  const aspect = new Float32Array(n * n);
+
+  for (let r = 1; r < n - 1; r++) {
+    for (let c = 1; c < n - 1; c++) {
+      const i = r * n + c;
+      const eW = elev[i - 1], eE = elev[i + 1];
+      const eN = elev[(r-1)*n + c], eS = elev[(r+1)*n + c];
+      if (isNaN(eW) || isNaN(eE) || isNaN(eN) || isNaN(eS)) continue;
+
+      const dx = (eE - eW) / (2 * cellM);
+      const dy = (eS - eN) / (2 * cellM);
+      slope[i] = Math.atan(Math.sqrt(dx*dx + dy*dy)) * 180 / Math.PI;
+      let a = Math.atan2(-dx, dy) * 180 / Math.PI;
+      if (a < 0) a += 360;
+      aspect[i] = a;
+    }
+  }
+  // Copy edge rows from neighbors
+  for (let c = 0; c < n; c++) {
+    slope[c] = slope[n + c];
+    aspect[c] = aspect[n + c];
+    slope[(n-1)*n + c] = slope[(n-2)*n + c];
+    aspect[(n-1)*n + c] = aspect[(n-2)*n + c];
+  }
+  for (let r = 0; r < n; r++) {
+    slope[r*n] = slope[r*n + 1];
+    aspect[r*n] = aspect[r*n + 1];
+    slope[r*n + n-1] = slope[r*n + n-2];
+    aspect[r*n + n-1] = aspect[r*n + n-2];
+  }
+  return { slope, aspect };
+}
+
+
+// ═══════════════════════════════════════
+// ROTHERMEL ROS (verbatim from verified grid test)
+// ═══════════════════════════════════════
+function calcROS(fk, wMph, wDir, m1, m10, m100, mLv, slopeDeg, aspectDeg) {
+  const f = FM[fk];
+  if (!f || f.d <= 0) return { ros: 0, R0: 0, fl: 0, az: 0 };
+
+  const L = t => t * 2000 / 43560;
+  const w = [L(f.w1), L(f.w10), L(f.w100)];
+  const wl = [L(f.wLH), L(f.wLW)];
+  const sv = [f.sv1, 109, 30];
+  const svl = [f.svLH || 0.001, f.svLW || 0.001];
+  const mf = [m1 / 100, m10 / 100, m100 / 100];
+  const ml = [mLv / 100, mLv / 100];
+
+  const dSA = w.map((a, i) => a * sv[i]);
+  const dT = dSA.reduce((a, b) => a + b, 0);
+  const lSA = wl.map((a, i) => a * svl[i]);
+  const lT = lSA.reduce((a, b) => a + b, 0);
+  const tSA = dT + lT;
+  if (tSA < 1e-6) return { ros: 0, R0: 0, fl: 0, az: 0 };
+
+  const dF = dSA.map(s => dT > 0 ? s / dT : 0);
+  const lF = lSA.map(s => lT > 0 ? s / lT : 0);
+  const fD = dT / tSA, fL = lT / tSA;
+
+  const sigma = fD * dF.reduce((s, a, i) => s + a * sv[i], 0) + fL * lF.reduce((s, a, i) => s + a * svl[i], 0);
+  if (sigma < 1) return { ros: 0, R0: 0, fl: 0, az: 0 };
+
+  const wT = w.reduce((a, b) => a + b, 0) + wl.reduce((a, b) => a + b, 0);
+  const beta = wT / (f.d * 32);
+  const bo = 3.348 * Math.pow(sigma, -0.8189);
+  const br = beta / bo;
+
+  const A = 133 * Math.pow(sigma, -0.7913);
+  const gMax = Math.pow(sigma, 1.5) / (495 + 0.0594 * Math.pow(sigma, 1.5));
+  const gam = gMax * Math.pow(br, A) * Math.exp(A * (1 - br));
+
+  const wnD = w.reduce((s, a, i) => s + dF[i] * a * 0.9445, 0);
+  const wnL = wl.reduce((s, a, i) => s + lF[i] * a * 0.9445, 0);
+
+  const mfDw = dF.reduce((s, a, i) => s + a * mf[i], 0);
+  const rmD = Math.min(mfDw / f.mx, 1);
+  const etD = Math.max(0, 1 - 2.59 * rmD + 5.11 * rmD * rmD - 3.52 * Math.pow(rmD, 3));
+
+  let etL = 1;
+  if (lT > 1e-5) {
+    const mfLw = lF.reduce((s, a, i) => s + a * ml[i], 0);
+    const rmL = Math.min(mfLw / Math.max(f.mx, 0.3), 1);
+    etL = Math.max(0, 1 - 2.59 * rmL + 5.11 * rmL * rmL - 3.52 * Math.pow(rmL, 3));
+  }
+
+  const etS = 0.174 * Math.pow(0.01, -0.19);
+  const IR = gam * (wnD * f.h * etD * etS + wnL * f.h * etL * etS);
+
+  const xi = Math.exp((0.792 + 0.681 * Math.pow(sigma, 0.5)) * (beta + 0.1)) / (192 + 0.2595 * sigma);
+  const rhoB = wT / f.d;
+  const eps = Math.exp(-138 / sigma);
+  const mfC = fD * mfDw + fL * (lF.reduce((s, a, i) => s + a * ml[i], 0) || 0);
+  const Qig = 250 + 1116 * mfC;
+  const hs = rhoB * eps * Qig;
+  if (hs < 0.001) return { ros: 0, R0: 0, fl: 0, az: 0 };
+
+  const R0 = IR * xi / hs;
+
+  const U = wMph * f.wrf * 88;
+  const C = 7.47 * Math.exp(-0.133 * Math.pow(sigma, 0.55));
+  const B = 0.02526 * Math.pow(sigma, 0.54);
+  const E = 0.715 * Math.exp(-3.59e-4 * sigma);
+  const phiW = U > 0 ? C * Math.pow(U, B) * Math.pow(br, -E) : 0;
+
+  const sR = slopeDeg * Math.PI / 180;
+  const phiS = 5.275 * Math.pow(Math.max(beta, 1e-4), -0.3) * Math.pow(Math.tan(sR), 2);
+
+  const wAz = ((wDir + 180) % 360) * Math.PI / 180;
+  const sAz = ((aspectDeg + 180) % 360) * Math.PI / 180;
+  const vx = phiW * Math.sin(wAz) + phiS * Math.sin(sAz);
+  const vy = phiW * Math.cos(wAz) + phiS * Math.cos(sAz);
+  const phiE = Math.sqrt(vx * vx + vy * vy);
+  const maxAz = Math.atan2(vx, vy);
+
+  const ros = R0 * (1 + phiE);
+  const fli = IR * ros / 60;
+  const fl = 0.45 * Math.pow(Math.max(fli, 0.01), 0.46);
+
+  return { ros, R0, fl, az: maxAz };
+}
+
+
+// ═══════════════════════════════════════
+// MTT SPREAD (verbatim from verified grid test)
+// ═══════════════════════════════════════
+function runMTT(n, fuel, slope, aspect, wS, wD, m1, m10, m100, mLv, durMin, cellM) {
+  const cellFt = cellM * 3.28084;
+  const at = new Float32Array(n * n);
+  at.fill(Infinity);
+
+  const cROS = new Float32Array(n * n);
+  const cR0 = new Float32Array(n * n);
+  const cAZ = new Float32Array(n * n);
+  const cFL = new Float32Array(n * n);
+
+  let validCount = 0;
+  for (let i = 0; i < n * n; i++) {
+    const r = calcROS(fuel[i], wS, wD, m1, m10, m100, mLv, slope[i], aspect[i]);
+    cROS[i] = r.ros;
+    cR0[i] = r.R0;
+    cAZ[i] = r.az;
+    cFL[i] = r.fl;
+    if (r.ros > 0) validCount++;
+  }
+  log(`  Burnable: ${validCount}/${n*n}`);
+
+  const ew = wS * 0.5;
+  const LB = Math.max(1, 0.936 * Math.exp(0.2566 * ew) + 0.461 * Math.exp(-0.1548 * ew) - 0.397);
+  const ecc = LB > 1.01 ? Math.sqrt(1 - 1 / (LB * LB)) : 0;
+
+  // Min-heap
+  const heap = [];
+  function push(t, r, c) {
+    heap.push([t, r, c]);
+    let i = heap.length - 1;
+    while (i > 0) {
+      const pi = (i - 1) >> 1;
+      if (heap[pi][0] <= heap[i][0]) break;
+      [heap[pi], heap[i]] = [heap[i], heap[pi]];
+      i = pi;
+    }
+  }
+  function pop() {
+    const top = heap[0];
+    const last = heap.pop();
+    if (heap.length > 0) {
+      heap[0] = last;
+      let i = 0;
+      while (true) {
+        let sm = i;
+        const l = 2 * i + 1, ri = 2 * i + 2;
+        if (l < heap.length && heap[l][0] < heap[sm][0]) sm = l;
+        if (ri < heap.length && heap[ri][0] < heap[sm][0]) sm = ri;
+        if (sm === i) break;
+        [heap[sm], heap[i]] = [heap[i], heap[sm]];
+        i = sm;
+      }
+    }
+    return top;
+  }
+
+  // Ignite center
+  const cr = Math.floor(n / 2), cc = Math.floor(n / 2);
+  at[cr * n + cc] = 0;
+  push(0, cr, cc);
+
+  const visited = new Uint8Array(n * n);
+  const neighbors = [
+    [-1, 0, 1], [1, 0, 1], [0, -1, 1], [0, 1, 1],
+    [-1, -1, 1.414], [-1, 1, 1.414], [1, -1, 1.414], [1, 1, 1.414]
+  ];
+
+  while (heap.length > 0) {
+    const [time, row, col] = pop();
+    const idx = row * n + col;
+    if (visited[idx]) continue;
+    if (time > durMin) continue;
+    visited[idx] = 1;
+    if (cROS[idx] <= 0) continue;
+
+    for (const [dr, dc, distMult] of neighbors) {
+      const nr = row + dr, nc = col + dc;
+      if (nr < 0 || nr >= n || nc < 0 || nc >= n) continue;
+      const ni = nr * n + nc;
+      if (visited[ni] || cROS[ni] <= 0) continue;
+
+      const travelAz = Math.atan2(dc, -dr);
+
+      function dirROS(headROS, backROS, cellAz) {
+        if (ecc < 0.01) return headROS;
+        let ad = travelAz - cellAz;
+        while (ad > Math.PI) ad -= 2 * Math.PI;
+        while (ad < -Math.PI) ad += 2 * Math.PI;
+        const cosA = Math.cos(ad);
+        const denom = 1 - ecc * cosA;
+        if (denom < 0.05) return headROS;
+        const result = headROS * (1 - ecc) / denom;
+        return Math.max(backROS * 0.3, Math.min(result, headROS));
+      }
+
+      const r1 = dirROS(cROS[idx], cR0[idx], cAZ[idx]);
+      const r2 = dirROS(cROS[ni], cR0[ni], cAZ[ni]);
+      const avg = (r1 + r2) / 2;
+      if (avg <= 0 || !isFinite(avg)) continue;
+
+      const travelTime = (cellFt * distMult) / avg;
+      if (!isFinite(travelTime) || travelTime <= 0) continue;
+
+      const newArrival = time + travelTime;
+      if (newArrival < at[ni] && newArrival <= durMin) {
+        at[ni] = newArrival;
+        push(newArrival, nr, nc);
+      }
+    }
+  }
+
+  let burned = 0;
+  for (let i = 0; i < n * n; i++) if (isFinite(at[i])) burned++;
+
+  return { at, cROS, cFL, burned };
+}
+
+
+// ═══════════════════════════════════════
+// MARCHING SQUARES + CONTOUR EXTRACTION
+// ═══════════════════════════════════════
+
+/**
+ * Marching squares: extract isolines from the arrival-time grid
+ * Returns arrays of line segments for each threshold
+ */
+function marchingSquares(grid, n, threshold) {
+  const segments = [];
+
+  for (let r = 0; r < n - 1; r++) {
+    for (let c = 0; c < n - 1; c++) {
+      // Four corners: TL, TR, BR, BL
+      const tl = grid[r * n + c];
+      const tr = grid[r * n + c + 1];
+      const br = grid[(r+1) * n + c + 1];
+      const bl = grid[(r+1) * n + c];
+
+      // Skip cells with any Infinity
+      if (!isFinite(tl) || !isFinite(tr) || !isFinite(br) || !isFinite(bl)) continue;
+
+      // Binary index: bit3=TL, bit2=TR, bit1=BR, bit0=BL
+      let idx = 0;
+      if (tl >= threshold) idx |= 8;
+      if (tr >= threshold) idx |= 4;
+      if (br >= threshold) idx |= 2;
+      if (bl >= threshold) idx |= 1;
+
+      if (idx === 0 || idx === 15) continue;
+
+      // Interpolation helpers
+      function interpTop() {
+        const t = (threshold - tl) / (tr - tl);
+        return [c + t, r];
+      }
+      function interpRight() {
+        const t = (threshold - tr) / (br - tr);
+        return [c + 1, r + t];
+      }
+      function interpBottom() {
+        const t = (threshold - bl) / (br - bl);
+        return [c + t, r + 1];
+      }
+      function interpLeft() {
+        const t = (threshold - tl) / (bl - tl);
+        return [c, r + t];
+      }
+
+      // 16 cases
+      const cases = {
+        1: [interpLeft, interpBottom],
+        2: [interpBottom, interpRight],
+        3: [interpLeft, interpRight],
+        4: [interpRight, interpTop],
+        5: null, // saddle
+        6: [interpBottom, interpTop],
+        7: [interpLeft, interpTop],
+        8: [interpTop, interpLeft],
+        9: [interpTop, interpBottom],
+        10: null, // saddle
+        11: [interpTop, interpRight],
+        12: [interpRight, interpLeft],
+        13: [interpRight, interpBottom],
+        14: [interpBottom, interpLeft],
+      };
+
+      if (idx === 5) {
+        // Saddle: use center average to disambiguate
+        const avg = (tl + tr + br + bl) / 4;
+        if (avg >= threshold) {
+          segments.push([interpLeft(), interpTop()]);
+          segments.push([interpBottom(), interpRight()]);
+        } else {
+          segments.push([interpLeft(), interpBottom()]);
+          segments.push([interpTop(), interpRight()]);
+        }
+      } else if (idx === 10) {
+        const avg = (tl + tr + br + bl) / 4;
+        if (avg >= threshold) {
+          segments.push([interpTop(), interpRight()]);
+          segments.push([interpBottom(), interpLeft()]);
+        } else {
+          segments.push([interpTop(), interpLeft()]);
+          segments.push([interpBottom(), interpRight()]);
+        }
+      } else if (cases[idx]) {
+        segments.push([cases[idx][0](), cases[idx][1]()]);
+      }
+    }
+  }
+
+  return segments;
+}
+
+/**
+ * Assemble line segments into ordered polygons
+ * Uses endpoint matching with spatial hashing
+ */
+function assemblePolygons(segments) {
+  if (segments.length === 0) return [];
+
+  const EPS = 1e-6;
+  const key = (p) => `${p[0].toFixed(4)},${p[1].toFixed(4)}`;
+
+  // Build adjacency: each endpoint maps to segment indices
+  const endpointMap = new Map();
+  segments.forEach((seg, i) => {
+    const k0 = key(seg[0]), k1 = key(seg[1]);
+    if (!endpointMap.has(k0)) endpointMap.set(k0, []);
+    if (!endpointMap.has(k1)) endpointMap.set(k1, []);
+    endpointMap.get(k0).push(i);
+    endpointMap.get(k1).push(i);
+  });
+
+  const used = new Uint8Array(segments.length);
+  const rings = [];
+
+  for (let start = 0; start < segments.length; start++) {
+    if (used[start]) continue;
+
+    const ring = [segments[start][0], segments[start][1]];
+    used[start] = 1;
+
+    // Walk forward
+    let maxIter = segments.length;
+    while (maxIter-- > 0) {
+      const lastPt = ring[ring.length - 1];
+      const k = key(lastPt);
+      const neighbors = endpointMap.get(k) || [];
+      let found = false;
+
+      for (const ni of neighbors) {
+        if (used[ni]) continue;
+        const seg = segments[ni];
+        const k0 = key(seg[0]), k1 = key(seg[1]);
+
+        if (k0 === k) {
+          ring.push(seg[1]);
+          used[ni] = 1;
+          found = true;
+          break;
+        } else if (k1 === k) {
+          ring.push(seg[0]);
+          used[ni] = 1;
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) break;
+
+      // Check if ring closed
+      if (ring.length > 2 && key(ring[ring.length-1]) === key(ring[0])) {
+        break;
+      }
+    }
+
+    if (ring.length >= 4) {
+      rings.push(ring);
+    }
+  }
+
+  return rings;
+}
+
+/**
+ * Chaikin corner-cutting subdivision for smooth contours
+ */
+function chaikinSmooth(ring, iterations = 3) {
+  let pts = ring.slice();
+
+  for (let iter = 0; iter < iterations; iter++) {
+    const smoothed = [];
+    const n = pts.length;
+    const closed = (Math.abs(pts[0][0] - pts[n-1][0]) < 1e-6 &&
+                    Math.abs(pts[0][1] - pts[n-1][1]) < 1e-6);
+    const len = closed ? n - 1 : n;
+
+    for (let i = 0; i < len; i++) {
+      const p0 = pts[i];
+      const p1 = pts[(i + 1) % (closed ? len : n)];
+
+      if (i === len - 1 && !closed) {
+        smoothed.push(p0);
+        break;
+      }
+
+      smoothed.push([
+        0.75 * p0[0] + 0.25 * p1[0],
+        0.75 * p0[1] + 0.25 * p1[1]
+      ]);
+      smoothed.push([
+        0.25 * p0[0] + 0.75 * p1[0],
+        0.25 * p0[1] + 0.75 * p1[1]
+      ]);
+    }
+
+    if (closed && smoothed.length > 0) {
+      smoothed.push([smoothed[0][0], smoothed[0][1]]);
+    }
+
+    pts = smoothed;
+  }
+
+  return pts;
+}
+
+
+// ═══════════════════════════════════════
+// RENDER CONTOURS TO LEAFLET
+// ═══════════════════════════════════════
+const HOUR_COLORS = [
+  '#FFFF50', '#FFD620', '#FFA500', '#FF6400',
+  '#E6370F', '#CC1E14', '#A00F14', '#780A0F',
+  '#5A050A', '#410308', '#2D0205', '#1E0103'
+];
+
+function renderContours(at, n, durHrs, grid) {
+  // Clear previous
+  contourLayers.forEach(l => map.removeLayer(l));
+  contourLayers = [];
+
+  const { lats, lngs, bounds } = grid;
+
+  // Convert grid coords [col, row] to [lat, lng]
+  function gridToLatLng(pt) {
+    const col = pt[0], row = pt[1];
+    // Interpolate within the grid
+    const latFrac = row / (n - 1);
+    const lngFrac = col / (n - 1);
+    const lat = bounds.north - latFrac * (bounds.north - bounds.south);
+    const lng = bounds.west + lngFrac * (bounds.east - bounds.west);
+    return [lat, lng];
+  }
+
+  // Generate contours for each hour (working outward, i.e., latest first for fill ordering)
+  for (let h = durHrs; h >= 1; h--) {
+    const threshold = h * 60; // minutes
+    const segments = marchingSquares(at, n, threshold);
+    if (segments.length === 0) continue;
+
+    const rings = assemblePolygons(segments);
+    const color = HOUR_COLORS[Math.min(h - 1, HOUR_COLORS.length - 1)];
+
+    for (const ring of rings) {
+      const smoothed = chaikinSmooth(ring, 3);
+      const latlngs = smoothed.map(gridToLatLng);
+
+      if (latlngs.length < 3) continue;
+
+      const polygon = L.polygon(latlngs, {
+        color: color,
+        weight: 1.5,
+        opacity: 0.9,
+        fillColor: color,
+        fillOpacity: 0.15 + 0.05 * (durHrs - h), // inner hours more opaque
+        smoothFactor: 1
+      });
+      polygon.bindTooltip(`Hour ${h}`, { sticky: true, className: '' });
+      polygon.addTo(map);
+      contourLayers.push(polygon);
+    }
+  }
+
+  // Add ignition point on top
+  const lat = parseFloat(document.getElementById('lat').value);
+  const lng = parseFloat(document.getElementById('lng').value);
+  setIgnitionMarker(lat, lng);
+
+  // Fit map to contours
+  if (contourLayers.length > 0) {
+    const group = L.featureGroup(contourLayers);
+    map.fitBounds(group.getBounds().pad(0.1));
+  }
 
   // Legend
-  const lgi=$('lgi');lgi.innerHTML='';
-  for(let h=0;h<Math.min(dH,HOUR_CLR.length);h++)
-    lgi.innerHTML+=`<div class="li"><span class="ls" style="background:${HOUR_CLR[h]}"></span>Hr ${h+1}</div>`;
-  $('lgd').style.display='block';
-
-  pg(100);st('ready',`${acres.toFixed(0)}ac · ${rch.toFixed(1)}ch/hr · ${elapsed}s`);
-  $('runBtn').disabled=false;
+  const legendBox = document.getElementById('legendBox');
+  const legendContent = document.getElementById('legendContent');
+  legendBox.classList.add('active');
+  legendContent.innerHTML = '';
+  for (let h = 1; h <= durHrs; h++) {
+    const color = HOUR_COLORS[Math.min(h - 1, HOUR_COLORS.length - 1)];
+    legendContent.innerHTML += `<div class="legend-row">
+      <div class="legend-swatch" style="background:${color}"></div>
+      <span class="legend-label">Hour ${h}</span>
+    </div>`;
+  }
 }
+
+
+// ═══════════════════════════════════════
+// MAIN RUN
+// ═══════════════════════════════════════
+async function runFireCast() {
+  const btn = document.getElementById('runBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳  Running...';
+  document.getElementById('log').innerHTML = '';
+  document.getElementById('statsBar').classList.remove('active');
+
+  try {
+    const lat = parseFloat(document.getElementById('lat').value);
+    const lng = parseFloat(document.getElementById('lng').value);
+    const n = parseInt(document.getElementById('gridsize').value);
+    const cellM = parseInt(document.getElementById('cellsize').value);
+    const durHrs = parseInt(document.getElementById('dur').value);
+    const wS = parseFloat(document.getElementById('ws').value);
+    const wD = parseFloat(document.getElementById('wd').value);
+    const m1 = parseFloat(document.getElementById('f1').value);
+    const m10 = parseFloat(document.getElementById('f10').value);
+    const m100 = parseFloat(document.getElementById('f100').value);
+    const mLv = parseFloat(document.getElementById('flv').value);
+
+    const extentKm = (n * cellM / 1000).toFixed(1);
+    log(`FireCast LPC — ${n}×${n} grid, ${cellM}m cells, ${extentKm}km extent`, 'info');
+    log(`Ignition: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+    log(`Wind: ${wS}mph from ${wD}°, Duration: ${durHrs}hr`);
+
+    setProgress(5);
+
+    // 1. Build sample grid
+    const grid = buildGrid(lat, lng, n, cellM);
+    log(`Grid bounds: ${grid.bounds.south.toFixed(4)}–${grid.bounds.north.toFixed(4)} N, ${grid.bounds.west.toFixed(4)}–${grid.bounds.east.toFixed(4)} W`);
+
+    // 2. Fetch elevation
+    const t0 = performance.now();
+    const elev = await fetch3DEP(grid.points, n);
+
+    const validElev = Array.from(elev).filter(e => !isNaN(e));
+    if (validElev.length > 0) {
+      log(`  Elevation range: ${Math.min(...validElev).toFixed(0)}–${Math.max(...validElev).toFixed(0)}m`);
+    }
+
+    // 3. Fetch fuel data
+    let fuel;
+    try {
+      fuel = await fetchLANDFIRE(grid.points, n);
+      // Check if we got mostly NB (service may have failed silently)
+      const nbCount = fuel.filter(f => f === 'NB').length;
+      if (nbCount > fuel.length * 0.9) {
+        log('  LANDFIRE returned >90% NB — using elevation fallback', 'warn');
+        fuel = fallbackFuel(elev, n);
+      }
+    } catch (e) {
+      log(`  LANDFIRE fetch failed: ${e.message}`, 'warn');
+      fuel = fallbackFuel(elev, n);
+    }
+
+    setProgress(65);
+
+    // 4. Compute terrain from DEM
+    log('Computing slope/aspect from DEM...');
+    const terrain = computeTerrain(elev, n, cellM);
+    const maxSlope = Math.max(...terrain.slope);
+    log(`  Max slope: ${maxSlope.toFixed(1)}°`, 'ok');
+
+    setProgress(70);
+
+    // 5. Run MTT spread model
+    log('Running MTT spread...', 'info');
+    const tMTT = performance.now();
+    const result = runMTT(n, fuel, terrain.slope, terrain.aspect, wS, wD, m1, m10, m100, mLv, durHrs * 60, cellM);
+    const solveTime = ((performance.now() - tMTT) / 1000).toFixed(2);
+    const totalTime = ((performance.now() - t0) / 1000).toFixed(1);
+
+    const acres = result.burned * cellM * cellM / 4046.86;
+    const maxROS = Math.max(...result.cROS);
+
+    log(`  Burned: ${result.burned} cells (${acres.toFixed(0)} acres)`, 'ok');
+    log(`  Max ROS: ${(maxROS / 66 * 60).toFixed(1)} ch/hr`);
+    log(`  MTT solve: ${solveTime}s, Total: ${totalTime}s`);
+
+    setProgress(85);
+
+    // 6. Extract contours and render
+    log('Extracting contours (marching squares)...', 'info');
+    renderContours(result.at, n, durHrs, grid);
+    log(`  Contour polygons rendered on map`, 'ok');
+
+    setProgress(100);
+
+    // Stats bar
+    document.getElementById('stAcres').textContent = acres.toFixed(0);
+    document.getElementById('stROS').textContent = (maxROS / 66 * 60).toFixed(1);
+    document.getElementById('stSolve').textContent = solveTime;
+    document.getElementById('stCells').textContent = result.burned.toLocaleString();
+    document.getElementById('statsBar').classList.add('active');
+
+    log(`Done in ${totalTime}s`, 'ok');
+
+  } catch (e) {
+    log(`ERROR: ${e.message}`, 'error');
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '▶  Run FireCast';
+    setTimeout(() => setProgress(0), 1500);
+  }
+}
+
+// Init marker
+setIgnitionMarker(37.275, -107.88);
+log('FireCast LPC ready. Click the map or enter coordinates, then Run.', 'info');
+log('Default ignition: 37.275°N, 107.88°W (near Durango, CO)', 'info');
 </script>
 </body>
 </html>
