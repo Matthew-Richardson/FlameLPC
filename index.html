@@ -550,13 +550,13 @@ async function fetchElevation(bounds, n, cellM) {
 
     const url = `https://api.open-meteo.com/v1/elevation?latitude=${batchLats.join(',')}&longitude=${batchLngs.join(',')}`;
 
-    // Retry up to 2 times on 429 with backoff
-    for (let attempt = 0; attempt < 3; attempt++) {
+    // Retry up to 3 times on 429 with increasing backoff
+    for (let attempt = 0; attempt < 4; attempt++) {
       try {
-        if (attempt > 0) await new Promise(r => setTimeout(r, 1500 * attempt));
+        if (attempt > 0) await new Promise(r => setTimeout(r, 2000 * attempt));
         const resp = await fetchWithTimeout(url, 10000);
         if (resp.status === 429) {
-          if (attempt < 2) { continue; } // retry after delay
+          if (attempt < 3) { continue; }
           throw new Error('Rate limited (429) after retries');
         }
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -571,17 +571,17 @@ async function fetchElevation(bounds, n, cellM) {
             }
           });
         }
-        break; // success — exit retry loop
+        break; // success
       } catch (e) {
-        if (attempt === 2) {
+        if (attempt === 3) {
           errors++;
           log(`  Batch ${Math.floor(i/BATCH)+1} error: ${e.message}`, 'warn');
         }
       }
     }
 
-    // Rate limit: 300ms between requests
-    await new Promise(r => setTimeout(r, 300));
+    // Rate limit: 600ms between requests (Open-Meteo free tier ~10k/day)
+    await new Promise(r => setTimeout(r, 600));
 
     setProgress(5 + 30 * Math.min(1, (i + BATCH) / allLats.length));
   }
@@ -802,6 +802,14 @@ function matchFBFM40Color(R, G, B, lookup) {
 
 /**
  * Fallback: assign fuel models from elevation bands (SW Colorado heuristics)
+ * Tuned for La Plata County / Durango area landscape:
+ *   <2000m: desert/sage shrub
+ *   2000-2200m: piñon-juniper woodland
+ *   2200-2500m: Gambel oak / mountain shrub (primary fire risk zone)
+ *   2500-2800m: mixed conifer with understory
+ *   2800-3200m: spruce-fir litter
+ *   3200-3500m: subalpine meadow
+ *   >3500m: alpine (non-burnable)
  */
 function fallbackFuel(elev, n) {
   log('  Using elevation-band fuel heuristics (SW CO)', 'warn');
@@ -809,12 +817,12 @@ function fallbackFuel(elev, n) {
   for (let i = 0; i < n * n; i++) {
     const e = elev[i];
     if (isNaN(e)) { fuel[i] = 'NB'; continue; }
-    if (e > 3500) fuel[i] = 'NB';       // alpine
-    else if (e > 3000) fuel[i] = 'GR2';  // alpine meadow
-    else if (e > 2700) fuel[i] = 'TL3';  // spruce-fir
-    else if (e > 2400) fuel[i] = 'TU1';  // mixed conifer
-    else if (e > 2100) fuel[i] = 'SH5';  // oak/mountain shrub
-    else if (e > 1800) fuel[i] = 'GS2';  // piñon-juniper
+    if (e > 3500) fuel[i] = 'NB';       // alpine tundra
+    else if (e > 3200) fuel[i] = 'GR2';  // subalpine meadow
+    else if (e > 2800) fuel[i] = 'TL5';  // spruce-fir — moderate litter (faster than TL3)
+    else if (e > 2500) fuel[i] = 'TU5';  // mixed conifer with heavy understory
+    else if (e > 2200) fuel[i] = 'SH5';  // Gambel oak / mountain shrub — fast
+    else if (e > 2000) fuel[i] = 'GS2';  // piñon-juniper / grass-shrub
     else fuel[i] = 'SH1';                // sage/desert shrub
   }
   return fuel;
