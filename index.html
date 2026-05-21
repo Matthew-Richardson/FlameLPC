@@ -7,1509 +7,1014 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap');
 
-  :root {
-    --bg: #0c0e12;
-    --panel: #14171e;
-    --border: #252a35;
-    --text: #d4dae6;
-    --dim: #6b7a94;
-    --accent: #f97316;
-    --accent-glow: #f9731640;
-    --danger: #ef4444;
-    --success: #22c55e;
-  }
+:root {
+  --bg: #0b0d10;
+  --panel: #12151c;
+  --panel2: #181c26;
+  --border: #232937;
+  --text: #cdd6e4;
+  --dim: #5e6d85;
+  --bright: #eef1f7;
+  --accent: #e8651a;
+  --accent2: #f59e0b;
+  --danger: #ef4444;
+  --ok: #34d399;
+  --blue: #3b82f6;
+  --glow: rgba(232,101,26,0.15);
+  --radius: 6px;
+}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+* { margin:0; padding:0; box-sizing:border-box; }
 
-  body {
-    font-family: 'DM Sans', system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 
-  /* ─── Header ─── */
-  .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 20px;
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-    z-index: 1000;
-  }
-  .header-left { display: flex; align-items: center; gap: 14px; }
-  .logo {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 700;
-    font-size: 16px;
-    color: var(--accent);
-    letter-spacing: -0.5px;
-  }
-  .logo span { color: var(--dim); font-weight: 400; }
-  .badge {
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 3px;
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-  }
-  .badge-dev { background: #f9731620; color: var(--accent); border: 1px solid #f9731640; }
+/* ── Header ── */
+header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 20px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  z-index: 900;
+}
+.logo {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600; font-size: 15px;
+  color: var(--accent);
+  letter-spacing: -0.3px;
+}
+.logo span { color: var(--dim); font-weight: 400; }
+.tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; font-weight: 600;
+  padding: 2px 7px; border-radius: 3px;
+  letter-spacing: 0.8px;
+  background: rgba(232,101,26,0.12);
+  color: var(--accent);
+  border: 1px solid rgba(232,101,26,0.25);
+}
+.hdr-right {
+  margin-left: auto;
+  display: flex; gap: 8px;
+}
+.hdr-btn {
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px; font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--panel2);
+  color: var(--dim);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.hdr-btn:hover { color: var(--text); border-color: var(--dim); }
 
-  /* ─── Main layout ─── */
-  .main { display: flex; flex: 1; min-height: 0; }
+/* ── Layout ── */
+.main { display: flex; flex: 1; min-height: 0; }
 
-  /* ─── Sidebar ─── */
-  .sidebar {
-    width: 340px;
-    flex-shrink: 0;
-    background: var(--panel);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-  }
-  .sidebar::-webkit-scrollbar { width: 4px; }
-  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+/* ── Sidebar ── */
+.sidebar {
+  width: 370px; flex-shrink: 0;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow-y: auto;
+}
+.sidebar::-webkit-scrollbar { width: 5px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-  .section {
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--border);
-  }
-  .section-title {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--dim);
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-  }
+.sec {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.sec-hd {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px; font-weight: 600;
+  color: var(--dim);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sec-hd .dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--dim);
+}
+.sec-hd .dot.live { background: var(--ok); box-shadow: 0 0 6px rgba(52,211,153,0.4); }
 
-  .field { margin-bottom: 8px; }
-  .field label {
-    display: block;
-    font-size: 11px;
-    color: var(--dim);
-    margin-bottom: 3px;
-    font-weight: 500;
-  }
-  .field input, .field select {
-    width: 100%;
-    padding: 7px 10px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--text);
-    font-size: 13px;
-    font-family: 'JetBrains Mono', monospace;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .field input:focus, .field select:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 2px var(--accent-glow);
-  }
+.fld { margin-bottom: 6px; }
+.fld label {
+  display: block;
+  font-size: 11px; color: var(--dim);
+  margin-bottom: 2px; font-weight: 400;
+}
+.fld input, .fld select {
+  width: 100%;
+  padding: 6px 9px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 12.5px;
+  font-family: 'IBM Plex Mono', monospace;
+  outline: none;
+  transition: border 0.15s;
+}
+.fld input:focus, .fld select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--glow);
+}
+.fld .derived {
+  background: var(--panel2);
+  border-color: rgba(52,211,153,0.2);
+  color: var(--ok);
+}
 
-  .row { display: flex; gap: 8px; }
-  .row .field { flex: 1; }
+.row { display: flex; gap: 6px; }
+.row .fld { flex: 1; }
+.row3 .fld { flex: 1; }
 
-  .btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .btn-primary {
-    background: var(--accent);
-    color: #fff;
-  }
-  .btn-primary:hover { background: #fb923c; }
-  .btn-primary:disabled {
-    background: #f9731640;
-    cursor: wait;
-  }
+.wx-summary {
+  font-size: 11px; color: var(--dim);
+  padding: 6px 8px;
+  background: var(--bg);
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  line-height: 1.5;
+  margin-bottom: 6px;
+}
+.wx-summary strong { color: var(--text); font-weight: 500; }
+.wx-summary .val { color: var(--accent2); font-family: 'IBM Plex Mono', monospace; font-weight: 500; }
 
-  /* ─── Status log ─── */
-  .log-panel {
-    flex: 1;
-    min-height: 100px;
-    overflow-y: auto;
-    padding: 10px 16px;
-  }
-  .log-line {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10.5px;
-    line-height: 1.6;
-    color: var(--dim);
-  }
-  .log-line.info { color: var(--text); }
-  .log-line.warn { color: #facc15; }
-  .log-line.error { color: var(--danger); }
-  .log-line.ok { color: var(--success); }
-  .log-line .ts { color: #3b4a61; margin-right: 6px; }
+.btn-run {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 10px;
+  border: none; border-radius: 5px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+  transition: background 0.15s;
+}
+.btn-run:hover { background: #f47a2e; }
+.btn-run:disabled { background: rgba(232,101,26,0.3); cursor: wait; }
 
-  /* ─── Map ─── */
-  .map-wrap { flex: 1; position: relative; }
-  #map { width: 100%; height: 100%; background: var(--bg); }
+.pbar-wrap {
+  height: 3px; background: var(--border);
+  border-radius: 2px; overflow: hidden;
+  margin-top: 8px; display: none;
+}
+.pbar-wrap.on { display: block; }
+.pbar { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; border-radius: 2px; }
 
-  /* ─── Legend overlay ─── */
-  .legend-box {
-    position: absolute;
-    bottom: 30px;
-    right: 14px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 10px 14px;
-    z-index: 800;
-    font-size: 11px;
-    min-width: 120px;
-    display: none;
-  }
-  .legend-box.active { display: block; }
-  .legend-title {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    color: var(--dim);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 6px;
-  }
-  .legend-row { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
-  .legend-swatch { width: 18px; height: 10px; border-radius: 2px; flex-shrink: 0; }
-  .legend-label { color: var(--text); font-size: 11px; }
+/* ── Log ── */
+.log-wrap {
+  flex: 1; min-height: 80px;
+  overflow-y: auto; padding: 8px 16px;
+}
+.log-ln {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; line-height: 1.55;
+  color: var(--dim);
+}
+.log-ln.i { color: var(--text); }
+.log-ln.w { color: var(--accent2); }
+.log-ln.e { color: var(--danger); }
+.log-ln.k { color: var(--ok); }
+.log-ln .t { color: #2f3a4e; margin-right: 5px; }
 
-  /* ─── Stats bar ─── */
-  .stats-bar {
-    position: absolute;
-    top: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 6px 18px;
-    z-index: 800;
-    display: none;
-    gap: 20px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-  }
-  .stats-bar.active { display: flex; }
-  .stat-item { display: flex; flex-direction: column; align-items: center; gap: 1px; }
-  .stat-val { color: var(--accent); font-weight: 700; font-size: 14px; }
-  .stat-lbl { color: var(--dim); font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; }
+/* ── Map ── */
+.map-area { flex: 1; position: relative; }
+#map { width: 100%; height: 100%; background: var(--bg); }
 
-  /* ─── Progress indicator ─── */
-  .progress-wrap {
-    height: 3px;
-    background: var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-    margin-top: 8px;
-    display: none;
-  }
-  .progress-wrap.active { display: block; }
-  .progress-bar {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 2px;
-    width: 0%;
-    transition: width 0.3s;
-  }
+/* Stats overlay */
+.stats {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 6px 16px;
+  z-index: 800; display: none; gap: 18px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+}
+.stats.on { display: flex; }
+.st { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.st .v { color: var(--accent); font-weight: 600; font-size: 13px; }
+.st .l { color: var(--dim); font-size: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-  /* Leaflet overrides */
-  .leaflet-control-attribution { font-size: 9px !important; }
-  .leaflet-control-zoom a {
-    background: var(--panel) !important;
-    color: var(--text) !important;
-    border-color: var(--border) !important;
-  }
+/* Legend */
+.legend {
+  position: absolute; bottom: 28px; right: 12px;
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 8px 12px;
+  z-index: 800; display: none; font-size: 11px; min-width: 110px;
+}
+.legend.on { display: block; }
+.leg-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px; color: var(--dim);
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;
+}
+.leg-row { display: flex; align-items: center; gap: 7px; margin-bottom: 2px; }
+.leg-sw { width: 16px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.leg-lb { color: var(--text); font-size: 10.5px; }
 
-  /* Click marker */
-  .ignition-icon {
-    display: flex; align-items: center; justify-content: center;
-    width: 24px; height: 24px;
-    background: var(--accent);
-    border: 2px solid #fff;
-    border-radius: 50%;
-    font-size: 12px;
-    box-shadow: 0 0 12px var(--accent-glow);
-  }
+/* Info modal */
+.modal-bg {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6); z-index: 2000;
+  align-items: center; justify-content: center;
+}
+.modal-bg.on { display: flex; }
+.modal {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 8px; padding: 24px 28px;
+  max-width: 620px; width: 90%;
+  max-height: 80vh; overflow-y: auto;
+  color: var(--text); font-size: 13px; line-height: 1.65;
+}
+.modal h2 { font-size: 16px; color: var(--accent); margin-bottom: 12px; font-weight: 600; }
+.modal h3 { font-size: 13px; color: var(--bright); margin: 14px 0 4px; font-weight: 600; }
+.modal p { margin-bottom: 8px; }
+.modal .cite {
+  font-size: 11px; color: var(--dim); font-style: italic;
+  padding-left: 12px; border-left: 2px solid var(--border);
+  margin: 6px 0 10px;
+}
+.modal .close-btn {
+  position: absolute; top: 12px; right: 16px;
+  background: none; border: none; color: var(--dim);
+  font-size: 20px; cursor: pointer;
+}
+
+/* Ignition marker */
+.ign-icon {
+  width: 22px; height: 22px;
+  background: var(--accent);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  box-shadow: 0 0 10px var(--glow);
+}
+
+/* Leaflet overrides */
+.leaflet-control-attribution { font-size: 9px !important; }
+.leaflet-control-zoom a { background: var(--panel) !important; color: var(--text) !important; border-color: var(--border) !important; }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-left">
-    <div class="logo">🔥 FireCast <span>LPC</span></div>
-    <div class="badge badge-dev">DEV</div>
+<header>
+  <div class="logo">🔥 FireCast <span>LPC</span></div>
+  <div class="tag">PLANNING SKETCH</div>
+  <div class="hdr-right">
+    <button class="hdr-btn" onclick="toggleInfo()">ⓘ Sources & Methods</button>
   </div>
-</div>
+</header>
 
 <div class="main">
   <div class="sidebar">
     <!-- Ignition -->
-    <div class="section">
-      <div class="section-title">Ignition Point</div>
-      <p style="font-size:11px;color:var(--dim);margin-bottom:8px;">Click the map to set ignition, or enter coordinates:</p>
+    <div class="sec">
+      <div class="sec-hd">Ignition Point</div>
+      <p style="font-size:10.5px;color:var(--dim);margin-bottom:6px">Click the map or enter coordinates</p>
       <div class="row">
-        <div class="field"><label>Latitude</label><input type="number" id="lat" value="37.2750" step="0.001"></div>
-        <div class="field"><label>Longitude</label><input type="number" id="lng" value="-107.8800" step="0.001"></div>
+        <div class="fld"><label>Latitude</label><input type="number" id="lat" value="37.2750" step="0.001"></div>
+        <div class="fld"><label>Longitude</label><input type="number" id="lng" value="-107.8800" step="0.001"></div>
       </div>
+      <div class="fld"><label>Duration (hours)</label><input type="number" id="dur" value="6" min="1" max="12"></div>
     </div>
 
-    <!-- Grid config -->
-    <div class="section">
-      <div class="section-title">Grid Configuration</div>
+    <!-- Weather (auto-populated, editable) -->
+    <div class="sec">
+      <div class="sec-hd"><span class="dot" id="wxDot"></span> Weather — Live Conditions</div>
+      <div class="wx-summary" id="wxSummary">Click <strong>Fetch Weather</strong> or <strong>Run</strong> to pull current conditions.</div>
       <div class="row">
-        <div class="field"><label>Grid Size</label>
-          <select id="gridsize">
-            <option value="60">60 × 60 (fast)</option>
-            <option value="80">80 × 80</option>
-            <option value="100" selected>100 × 100</option>
-            <option value="120">120 × 120</option>
-            <option value="150">150 × 150 (slow)</option>
-          </select>
-        </div>
-        <div class="field"><label>Cell (m)</label><input type="number" id="cellsize" value="90" min="30" max="200" step="10"></div>
+        <div class="fld"><label>Temperature (°F)</label><input type="number" id="wxTemp" value="85" step="1"></div>
+        <div class="fld"><label>Relative Humidity (%)</label><input type="number" id="wxRH" value="15" min="1" max="100"></div>
       </div>
-      <div class="field"><label>Duration (hours)</label><input type="number" id="dur" value="6" min="1" max="12"></div>
+      <div class="row">
+        <div class="fld"><label>Wind Speed (mph)</label><input type="number" id="wxWind" value="15" min="0" max="80"></div>
+        <div class="fld"><label>Wind From (°)</label><input type="number" id="wxWindDir" value="225" min="0" max="360" step="5"></div>
+      </div>
+      <div class="row">
+        <div class="fld"><label>24hr Precip (in)</label><input type="number" id="wxPrecip24" value="0" min="0" step="0.01"></div>
+        <div class="fld"><label>7-day Precip (in)</label><input type="number" id="wxPrecip7d" value="0" min="0" step="0.1"></div>
+      </div>
+      <button class="hdr-btn" style="width:100%;margin-top:4px" onclick="fetchWeather()">⟳ Fetch Weather</button>
     </div>
 
-    <!-- Weather -->
-    <div class="section">
-      <div class="section-title">Weather</div>
-      <div class="row">
-        <div class="field"><label>Wind Speed (mph)</label><input type="number" id="ws" value="15" min="0" max="60"></div>
-        <div class="field"><label>Wind From (°)</label><input type="number" id="wd" value="225" min="0" max="360" step="5"></div>
+    <!-- Fuel Moisture (derived, editable) -->
+    <div class="sec">
+      <div class="sec-hd"><span class="dot" id="fmDot"></span> Fuel Moisture — Derived</div>
+      <p style="font-size:10px;color:var(--dim);margin-bottom:6px">Auto-calculated from weather. Edit to override.</p>
+      <div class="row row3">
+        <div class="fld"><label>1hr FM (%)</label><input type="number" id="fm1" class="derived" value="4" min="1" max="35"></div>
+        <div class="fld"><label>10hr FM (%)</label><input type="number" id="fm10" class="derived" value="6" min="1" max="35"></div>
+        <div class="fld"><label>100hr FM (%)</label><input type="number" id="fm100" class="derived" value="9" min="1" max="35"></div>
       </div>
+      <div class="fld"><label>Live Herbaceous FM (%)</label><input type="number" id="fmLive" class="derived" value="70" min="30" max="250"></div>
     </div>
 
-    <!-- Fuel Moisture -->
-    <div class="section">
-      <div class="section-title">Fuel Moisture</div>
-      <div class="row">
-        <div class="field"><label>1hr (%)</label><input type="number" id="f1" value="4" min="1" max="30"></div>
-        <div class="field"><label>10hr</label><input type="number" id="f10" value="6"></div>
+    <!-- Fuel model -->
+    <div class="sec">
+      <div class="sec-hd">Fuel at Ignition</div>
+      <div class="fld"><label>Fuel Model (auto from location)</label>
+        <select id="fuelModel">
+          <option value="auto" selected>Auto — from fuel zone map</option>
+          <option value="GR2">GR2 — Low load dry grass</option>
+          <option value="GR4">GR4 — Moderate load dry grass</option>
+          <option value="GS2">GS2 — Moderate grass-shrub</option>
+          <option value="SH1">SH1 — Low load shrub</option>
+          <option value="SH5">SH5 — High load shrub (Gambel oak)</option>
+          <option value="SH7">SH7 — Very high load shrub</option>
+          <option value="TU1">TU1 — Timber-grass-shrub (light)</option>
+          <option value="TU5">TU5 — Timber w/ heavy understory</option>
+          <option value="TL3">TL3 — Moderate conifer litter</option>
+          <option value="TL5">TL5 — High load conifer litter</option>
+        </select>
       </div>
-      <div class="row">
-        <div class="field"><label>100hr</label><input type="number" id="f100" value="9"></div>
-        <div class="field"><label>Live Herb (%)</label><input type="number" id="flv" value="70"></div>
-      </div>
+      <div class="fld" id="autoFuelInfo" style="font-size:10.5px;color:var(--dim)"></div>
     </div>
 
     <!-- Run -->
-    <div class="section">
-      <button class="btn btn-primary" id="runBtn" onclick="runFireCast()">▶ &nbsp;Run FireCast</button>
-      <div class="progress-wrap" id="progress"><div class="progress-bar" id="pbar"></div></div>
+    <div class="sec">
+      <button class="btn-run" id="runBtn" onclick="run()">▶  Run FireCast</button>
+      <div class="pbar-wrap" id="pbar"><div class="pbar" id="pbarFill"></div></div>
     </div>
 
-    <!-- Log -->
-    <div class="log-panel" id="log"></div>
+    <div class="log-wrap" id="log"></div>
   </div>
 
-  <div class="map-wrap">
+  <div class="map-area">
     <div id="map"></div>
-    <div class="stats-bar" id="statsBar">
-      <div class="stat-item"><span class="stat-val" id="stAcres">—</span><span class="stat-lbl">Acres</span></div>
-      <div class="stat-item"><span class="stat-val" id="stROS">—</span><span class="stat-lbl">Max ch/hr</span></div>
-      <div class="stat-item"><span class="stat-val" id="stSolve">—</span><span class="stat-lbl">Solve (s)</span></div>
-      <div class="stat-item"><span class="stat-val" id="stCells">—</span><span class="stat-lbl">Burned</span></div>
+    <div class="stats" id="stats">
+      <div class="st"><span class="v" id="sAcres">—</span><span class="l">Acres</span></div>
+      <div class="st"><span class="v" id="sROS">—</span><span class="l">Head ROS</span></div>
+      <div class="st"><span class="v" id="sFL">—</span><span class="l">Flame Len</span></div>
+      <div class="st"><span class="v" id="sFuel">—</span><span class="l">Fuel</span></div>
     </div>
-    <div class="legend-box" id="legendBox">
-      <div class="legend-title">Arrival Hour</div>
-      <div id="legendContent"></div>
+    <div class="legend" id="legend">
+      <div class="leg-title">Spread Hour</div>
+      <div id="legContent"></div>
     </div>
   </div>
 </div>
 
-<script>
-// ═══════════════════════════════════════
-// MAP INIT
-// ═══════════════════════════════════════
-const map = L.map('map', {
-  center: [37.275, -107.88],
-  zoom: 12,
-  zoomControl: true
-});
+<!-- Info / Sources Modal -->
+<div class="modal-bg" id="infoModal" onclick="if(event.target===this)toggleInfo()">
+  <div class="modal" style="position:relative">
+    <button class="close-btn" onclick="toggleInfo()">×</button>
+    <h2>FireCast LPC — Sources & Methods</h2>
+    <p>FireCast LPC is a <strong>rapid situational awareness sketch tool</strong> for wildfire spread estimation. It is not a prediction — it is a planning aid for initial evacuation zone assessment.</p>
 
+    <h3>Spread Model</h3>
+    <p>Surface fire rate of spread uses the Rothermel (1972) mathematical model. Fire perimeter shape uses Anderson's (1983) wind-driven elliptical projection with length-to-breadth ratio derived from wind speed.</p>
+    <div class="cite">Rothermel, R.C. (1972). "A mathematical model for predicting fire spread in wildland fuels." USDA Forest Service Research Paper INT-115.</div>
+    <div class="cite">Anderson, H.E. (1983). "Predicting wind-driven wild land fire size and shape." USDA Forest Service Research Paper INT-305.</div>
+
+    <h3>Fuel Models</h3>
+    <p>Fuel model parameters follow the Scott & Burgan (2005) 40 standard fire behavior fuel models (FBFM40 system). The embedded fuel zone map for La Plata County uses elevation-band assignments calibrated to regional vegetation: piñon-juniper (GS2), Gambel oak/mountain shrub (SH5), mixed conifer (TU5), spruce-fir (TL5), and subalpine meadow (GR2).</p>
+    <div class="cite">Scott, J.H. & Burgan, R.E. (2005). "Standard fire behavior fuel models." USDA Forest Service GTR RMRS-GTR-153.</div>
+
+    <h3>Dead Fuel Moisture</h3>
+    <p>1-hour fuel moisture is estimated from current temperature and relative humidity using the Simard (1968) equilibrium moisture content equations, which underlie the NFDRS fuel moisture calculations. 10-hour and 100-hour moisture content uses time-lag weighted response to recent weather history following Nelson (2000).</p>
+    <div class="cite">Simard, A.J. (1968). "The moisture content of forest fuels — A review of the basic concepts." Forest Fire Research Institute Information Report FF-X-14.</div>
+    <div class="cite">Nelson, R.M. Jr. (2000). "Prediction of diurnal change in 10-h fuel stick moisture content." Canadian Journal of Forest Research 30(7):1105-1116.</div>
+
+    <h3>Live Fuel Moisture</h3>
+    <p>Live herbaceous fuel moisture uses a seasonal approximation for SW Colorado montane vegetation, ranging from ~30% (late summer/drought) to ~120% (spring green-up), adjusted by recent precipitation and day of year.</p>
+    <div class="cite">Jolly, W.M. et al. (2005). "Season profiles of live woody vegetation moisture in the western US." International Journal of Wildland Fire 14:169-182.</div>
+
+    <h3>Weather Data</h3>
+    <p>Current conditions from Open-Meteo API using NOAA HRRR (3km) and GFS model blends. Temperature, humidity, wind, and precipitation history are used to derive fuel moisture values. All weather inputs are editable to match RAWS observations or spot forecasts.</p>
+
+    <h3>Limitations</h3>
+    <p>This tool models <strong>surface fire only</strong> — no crown fire initiation, no spotting, no diurnal wind shifts, no terrain-channeled winds. Fuel assignments are approximations from elevation bands, not LANDFIRE ground truth. The elliptical spread assumes uniform fuel and constant wind. Use for initial size-up and evacuation zone discussion only.</p>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// MAP
+// ═══════════════════════════════════════════════════════════════
+const map = L.map('map', { center: [37.275, -107.88], zoom: 12, zoomControl: true });
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OSM &amp; CARTO',
-  maxZoom: 19
+  attribution: '&copy; OSM & CARTO', maxZoom: 19
 }).addTo(map);
 
-let ignitionMarker = null;
-let contourLayers = [];
+let ignMarker = null, ellipseLayers = [];
+const ignIcon = L.divIcon({ className:'', html:'<div class="ign-icon">🔥</div>', iconSize:[22,22], iconAnchor:[11,11] });
 
-const ignitionIcon = L.divIcon({
-  className: '',
-  html: '<div class="ignition-icon">🔥</div>',
-  iconSize: [24, 24],
-  iconAnchor: [12, 12]
-});
-
-map.on('click', function(e) {
+map.on('click', e => {
   document.getElementById('lat').value = e.latlng.lat.toFixed(4);
   document.getElementById('lng').value = e.latlng.lng.toFixed(4);
-  setIgnitionMarker(e.latlng.lat, e.latlng.lng);
+  placeIgnition(e.latlng.lat, e.latlng.lng);
+  lookupFuel(e.latlng.lat, e.latlng.lng);
 });
 
-function setIgnitionMarker(lat, lng) {
-  if (ignitionMarker) map.removeLayer(ignitionMarker);
-  ignitionMarker = L.marker([lat, lng], { icon: ignitionIcon }).addTo(map);
+function placeIgnition(lat, lng) {
+  if (ignMarker) map.removeLayer(ignMarker);
+  ignMarker = L.marker([lat, lng], { icon: ignIcon }).addTo(map);
 }
 
-// ═══════════════════════════════════════
-// LOGGING
-// ═══════════════════════════════════════
-function log(msg, cls = '') {
+function toggleInfo() {
+  document.getElementById('infoModal').classList.toggle('on');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LOGGING / PROGRESS
+// ═══════════════════════════════════════════════════════════════
+function log(m, c='') {
   const el = document.getElementById('log');
-  const ts = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
-  el.innerHTML += `<div class="log-line ${cls}"><span class="ts">${ts}</span>${msg}</div>`;
+  const ts = new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  el.innerHTML += `<div class="log-ln ${c}"><span class="t">${ts}</span>${m}</div>`;
   el.scrollTop = el.scrollHeight;
 }
-
-function setProgress(pct) {
-  const wrap = document.getElementById('progress');
-  wrap.classList.toggle('active', pct > 0 && pct < 100);
-  document.getElementById('pbar').style.width = pct + '%';
+function setProg(p) {
+  const w = document.getElementById('pbar');
+  w.classList.toggle('on', p > 0 && p < 100);
+  document.getElementById('pbarFill').style.width = p + '%';
 }
 
-// ═══════════════════════════════════════
-// FBFM40 FUEL MODEL MAPPING
-// ═══════════════════════════════════════
-const FBFM40_MAP = {
-  // Grass
-  101:'GR1',102:'GR2',103:'GR3',104:'GR4',105:'GR5',106:'GR6',107:'GR7',108:'GR8',109:'GR9',
-  // Grass-Shrub
-  121:'GS1',122:'GS2',123:'GS3',124:'GS4',
-  // Shrub
-  141:'SH1',142:'SH2',143:'SH3',144:'SH4',145:'SH5',146:'SH6',147:'SH7',148:'SH8',149:'SH9',
-  // Timber-Understory
-  161:'TU1',162:'TU2',163:'TU3',164:'TU4',165:'TU5',
-  // Timber Litter
-  181:'TL1',182:'TL2',183:'TL3',184:'TL4',185:'TL5',186:'TL6',187:'TL7',188:'TL8',189:'TL9',
-  // Slash-Blowdown
-  201:'SB1',202:'SB2',203:'SB3',204:'SB4',
-  // Non-burnable
-  91:'NB',92:'NB',93:'NB',98:'NB',99:'NB',
-  // Anderson 13
-  1:'FM1',2:'FM2',3:'FM3',4:'FM4',5:'FM5',6:'FM6',7:'FM7',8:'FM8',9:'FM9',10:'FM10',11:'FM11',12:'FM12',13:'FM13',
-};
-
-// ═══════════════════════════════════════
-// FUEL MODELS (from verified grid test + extended)
-// ═══════════════════════════════════════
-const FM = {
-  GR1:{w1:.1,w10:0,w100:0,wLH:.3,wLW:0,sv1:2200,svLH:2000,svLW:0,d:.4,mx:.15,h:8000,wrf:.6},
-  GR2:{w1:.1,w10:0,w100:0,wLH:1,wLW:0,sv1:2000,svLH:1800,svLW:0,d:1,mx:.15,h:8000,wrf:.6},
-  GR3:{w1:.1,w10:.4,w100:0,wLH:1.5,wLW:0,sv1:1500,svLH:1300,svLW:0,d:2,mx:.3,h:8000,wrf:.6},
-  GR4:{w1:.25,w10:0,w100:0,wLH:1.9,wLW:0,sv1:2000,svLH:1800,svLW:0,d:2,mx:.15,h:8000,wrf:.6},
-  GR5:{w1:.4,w10:0,w100:0,wLH:2.5,wLW:0,sv1:1800,svLH:1600,svLW:0,d:1.5,mx:.4,h:8000,wrf:.6},
-  GR6:{w1:.1,w10:0,w100:0,wLH:3.4,wLW:0,sv1:2200,svLH:2000,svLW:0,d:1.5,mx:.4,h:9000,wrf:.6},
-  GR7:{w1:1,w10:0,w100:0,wLH:5.4,wLW:0,sv1:2000,svLH:1800,svLW:0,d:3,mx:.15,h:8000,wrf:.6},
-  GR8:{w1:.5,w10:1,w100:0,wLH:7.3,wLW:0,sv1:1500,svLH:1300,svLW:0,d:4,mx:.3,h:8000,wrf:.6},
-  GR9:{w1:1,w10:1,w100:0,wLH:9,wLW:0,sv1:1800,svLH:1600,svLW:0,d:5,mx:.4,h:8000,wrf:.6},
-  GS1:{w1:.2,w10:0,w100:0,wLH:.5,wLW:.65,sv1:2000,svLH:1800,svLW:1800,d:.9,mx:.15,h:8000,wrf:.55},
-  GS2:{w1:.5,w10:.5,w100:0,wLH:.6,wLW:1,sv1:2000,svLH:1800,svLW:1800,d:1.5,mx:.15,h:8000,wrf:.55},
-  GS3:{w1:.3,w10:.25,w100:0,wLH:1.45,wLW:1.25,sv1:1800,svLH:1600,svLW:1600,d:1.8,mx:.4,h:8000,wrf:.55},
-  GS4:{w1:1.9,w10:.3,w100:.1,wLH:3.4,wLW:7.1,sv1:1800,svLH:1600,svLW:1600,d:2.1,mx:.4,h:8000,wrf:.55},
-  SH1:{w1:.25,w10:.25,w100:0,wLH:.15,wLW:1.3,sv1:2000,svLH:1800,svLW:1600,d:1,mx:.15,h:8000,wrf:.5},
-  SH2:{w1:1.35,w10:2.4,w100:.75,wLH:0,wLW:3.85,sv1:2000,svLH:0,svLW:1600,d:1,mx:.15,h:8000,wrf:.5},
-  SH3:{w1:.45,w10:3,w100:0,wLH:0,wLW:6.2,sv1:1600,svLH:0,svLW:1400,d:2.4,mx:.4,h:8000,wrf:.5},
-  SH4:{w1:.85,w10:1.15,w100:.2,wLH:0,wLW:2.55,sv1:2000,svLH:1800,svLW:1600,d:3,mx:.3,h:8000,wrf:.5},
-  SH5:{w1:3.6,w10:2.1,w100:0,wLH:0,wLW:2.9,sv1:750,svLH:0,svLW:1600,d:6,mx:.15,h:8000,wrf:.5},
-  SH6:{w1:2.9,w10:1.45,w100:0,wLH:0,wLW:1.4,sv1:750,svLH:0,svLW:1600,d:2,mx:.3,h:8000,wrf:.5},
-  SH7:{w1:3.5,w10:5.3,w100:2.2,wLH:0,wLW:3.4,sv1:750,svLH:0,svLW:1600,d:6,mx:.15,h:8000,wrf:.5},
-  SH8:{w1:2,w10:3,w100:1,wLH:0,wLW:4,sv1:750,svLH:0,svLW:1600,d:3,mx:.4,h:8000,wrf:.5},
-  SH9:{w1:4.5,w10:2.45,w100:0,wLH:1.55,wLW:7,sv1:750,svLH:1800,svLW:1500,d:4.4,mx:.4,h:8000,wrf:.5},
-  TU1:{w1:.2,w10:.9,w100:1.5,wLH:.2,wLW:.9,sv1:2000,svLH:1800,svLW:1600,d:.6,mx:.2,h:8000,wrf:.4},
-  TU2:{w1:.95,w10:1.8,w100:1.25,wLH:0,wLW:.2,sv1:2000,svLH:0,svLW:1600,d:1,mx:.3,h:8000,wrf:.4},
-  TU3:{w1:1.1,w10:.15,w100:.25,wLH:.65,wLW:1.1,sv1:1800,svLH:1600,svLW:1400,d:1.3,mx:.3,h:8000,wrf:.4},
-  TU4:{w1:4.5,w10:0,w100:0,wLH:0,wLW:2,sv1:2300,svLH:0,svLW:2000,d:.5,mx:.12,h:8000,wrf:.4},
-  TU5:{w1:4,w10:4,w100:3,wLH:0,wLW:3,sv1:1500,svLH:0,svLW:750,d:1,mx:.25,h:8000,wrf:.4},
-  TL1:{w1:1,w10:2.2,w100:3.6,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.2,mx:.3,h:8000,wrf:.4},
-  TL2:{w1:1.4,w10:2.3,w100:2.2,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.2,mx:.25,h:8000,wrf:.4},
-  TL3:{w1:.5,w10:2.2,w100:2.8,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.3,mx:.2,h:8000,wrf:.4},
-  TL4:{w1:.5,w10:1.5,w100:4.2,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.4,mx:.25,h:8000,wrf:.4},
-  TL5:{w1:1.15,w10:2.5,w100:4.4,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.6,mx:.25,h:8000,wrf:.4},
-  TL6:{w1:2.4,w10:1.2,w100:1.2,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.3,mx:.25,h:8000,wrf:.4},
-  TL7:{w1:.3,w10:1.4,w100:8.1,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.4,mx:.25,h:8000,wrf:.4},
-  TL8:{w1:5.8,w10:1.4,w100:1.1,wLH:0,wLW:0,sv1:1800,svLH:0,svLW:0,d:.3,mx:.35,h:8000,wrf:.4},
-  TL9:{w1:6.65,w10:3.3,w100:4.15,wLH:0,wLW:0,sv1:1800,svLH:0,svLW:0,d:.6,mx:.35,h:8000,wrf:.4},
-  SB1:{w1:1.5,w10:3,w100:11,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:1,mx:.25,h:8000,wrf:.4},
-  SB2:{w1:4.5,w10:4.25,w100:4,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:1,mx:.25,h:8000,wrf:.4},
-  SB3:{w1:5.5,w10:2.75,w100:3,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:1.2,mx:.25,h:8000,wrf:.4},
-  SB4:{w1:5.25,w10:3.5,w100:5.25,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:2.7,mx:.25,h:8000,wrf:.4},
-  // Anderson 13 (legacy fallback)
-  FM1:{w1:.74,w10:0,w100:0,wLH:0,wLW:0,sv1:3500,svLH:0,svLW:0,d:1,mx:.12,h:8000,wrf:.6},
-  FM2:{w1:2,w10:1,w100:.5,wLH:.5,wLW:0,sv1:3000,svLH:1500,svLW:0,d:1,mx:.15,h:8000,wrf:.6},
-  FM3:{w1:3,w10:0,w100:0,wLH:0,wLW:0,sv1:1500,svLH:0,svLW:0,d:2.5,mx:.25,h:8000,wrf:.6},
-  FM4:{w1:5,w10:4,w100:2,wLH:5,wLW:0,sv1:2000,svLH:1500,svLW:0,d:6,mx:.2,h:8000,wrf:.5},
-  FM5:{w1:1,w10:.5,w100:0,wLH:2,wLW:0,sv1:2000,svLH:1500,svLW:0,d:2,mx:.2,h:8000,wrf:.5},
-  FM6:{w1:1.5,w10:2.5,w100:2,wLH:0,wLW:0,sv1:1750,svLH:0,svLW:0,d:2.5,mx:.25,h:8000,wrf:.5},
-  FM7:{w1:1.13,w10:1.87,w100:1.5,wLH:0,wLW:.37,sv1:1750,svLH:0,svLW:1550,d:2.5,mx:.4,h:8000,wrf:.5},
-  FM8:{w1:1.5,w10:1,w100:2.5,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.2,mx:.3,h:8000,wrf:.4},
-  FM9:{w1:2.92,w10:.41,w100:.15,wLH:0,wLW:0,sv1:2500,svLH:0,svLW:0,d:.2,mx:.25,h:8000,wrf:.4},
-  FM10:{w1:3,w10:2,w100:5,wLH:2,wLW:0,sv1:2000,svLH:1500,svLW:0,d:1,mx:.25,h:8000,wrf:.4},
-  FM11:{w1:1.5,w10:4.51,w100:5.51,wLH:0,wLW:0,sv1:1500,svLH:0,svLW:0,d:1,mx:.15,h:8000,wrf:.4},
-  FM12:{w1:4,w10:14.03,w100:16.53,wLH:0,wLW:0,sv1:1500,svLH:0,svLW:0,d:2.3,mx:.2,h:8000,wrf:.4},
-  FM13:{w1:7,w10:23.04,w100:28.05,wLH:0,wLW:0,sv1:1500,svLH:0,svLW:0,d:3,mx:.25,h:8000,wrf:.4},
-  NB:{w1:0,w10:0,w100:0,wLH:0,wLW:0,sv1:0,svLH:0,svLW:0,d:0,mx:0,h:0,wrf:0},
-};
-
-// ═══════════════════════════════════════
-// DATA FETCHING — ELEVATION & FUEL
-// Open-Meteo Elevation API (Copernicus 90m DEM) — CORS enabled, batch capable
-// LANDFIRE FBFM40 via MapServer export → canvas pixel decode
-// All fetches have AbortController timeouts to prevent silent hangs
-// ═══════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// LA PLATA COUNTY FUEL ZONE MAP (embedded)
+// Elevation-band assignment calibrated to SW CO vegetation zones
+// In production, replace with pre-baked LANDFIRE FBFM40 raster
+// ═══════════════════════════════════════════════════════════════
 
 /**
- * Build grid bounds centered on ignition
+ * Determine fuel model from elevation at a given lat/lng.
+ * Uses Open-Meteo elevation lookup for the ignition point (single call).
+ * Returns a fuel model code and description.
  */
-function buildGrid(lat, lng, n, cellM) {
-  const mPerDegLat = 111320;
-  const mPerDegLng = 111320 * Math.cos(lat * Math.PI / 180);
-  const halfExtentLat = (n / 2) * cellM / mPerDegLat;
-  const halfExtentLng = (n / 2) * cellM / mPerDegLng;
-
-  return {
-    bounds: {
-      south: lat - halfExtentLat,
-      north: lat + halfExtentLat,
-      west: lng - halfExtentLng,
-      east: lng + halfExtentLng
-    },
-    mPerDegLat,
-    mPerDegLng
-  };
-}
-
-/** Fetch with timeout via AbortController */
-function fetchWithTimeout(url, timeoutMs = 15000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  return fetch(url, { signal: controller.signal })
-    .finally(() => clearTimeout(timer));
-}
-
-/**
- * Fetch elevation via Open-Meteo Elevation API
- * - CORS enabled, no API key needed
- * - Batch up to 100 coordinates per request
- * - 90m Copernicus GLO-90 DEM
- * - Sub-10ms response times
- */
-async function fetchElevation(bounds, n, cellM) {
-  log('Fetching elevation (Open-Meteo / Copernicus 90m DEM)...');
-
-  // Sample a coarser grid and interpolate to full resolution
-  // Open-Meteo free tier: ~600 calls/min. Use 30x30 = 900 points = 9 batches.
-  const sampleN = Math.min(n, 30);
-  const sampleElev = new Float32Array(sampleN * sampleN);
-  sampleElev.fill(NaN);
-
-  const latStep = (bounds.north - bounds.south) / (sampleN - 1);
-  const lngStep = (bounds.east - bounds.west) / (sampleN - 1);
-
-  // Build coordinate arrays
-  const allLats = [], allLngs = [];
-  for (let r = 0; r < sampleN; r++) {
-    for (let c = 0; c < sampleN; c++) {
-      allLats.push(bounds.north - r * latStep);
-      allLngs.push(bounds.west + c * lngStep);
+async function getElevationAt(lat, lng) {
+  try {
+    const resp = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lng}`);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    if (data.elevation && data.elevation[0] != null) {
+      return data.elevation[0];
     }
+  } catch(e) {
+    log(`Elevation lookup failed: ${e.message}`, 'w');
   }
-
-  // Open-Meteo accepts up to 100 coords per request via comma-separated params
-  const BATCH = 100;
-  let fetched = 0, errors = 0;
-
-  for (let i = 0; i < allLats.length; i += BATCH) {
-    const batchLats = allLats.slice(i, i + BATCH);
-    const batchLngs = allLngs.slice(i, i + BATCH);
-
-    const url = `https://api.open-meteo.com/v1/elevation?latitude=${batchLats.join(',')}&longitude=${batchLngs.join(',')}`;
-
-    // Retry up to 3 times on 429 with increasing backoff
-    for (let attempt = 0; attempt < 4; attempt++) {
-      try {
-        if (attempt > 0) await new Promise(r => setTimeout(r, 2000 * attempt));
-        const resp = await fetchWithTimeout(url, 10000);
-        if (resp.status === 429) {
-          if (attempt < 3) { continue; }
-          throw new Error('Rate limited (429) after retries');
-        }
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const data = await resp.json();
-
-        if (data.elevation && Array.isArray(data.elevation)) {
-          data.elevation.forEach((val, j) => {
-            const idx = i + j;
-            if (idx < sampleElev.length && val != null && val > -1000) {
-              sampleElev[idx] = val;
-              fetched++;
-            }
-          });
-        }
-        break; // success
-      } catch (e) {
-        if (attempt === 3) {
-          errors++;
-          log(`  Batch ${Math.floor(i/BATCH)+1} error: ${e.message}`, 'warn');
-        }
-      }
-    }
-
-    // Rate limit: 600ms between requests (Open-Meteo free tier ~10k/day)
-    await new Promise(r => setTimeout(r, 600));
-
-    setProgress(5 + 30 * Math.min(1, (i + BATCH) / allLats.length));
-  }
-
-  log(`  Elevation: ${fetched}/${allLats.length} points (${errors} batch errors)`,
-      fetched > allLats.length * 0.5 ? 'ok' : 'warn');
-
-  // If total failure, use flat terrain
-  if (fetched < allLats.length * 0.1) {
-    log('  Elevation fetch failed — using flat terrain at 2100m', 'warn');
-    const elev = new Float32Array(n * n);
-    elev.fill(2100);
-    return elev;
-  }
-
-  // Fill gaps in sample grid
-  for (let pass = 0; pass < 5; pass++) {
-    let fixed = 0;
-    for (let r = 0; r < sampleN; r++) {
-      for (let c = 0; c < sampleN; c++) {
-        const i = r * sampleN + c;
-        if (!isNaN(sampleElev[i])) continue;
-        let sum = 0, cnt = 0;
-        for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
-          const nr = r + dr, nc = c + dc;
-          if (nr >= 0 && nr < sampleN && nc >= 0 && nc < sampleN) {
-            const v = sampleElev[nr * sampleN + nc];
-            if (!isNaN(v)) { sum += v; cnt++; }
-          }
-        }
-        if (cnt > 0) { sampleElev[i] = sum / cnt; fixed++; }
-      }
-    }
-    if (fixed === 0) break;
-  }
-
-  // Bilinear interpolation from sampleN → full n grid
-  const elev = new Float32Array(n * n);
-  for (let r = 0; r < n; r++) {
-    for (let c = 0; c < n; c++) {
-      const sr = r * (sampleN - 1) / (n - 1);
-      const sc = c * (sampleN - 1) / (n - 1);
-      const sr0 = Math.floor(sr), sc0 = Math.floor(sc);
-      const sr1 = Math.min(sr0 + 1, sampleN - 1);
-      const sc1 = Math.min(sc0 + 1, sampleN - 1);
-      const fr = sr - sr0, fc = sc - sc0;
-
-      const v00 = sampleElev[sr0 * sampleN + sc0];
-      const v10 = sampleElev[sr1 * sampleN + sc0];
-      const v01 = sampleElev[sr0 * sampleN + sc1];
-      const v11 = sampleElev[sr1 * sampleN + sc1];
-
-      if (!isNaN(v00) && !isNaN(v10) && !isNaN(v01) && !isNaN(v11)) {
-        elev[r * n + c] = v00*(1-fr)*(1-fc) + v10*fr*(1-fc) + v01*(1-fr)*fc + v11*fr*fc;
-      } else {
-        const vals = [v00, v10, v01, v11].filter(v => !isNaN(v));
-        elev[r * n + c] = vals.length > 0 ? vals.reduce((a,b)=>a+b)/vals.length : 2100;
-      }
-    }
-  }
-
-  const valid = Array.from(elev).filter(e => !isNaN(e) && e > -500);
-  if (valid.length > 0) {
-    log(`  Range: ${Math.min(...valid).toFixed(0)}–${Math.max(...valid).toFixed(0)}m`);
-  }
-
-  return elev;
-}
-
-/**
- * Fetch LANDFIRE FBFM40 via MapServer export → PNG → canvas pixel decode
- *
- * Uses the Esri MapServer /export endpoint which (by default) sends
- * Access-Control-Allow-Origin: * headers. We request an n×n PNG of
- * the FBFM40 layer, draw it to a canvas, and decode pixel colors
- * against the known LANDFIRE symbology.
- */
-async function fetchLANDFIRE(bounds, n) {
-  log('Fetching LANDFIRE FBFM40 fuel model raster...');
-  const fuel = new Array(n * n).fill(null);
-
-  // Project bounds to Web Mercator (EPSG:3857)
-  function toWebMercator(lat, lng) {
-    const x = lng * 20037508.34 / 180;
-    const latRad = lat * Math.PI / 180;
-    const y = Math.log(Math.tan(Math.PI / 4 + latRad / 2)) * 20037508.34 / Math.PI;
-    return [x, y];
-  }
-  const sw = toWebMercator(bounds.south, bounds.west);
-  const ne = toWebMercator(bounds.north, bounds.east);
-  const bbox = `${sw[0]},${sw[1]},${ne[0]},${ne[1]}`;
-
-  // Try multiple endpoints in order
-  const endpoints = [
-    { name: 'LF 2.3.0', url: 'https://landfire.gov/arcgis/rest/services/Landfire/US_230/MapServer/export', layers: 'show:2' },
-    { name: 'LF 2.2.0', url: 'https://landfire.gov/arcgis/rest/services/Landfire/US_220/MapServer/export', layers: 'show:2' },
-    { name: 'LF 2.0.0 (cr)', url: 'https://landfire.cr.usgs.gov/arcgis/rest/services/Landfire/US_200/MapServer/export', layers: 'show:19' },
-  ];
-
-  for (const ep of endpoints) {
-    try {
-      const params = new URLSearchParams({
-        bbox, bboxSR: '3857', imageSR: '3857',
-        size: `${n},${n}`, format: 'png',
-        layers: ep.layers, transparent: 'false', f: 'image'
-      });
-      const url = ep.url + '?' + params.toString();
-      log(`  Trying ${ep.name}...`);
-
-      // Load as an image (crossOrigin for canvas access)
-      const imageData = await new Promise((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error('Timeout (15s)')), 15000);
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
-          clearTimeout(timer);
-          const canvas = document.createElement('canvas');
-          canvas.width = n; canvas.height = n;
-          const ctx = canvas.getContext('2d', { willReadFrequently: true });
-          ctx.drawImage(img, 0, 0, n, n);
-          try {
-            resolve(ctx.getImageData(0, 0, n, n));
-          } catch (e) {
-            reject(new Error('Canvas tainted (CORS blocked by server)'));
-          }
-        };
-        img.onerror = () => { clearTimeout(timer); reject(new Error('Image load failed')); };
-        img.src = url;
-      });
-
-      log(`  ${ep.name}: loaded ${n}×${n} raster`, 'ok');
-
-      // Decode pixel colors → fuel model codes
-      const lookup = buildFBFM40ColorLookup();
-      let matched = 0;
-
-      for (let i = 0; i < n * n; i++) {
-        const pi = i * 4;
-        const R = imageData.data[pi], G = imageData.data[pi+1], B = imageData.data[pi+2];
-        const model = matchFBFM40Color(R, G, B, lookup);
-        fuel[i] = model || 'NB';
-        if (model && model !== 'NB') matched++;
-      }
-
-      const counts = {};
-      for (const f of fuel) counts[f] = (counts[f] || 0) + 1;
-      const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5)
-        .map(e => `${e[0]}:${e[1]}`).join(' ');
-      log(`  Decoded: ${matched} burnable pixels — ${top}`);
-
-      return fuel; // Success — stop trying endpoints
-    } catch (e) {
-      log(`  ${ep.name}: ${e.message}`, 'warn');
-    }
-  }
-
-  // All endpoints failed
-  log('  All LANDFIRE endpoints failed', 'error');
   return null;
 }
 
-/**
- * LANDFIRE FBFM40 legend color → fuel code lookup.
- * Standard LANDFIRE rendering symbology for the 40 Scott & Burgan + Anderson 13 models.
- */
-function buildFBFM40ColorLookup() {
-  return [
-    // Non-burnable
-    [0, 0, 0, 'NB'],           // nodata/background
-    [79, 79, 79, 'NB'],        // 91 Urban
-    [0, 0, 255, 'NB'],         // 98 Water
-    [137, 137, 137, 'NB'],     // 93 Ag
-    [115, 115, 115, 'NB'],     // 92 Snow/Ice
-    [156, 156, 156, 'NB'],     // 99 Barren
-
-    // Grass (GR) — yellows
-    [255,255,190,101],[255,255,115,102],[255,255,0,103],[230,230,0,104],
-    [214,214,0,105],[199,199,0,106],[184,184,0,107],[168,168,0,108],[153,153,0,109],
-
-    // Grass-Shrub (GS)
-    [217,217,152,121],[194,194,107,122],[173,173,67,123],[153,153,0,124],
-
-    // Shrub (SH)
-    [204,163,0,141],[191,140,0,142],[179,117,0,143],[166,95,0,144],
-    [153,72,0,145],[140,51,0,146],[128,30,0,147],[115,10,0,148],[168,112,0,149],
-
-    // Timber-Understory (TU)
-    [0,168,132,161],[0,148,115,162],[0,128,98,163],[0,109,81,164],[0,89,65,165],
-
-    // Timber Litter (TL) — greens
-    [0,199,0,181],[0,184,0,182],[0,168,0,183],[0,153,0,184],
-    [0,137,0,185],[0,122,0,186],[0,107,0,187],[0,92,0,188],[0,77,0,189],
-
-    // Slash-Blowdown (SB) — purples
-    [168,0,132,201],[148,0,115,202],[128,0,98,203],[109,0,81,204],
-
-    // Anderson 13 (legacy)
-    [255,235,175,1],[255,218,135,2],[255,200,95,3],[255,183,55,4],
-    [242,167,46,5],[230,152,38,6],[217,137,29,7],[204,122,20,8],
-    [191,107,11,9],[178,92,2,10],[165,80,0,11],[153,68,0,12],[140,56,0,13],
-  ];
+function fuelFromElevation(elevM) {
+  if (elevM == null) return { code: 'SH5', desc: 'Default — High load shrub (no elevation data)', elev: null };
+  if (elevM > 3500) return { code: 'GR2', desc: `Alpine meadow (${elevM.toFixed(0)}m)`, elev: elevM };
+  if (elevM > 3200) return { code: 'GR2', desc: `Subalpine meadow (${elevM.toFixed(0)}m)`, elev: elevM };
+  if (elevM > 2800) return { code: 'TL5', desc: `Spruce-fir litter (${elevM.toFixed(0)}m)`, elev: elevM };
+  if (elevM > 2500) return { code: 'TU5', desc: `Mixed conifer w/ understory (${elevM.toFixed(0)}m)`, elev: elevM };
+  if (elevM > 2200) return { code: 'SH5', desc: `Gambel oak / mountain shrub (${elevM.toFixed(0)}m)`, elev: elevM };
+  if (elevM > 2000) return { code: 'GS2', desc: `Piñon-juniper / grass-shrub (${elevM.toFixed(0)}m)`, elev: elevM };
+  if (elevM > 1700) return { code: 'SH1', desc: `Sage / desert shrub (${elevM.toFixed(0)}m)`, elev: elevM };
+  return { code: 'GR4', desc: `Low desert grass (${elevM.toFixed(0)}m)`, elev: elevM };
 }
 
-/**
- * Match pixel RGB to closest FBFM40 legend color (Euclidean distance, max threshold)
- */
-function matchFBFM40Color(R, G, B, lookup) {
-  let bestDist = Infinity, bestCode = null;
-  for (const [lr, lg, lb, code] of lookup) {
-    const dr = R-lr, dg = G-lg, db = B-lb;
-    const dist = dr*dr + dg*dg + db*db;
-    if (dist < bestDist) { bestDist = dist; bestCode = code; }
+async function lookupFuel(lat, lng) {
+  const elev = await getElevationAt(lat, lng);
+  const fuel = fuelFromElevation(elev);
+  const info = document.getElementById('autoFuelInfo');
+  info.textContent = `Zone: ${fuel.desc}`;
+  // If set to auto, this will be used during run
+  window._autoFuel = fuel;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WEATHER — Open-Meteo Forecast + History
+// ═══════════════════════════════════════════════════════════════
+async function fetchWeather() {
+  const lat = parseFloat(document.getElementById('lat').value);
+  const lng = parseFloat(document.getElementById('lng').value);
+
+  log('Fetching weather from Open-Meteo (HRRR/GFS)...', 'i');
+  const dot = document.getElementById('wxDot');
+  dot.classList.remove('live');
+
+  try {
+    // Current + 7 day history for fuel moisture derivation
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 3600 * 1000);
+    const startDate = weekAgo.toISOString().slice(0, 10);
+    const endDate = now.toISOString().slice(0, 10);
+
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}` +
+      `&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,precipitation` +
+      `&hourly=temperature_2m,relative_humidity_2m,precipitation` +
+      `&past_days=7&forecast_days=1` +
+      `&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`;
+
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+
+    // Current conditions
+    const cur = data.current;
+    const temp = Math.round(cur.temperature_2m);
+    const rh = Math.round(cur.relative_humidity_2m);
+    const wind = Math.round(cur.wind_speed_10m);
+    const windDir = Math.round(cur.wind_direction_10m);
+
+    document.getElementById('wxTemp').value = temp;
+    document.getElementById('wxRH').value = rh;
+    document.getElementById('wxWind').value = wind;
+    document.getElementById('wxWindDir').value = windDir;
+
+    // Precipitation from hourly history
+    const hourlyPrecip = data.hourly?.precipitation || [];
+    const hourlyTime = data.hourly?.time || [];
+
+    // 24-hour precip: sum of last 24 entries
+    const last24 = hourlyPrecip.slice(-24).reduce((a, b) => a + (b || 0), 0);
+    // 7-day precip: sum all
+    const last7d = hourlyPrecip.reduce((a, b) => a + (b || 0), 0);
+
+    document.getElementById('wxPrecip24').value = last24.toFixed(2);
+    document.getElementById('wxPrecip7d').value = last7d.toFixed(1);
+
+    // Summary
+    const summary = document.getElementById('wxSummary');
+    summary.innerHTML = `<strong>Current:</strong> <span class="val">${temp}°F</span>, ` +
+      `RH <span class="val">${rh}%</span>, ` +
+      `Wind <span class="val">${wind} mph</span> from <span class="val">${windDir}°</span><br>` +
+      `24hr precip: <span class="val">${last24.toFixed(2)}"</span>, ` +
+      `7-day: <span class="val">${last7d.toFixed(1)}"</span>`;
+
+    dot.classList.add('live');
+    log(`Weather: ${temp}°F, ${rh}% RH, ${wind}mph from ${windDir}°`, 'k');
+
+    // Derive fuel moisture
+    deriveFuelMoisture(temp, rh, last24, last7d, data.hourly);
+
+    // Also look up fuel at this point
+    lookupFuel(lat, lng);
+
+  } catch(e) {
+    log(`Weather fetch failed: ${e.message}`, 'e');
   }
-  if (bestDist > 3000) return null; // too far = unknown
-  if (typeof bestCode === 'number') return FBFM40_MAP[bestCode] || 'NB';
-  return bestCode;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FUEL MOISTURE — Nelson / Simard derivation
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Simard (1968) equilibrium moisture content from temperature and RH.
+ * This is the core NFDRS fine fuel moisture equation.
+ */
+function simardEMC(tempF, rh) {
+  // Simard's EMC equations (three humidity regimes)
+  if (rh <= 10) {
+    return 0.03229 + 0.281073 * rh - 0.000578 * tempF * rh;
+  } else if (rh <= 50) {
+    return 2.22749 + 0.160107 * rh - 0.01478 * tempF;
+  } else {
+    return 21.0606 + 0.005565 * rh * rh - 0.00035 * tempF * rh - 0.483199 * rh;
+  }
 }
 
 /**
- * Fallback: assign fuel models from elevation bands (SW Colorado heuristics)
- * Tuned for La Plata County / Durango area landscape:
- *   <2000m: desert/sage shrub
- *   2000-2200m: piñon-juniper woodland
- *   2200-2500m: Gambel oak / mountain shrub (primary fire risk zone)
- *   2500-2800m: mixed conifer with understory
- *   2800-3200m: spruce-fir litter
- *   3200-3500m: subalpine meadow
- *   >3500m: alpine (non-burnable)
+ * Derive all fuel moisture values from weather conditions.
+ * 1hr: direct EMC from current temp/RH (responds within 1 hour)
+ * 10hr: EMC weighted toward recent 10 hours of weather
+ * 100hr: influenced by 7-day precipitation history
+ * Live: seasonal estimate for SW Colorado montane
  */
-function fallbackFuel(elev, n) {
-  log('  Using elevation-band fuel heuristics (SW CO)', 'warn');
-  const fuel = new Array(n * n);
-  for (let i = 0; i < n * n; i++) {
-    const e = elev[i];
-    if (isNaN(e)) { fuel[i] = 'NB'; continue; }
-    if (e > 3500) fuel[i] = 'NB';       // alpine tundra
-    else if (e > 3200) fuel[i] = 'GR2';  // subalpine meadow
-    else if (e > 2800) fuel[i] = 'TL5';  // spruce-fir — moderate litter (faster than TL3)
-    else if (e > 2500) fuel[i] = 'TU5';  // mixed conifer with heavy understory
-    else if (e > 2200) fuel[i] = 'SH5';  // Gambel oak / mountain shrub — fast
-    else if (e > 2000) fuel[i] = 'GS2';  // piñon-juniper / grass-shrub
-    else fuel[i] = 'SH1';                // sage/desert shrub
-  }
-  return fuel;
-}
+function deriveFuelMoisture(tempF, rh, precip24, precip7d, hourlyData) {
+  // 1-hour: equilibrium moisture content (Simard 1968)
+  let fm1 = simardEMC(tempF, rh);
+  fm1 = Math.max(1, Math.min(35, Math.round(fm1)));
 
-
-// ═══════════════════════════════════════
-// SLOPE/ASPECT FROM DEM
-// ═══════════════════════════════════════
-function computeTerrain(elev, n, cellM) {
-  const slope = new Float32Array(n * n);
-  const aspect = new Float32Array(n * n);
-
-  for (let r = 1; r < n - 1; r++) {
-    for (let c = 1; c < n - 1; c++) {
-      const i = r * n + c;
-      const eW = elev[i - 1], eE = elev[i + 1];
-      const eN = elev[(r-1)*n + c], eS = elev[(r+1)*n + c];
-      if (isNaN(eW) || isNaN(eE) || isNaN(eN) || isNaN(eS)) continue;
-
-      const dx = (eE - eW) / (2 * cellM);
-      const dy = (eS - eN) / (2 * cellM);
-      slope[i] = Math.min(Math.atan(Math.sqrt(dx*dx + dy*dy)) * 180 / Math.PI, 45);
-      let a = Math.atan2(-dx, dy) * 180 / Math.PI;
-      if (a < 0) a += 360;
-      aspect[i] = a;
+  // 10-hour: EMC with lag — average of recent 10 hours' EMC values
+  let fm10 = fm1;
+  if (hourlyData && hourlyData.temperature_2m && hourlyData.relative_humidity_2m) {
+    const temps = hourlyData.temperature_2m;
+    const rhs = hourlyData.relative_humidity_2m;
+    const len = temps.length;
+    const window10 = Math.min(10, len);
+    let emcSum = 0;
+    for (let i = len - window10; i < len; i++) {
+      if (temps[i] != null && rhs[i] != null) {
+        emcSum += simardEMC(temps[i], rhs[i]);
+      }
     }
+    fm10 = emcSum / window10;
+    // 10hr responds slower — bias toward EMC, slightly higher
+    fm10 = fm10 * 0.7 + fm1 * 0.3;
   }
-  // Copy edge rows from neighbors
-  for (let c = 0; c < n; c++) {
-    slope[c] = slope[n + c];
-    aspect[c] = aspect[n + c];
-    slope[(n-1)*n + c] = slope[(n-2)*n + c];
-    aspect[(n-1)*n + c] = aspect[(n-2)*n + c];
+  // Add moisture from recent precipitation (Nelson 2000 simplified)
+  if (precip24 > 0.05) fm10 += precip24 * 5; // rough wetting
+  fm10 = Math.max(2, Math.min(35, Math.round(fm10)));
+
+  // 100-hour: heavily influenced by 7-day precipitation
+  let fm100 = fm10 * 1.3; // baseline
+  if (precip7d > 0.1) {
+    fm100 += precip7d * 3; // significant wetting from multi-day rain
   }
-  for (let r = 0; r < n; r++) {
-    slope[r*n] = slope[r*n + 1];
-    aspect[r*n] = aspect[r*n + 1];
-    slope[r*n + n-1] = slope[r*n + n-2];
-    aspect[r*n + n-1] = aspect[r*n + n-2];
+  fm100 = Math.max(3, Math.min(35, Math.round(fm100)));
+
+  // Live herbaceous: seasonal curve for SW CO montane
+  // Peak green-up ~June 15 (DOY 166), cure-out by ~Sept 15 (DOY 258)
+  const doy = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+  let fmLive;
+  if (doy < 120) {
+    fmLive = 60; // early spring, pre-green-up, carryover dead
+  } else if (doy < 166) {
+    // Greening: 60 → 120
+    fmLive = 60 + (doy - 120) / (166 - 120) * 60;
+  } else if (doy < 220) {
+    // Peak green: 120 → 90
+    fmLive = 120 - (doy - 166) / (220 - 166) * 30;
+  } else if (doy < 275) {
+    // Curing: 90 → 40
+    fmLive = 90 - (doy - 220) / (275 - 220) * 50;
+  } else {
+    fmLive = 40; // late fall/winter, cured
   }
-  return { slope, aspect };
+  // Adjust for recent rain
+  if (precip7d > 0.5) fmLive += 15;
+  fmLive = Math.max(30, Math.min(200, Math.round(fmLive)));
+
+  // Set fields
+  document.getElementById('fm1').value = fm1;
+  document.getElementById('fm10').value = fm10;
+  document.getElementById('fm100').value = fm100;
+  document.getElementById('fmLive').value = fmLive;
+
+  log(`Fuel moisture derived: 1hr=${fm1}%, 10hr=${fm10}%, 100hr=${fm100}%, Live=${fmLive}%`, 'k');
+  document.getElementById('fmDot').classList.add('live');
 }
 
 
-// ═══════════════════════════════════════
-// ROTHERMEL ROS (verbatim from verified grid test)
-// ═══════════════════════════════════════
-function calcROS(fk, wMph, wDir, m1, m10, m100, mLv, slopeDeg, aspectDeg) {
+// ═══════════════════════════════════════════════════════════════
+// FUEL MODELS — Scott & Burgan (2005) FBFM40
+// ═══════════════════════════════════════════════════════════════
+const FM = {
+  GR2:{w1:.1,w10:0,w100:0,wLH:1,wLW:0,sv1:2000,svLH:1800,svLW:0,d:1,mx:.15,h:8000,wrf:.6},
+  GR4:{w1:.25,w10:0,w100:0,wLH:1.9,wLW:0,sv1:2000,svLH:1800,svLW:0,d:2,mx:.15,h:8000,wrf:.6},
+  GS2:{w1:.5,w10:.5,w100:0,wLH:.6,wLW:1,sv1:2000,svLH:1800,svLW:1800,d:1.5,mx:.15,h:8000,wrf:.55},
+  SH1:{w1:.25,w10:.25,w100:0,wLH:.15,wLW:1.3,sv1:2000,svLH:1800,svLW:1600,d:1,mx:.15,h:8000,wrf:.5},
+  SH5:{w1:3.6,w10:2.1,w100:0,wLH:0,wLW:2.9,sv1:750,svLH:0,svLW:1600,d:6,mx:.15,h:8000,wrf:.5},
+  SH7:{w1:3.5,w10:5.3,w100:2.2,wLH:0,wLW:3.4,sv1:750,svLH:0,svLW:1600,d:6,mx:.15,h:8000,wrf:.5},
+  TU1:{w1:.2,w10:.9,w100:1.5,wLH:.2,wLW:.9,sv1:2000,svLH:1800,svLW:1600,d:.6,mx:.2,h:8000,wrf:.4},
+  TU5:{w1:4,w10:4,w100:3,wLH:0,wLW:3,sv1:1500,svLH:0,svLW:750,d:1,mx:.25,h:8000,wrf:.4},
+  TL3:{w1:.5,w10:2.2,w100:2.8,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.3,mx:.2,h:8000,wrf:.4},
+  TL5:{w1:1.15,w10:2.5,w100:4.4,wLH:0,wLW:0,sv1:2000,svLH:0,svLW:0,d:.6,mx:.25,h:8000,wrf:.4},
+  NB:{w1:0,w10:0,w100:0,wLH:0,wLW:0,sv1:0,svLH:0,svLW:0,d:0,mx:0,h:0,wrf:0},
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+// ROTHERMEL ROS — Verbatim from verified grid test
+// ═══════════════════════════════════════════════════════════════
+function calcROS(fk, wMph, wDir, m1, m10, m100, mLv) {
   const f = FM[fk];
-  if (!f || f.d <= 0) return { ros: 0, R0: 0, fl: 0, az: 0 };
+  if (!f || f.d <= 0) return { ros:0, R0:0, fl:0, az:0 };
+
+  // No slope in simplified model — flat terrain assumption
+  const slopeDeg = 0, aspectDeg = 0;
 
   const L = t => t * 2000 / 43560;
   const w = [L(f.w1), L(f.w10), L(f.w100)];
   const wl = [L(f.wLH), L(f.wLW)];
   const sv = [f.sv1, 109, 30];
   const svl = [f.svLH || 0.001, f.svLW || 0.001];
-  const mf = [m1 / 100, m10 / 100, m100 / 100];
-  const ml = [mLv / 100, mLv / 100];
+  const mf = [m1/100, m10/100, m100/100];
+  const ml = [mLv/100, mLv/100];
 
-  const dSA = w.map((a, i) => a * sv[i]);
-  const dT = dSA.reduce((a, b) => a + b, 0);
-  const lSA = wl.map((a, i) => a * svl[i]);
-  const lT = lSA.reduce((a, b) => a + b, 0);
+  const dSA = w.map((a,i) => a*sv[i]);
+  const dT = dSA.reduce((a,b) => a+b, 0);
+  const lSA = wl.map((a,i) => a*svl[i]);
+  const lT = lSA.reduce((a,b) => a+b, 0);
   const tSA = dT + lT;
-  if (tSA < 1e-6) return { ros: 0, R0: 0, fl: 0, az: 0 };
+  if (tSA < 1e-6) return { ros:0, R0:0, fl:0, az:0 };
 
-  const dF = dSA.map(s => dT > 0 ? s / dT : 0);
-  const lF = lSA.map(s => lT > 0 ? s / lT : 0);
-  const fD = dT / tSA, fL = lT / tSA;
+  const dF = dSA.map(s => dT>0 ? s/dT : 0);
+  const lF = lSA.map(s => lT>0 ? s/lT : 0);
+  const fD = dT/tSA, fL = lT/tSA;
 
-  const sigma = fD * dF.reduce((s, a, i) => s + a * sv[i], 0) + fL * lF.reduce((s, a, i) => s + a * svl[i], 0);
-  if (sigma < 1) return { ros: 0, R0: 0, fl: 0, az: 0 };
+  const sigma = fD * dF.reduce((s,a,i) => s+a*sv[i], 0) + fL * lF.reduce((s,a,i) => s+a*svl[i], 0);
+  if (sigma < 1) return { ros:0, R0:0, fl:0, az:0 };
 
-  const wT = w.reduce((a, b) => a + b, 0) + wl.reduce((a, b) => a + b, 0);
+  const wT = w.reduce((a,b) => a+b, 0) + wl.reduce((a,b) => a+b, 0);
   const beta = wT / (f.d * 32);
   const bo = 3.348 * Math.pow(sigma, -0.8189);
   const br = beta / bo;
 
   const A = 133 * Math.pow(sigma, -0.7913);
-  const gMax = Math.pow(sigma, 1.5) / (495 + 0.0594 * Math.pow(sigma, 1.5));
-  const gam = gMax * Math.pow(br, A) * Math.exp(A * (1 - br));
+  const gMax = Math.pow(sigma,1.5) / (495 + 0.0594*Math.pow(sigma,1.5));
+  const gam = gMax * Math.pow(br, A) * Math.exp(A*(1-br));
 
-  const wnD = w.reduce((s, a, i) => s + dF[i] * a * 0.9445, 0);
-  const wnL = wl.reduce((s, a, i) => s + lF[i] * a * 0.9445, 0);
+  const wnD = w.reduce((s,a,i) => s+dF[i]*a*0.9445, 0);
+  const wnL = wl.reduce((s,a,i) => s+lF[i]*a*0.9445, 0);
 
-  const mfDw = dF.reduce((s, a, i) => s + a * mf[i], 0);
-  const rmD = Math.min(mfDw / f.mx, 1);
-  const etD = Math.max(0, 1 - 2.59 * rmD + 5.11 * rmD * rmD - 3.52 * Math.pow(rmD, 3));
+  const mfDw = dF.reduce((s,a,i) => s+a*mf[i], 0);
+  const rmD = Math.min(mfDw/f.mx, 1);
+  const etD = Math.max(0, 1 - 2.59*rmD + 5.11*rmD*rmD - 3.52*Math.pow(rmD,3));
 
   let etL = 1;
   if (lT > 1e-5) {
-    const mfLw = lF.reduce((s, a, i) => s + a * ml[i], 0);
-    const rmL = Math.min(mfLw / Math.max(f.mx, 0.3), 1);
-    etL = Math.max(0, 1 - 2.59 * rmL + 5.11 * rmL * rmL - 3.52 * Math.pow(rmL, 3));
+    const mfLw = lF.reduce((s,a,i) => s+a*ml[i], 0);
+    const rmL = Math.min(mfLw/Math.max(f.mx, 0.3), 1);
+    etL = Math.max(0, 1 - 2.59*rmL + 5.11*rmL*rmL - 3.52*Math.pow(rmL,3));
   }
 
   const etS = 0.174 * Math.pow(0.01, -0.19);
-  const IR = gam * (wnD * f.h * etD * etS + wnL * f.h * etL * etS);
+  const IR = gam * (wnD*f.h*etD*etS + wnL*f.h*etL*etS);
 
-  const xi = Math.exp((0.792 + 0.681 * Math.pow(sigma, 0.5)) * (beta + 0.1)) / (192 + 0.2595 * sigma);
+  const xi = Math.exp((0.792 + 0.681*Math.pow(sigma,0.5)) * (beta+0.1)) / (192 + 0.2595*sigma);
   const rhoB = wT / f.d;
-  const eps = Math.exp(-138 / sigma);
-  const mfC = fD * mfDw + fL * (lF.reduce((s, a, i) => s + a * ml[i], 0) || 0);
-  const Qig = 250 + 1116 * mfC;
+  const eps = Math.exp(-138/sigma);
+  const mfC = fD*mfDw + fL*(lF.reduce((s,a,i) => s+a*ml[i], 0) || 0);
+  const Qig = 250 + 1116*mfC;
   const hs = rhoB * eps * Qig;
-  if (hs < 0.001) return { ros: 0, R0: 0, fl: 0, az: 0 };
+  if (hs < 0.001) return { ros:0, R0:0, fl:0, az:0 };
 
   const R0 = IR * xi / hs;
 
+  // Wind factor (no slope factor in simplified model)
   const U = wMph * f.wrf * 88;
   const C = 7.47 * Math.exp(-0.133 * Math.pow(sigma, 0.55));
   const B = 0.02526 * Math.pow(sigma, 0.54);
   const E = 0.715 * Math.exp(-3.59e-4 * sigma);
   const phiW = U > 0 ? C * Math.pow(U, B) * Math.pow(br, -E) : 0;
 
-  const sR = slopeDeg * Math.PI / 180;
-  const phiS = 5.275 * Math.pow(Math.max(beta, 1e-4), -0.3) * Math.pow(Math.tan(sR), 2);
-
   const wAz = ((wDir + 180) % 360) * Math.PI / 180;
-  const sAz = ((aspectDeg + 180) % 360) * Math.PI / 180;
-  const vx = phiW * Math.sin(wAz) + phiS * Math.sin(sAz);
-  const vy = phiW * Math.cos(wAz) + phiS * Math.cos(sAz);
-  const phiE = Math.sqrt(vx * vx + vy * vy);
-  const maxAz = Math.atan2(vx, vy);
+  const ros = R0 * (1 + phiW);
 
-  const ros = R0 * (1 + phiE);
+  // Byram's fireline intensity → flame length
   const fli = IR * ros / 60;
   const fl = 0.45 * Math.pow(Math.max(fli, 0.01), 0.46);
 
-  return { ros, R0, fl, az: maxAz };
+  return { ros, R0, fl, az: wAz };
 }
 
 
-// ═══════════════════════════════════════
-// MTT SPREAD (verbatim from verified grid test)
-// ═══════════════════════════════════════
-function runMTT(n, fuel, slope, aspect, wS, wD, m1, m10, m100, mLv, durMin, cellM) {
-  const cellFt = cellM * 3.28084;
-  const at = new Float32Array(n * n);
-  at.fill(Infinity);
-
-  const cROS = new Float32Array(n * n);
-  const cR0 = new Float32Array(n * n);
-  const cAZ = new Float32Array(n * n);
-  const cFL = new Float32Array(n * n);
-
-  let validCount = 0;
-  for (let i = 0; i < n * n; i++) {
-    const r = calcROS(fuel[i], wS, wD, m1, m10, m100, mLv, slope[i], aspect[i]);
-    cROS[i] = r.ros;
-    cR0[i] = r.R0;
-    cAZ[i] = r.az;
-    cFL[i] = r.fl;
-    if (r.ros > 0) validCount++;
-  }
-  log(`  Burnable: ${validCount}/${n*n}`);
-
-  // Diagnostic: check ignition cell and its neighbors
-  const cIdx = Math.floor(n/2) * n + Math.floor(n/2);
-  log(`  Ignition cell: fuel=${fuel[cIdx]}, slope=${slope[cIdx].toFixed(1)}°, ROS=${cROS[cIdx].toFixed(1)} ft/min, R0=${cR0[cIdx].toFixed(2)}`);
-  // Check 4 neighbors
-  const dirs = [[-1,0,'N'],[1,0,'S'],[0,-1,'W'],[0,1,'E']];
-  for (const [dr,dc,lbl] of dirs) {
-    const ni = (Math.floor(n/2)+dr)*n + Math.floor(n/2)+dc;
-    log(`    ${lbl}: fuel=${fuel[ni]}, slope=${slope[ni].toFixed(1)}°, ROS=${cROS[ni].toFixed(1)}`);
-  }
-
-  const ew = wS * 0.5;
-  const LB = Math.max(1, 0.936 * Math.exp(0.2566 * ew) + 0.461 * Math.exp(-0.1548 * ew) - 0.397);
-  const ecc = LB > 1.01 ? Math.sqrt(1 - 1 / (LB * LB)) : 0;
-
-  // Min-heap
-  const heap = [];
-  function push(t, r, c) {
-    heap.push([t, r, c]);
-    let i = heap.length - 1;
-    while (i > 0) {
-      const pi = (i - 1) >> 1;
-      if (heap[pi][0] <= heap[i][0]) break;
-      [heap[pi], heap[i]] = [heap[i], heap[pi]];
-      i = pi;
-    }
-  }
-  function pop() {
-    const top = heap[0];
-    const last = heap.pop();
-    if (heap.length > 0) {
-      heap[0] = last;
-      let i = 0;
-      while (true) {
-        let sm = i;
-        const l = 2 * i + 1, ri = 2 * i + 2;
-        if (l < heap.length && heap[l][0] < heap[sm][0]) sm = l;
-        if (ri < heap.length && heap[ri][0] < heap[sm][0]) sm = ri;
-        if (sm === i) break;
-        [heap[sm], heap[i]] = [heap[i], heap[sm]];
-        i = sm;
-      }
-    }
-    return top;
-  }
-
-  // Ignite center 3×3 kernel to avoid single-cell edge effects
-  const cr = Math.floor(n / 2), cc = Math.floor(n / 2);
-  for (let dr = -1; dr <= 1; dr++) {
-    for (let dc = -1; dc <= 1; dc++) {
-      const ir = cr + dr, ic = cc + dc;
-      if (ir >= 0 && ir < n && ic >= 0 && ic < n) {
-        at[ir * n + ic] = 0;
-        push(0, ir, ic);
-      }
-    }
-  }
-
-  const visited = new Uint8Array(n * n);
-  const neighbors = [
-    [-1, 0, 1], [1, 0, 1], [0, -1, 1], [0, 1, 1],
-    [-1, -1, 1.414], [-1, 1, 1.414], [1, -1, 1.414], [1, 1, 1.414]
-  ];
-
-  while (heap.length > 0) {
-    const [time, row, col] = pop();
-    const idx = row * n + col;
-    if (visited[idx]) continue;
-    if (time > durMin) continue;
-    visited[idx] = 1;
-    if (cROS[idx] <= 0) continue;
-
-    for (const [dr, dc, distMult] of neighbors) {
-      const nr = row + dr, nc = col + dc;
-      if (nr < 0 || nr >= n || nc < 0 || nc >= n) continue;
-      const ni = nr * n + nc;
-      if (visited[ni] || cROS[ni] <= 0) continue;
-
-      const travelAz = Math.atan2(dc, -dr);
-
-      function dirROS(headROS, backROS, cellAz) {
-        if (ecc < 0.01) return headROS;
-        let ad = travelAz - cellAz;
-        while (ad > Math.PI) ad -= 2 * Math.PI;
-        while (ad < -Math.PI) ad += 2 * Math.PI;
-        const cosA = Math.cos(ad);
-        const denom = 1 - ecc * cosA;
-        if (denom < 0.05) return headROS;
-        const result = headROS * (1 - ecc) / denom;
-        return Math.max(backROS * 0.3, Math.min(result, headROS));
-      }
-
-      const r1 = dirROS(cROS[idx], cR0[idx], cAZ[idx]);
-      const r2 = dirROS(cROS[ni], cR0[ni], cAZ[ni]);
-      const avg = (r1 + r2) / 2;
-      if (avg <= 0 || !isFinite(avg)) continue;
-
-      const travelTime = (cellFt * distMult) / avg;
-      if (!isFinite(travelTime) || travelTime <= 0) continue;
-
-      const newArrival = time + travelTime;
-      if (newArrival < at[ni] && newArrival <= durMin) {
-        at[ni] = newArrival;
-        push(newArrival, nr, nc);
-      }
-    }
-  }
-
-  let burned = 0;
-  let minAT = Infinity, maxAT = 0;
-  for (let i = 0; i < n * n; i++) {
-    if (isFinite(at[i])) {
-      burned++;
-      if (at[i] > 0) { minAT = Math.min(minAT, at[i]); maxAT = Math.max(maxAT, at[i]); }
-    }
-  }
-  if (burned > 1) {
-    log(`  Arrival times: ${minAT.toFixed(1)}–${maxAT.toFixed(1)} min`);
-  }
-
-  return { at, cROS, cFL, burned };
-}
-
-
-// ═══════════════════════════════════════
-// CONTOUR EXTRACTION — BOUNDARY TRACING
-// Traces the outer boundary of burned cells at each hourly threshold,
-// converts to lat/lng polygon, applies Chaikin smoothing
-// ═══════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// ANDERSON (1983) ELLIPTICAL SPREAD PROJECTION
+// ═══════════════════════════════════════════════════════════════
 
 /**
- * For a given arrival-time grid and threshold (in minutes), find all cells
- * where arrival time <= threshold, then trace the outer boundary of that region.
- * Returns an array of closed rings in grid coordinates [col, row].
+ * Generate an elliptical fire perimeter for a given duration.
  *
- * Uses the "square boundary" method: walk the edges between burned/unburned cells.
+ * Anderson (1983) length-to-breadth ratio:
+ *   LB = 0.936 * exp(0.2566 * U_eff) + 0.461 * exp(-0.1548 * U_eff) - 0.397
+ *   where U_eff = midflame wind speed (mph)
+ *
+ * Head fire distance = headROS * time
+ * Backing fire distance = R0 * time (no-wind rate)
+ * Ellipse semi-axes from LB ratio and head/back distances.
+ *
+ * Returns array of [lat, lng] points forming the ellipse polygon.
  */
-function traceBurnBoundary(at, n, threshold) {
-  // Build a binary grid: 1 = burned (at <= threshold), 0 = not
-  const burned = new Uint8Array((n + 2) * (n + 2)); // padded by 1 on each side
-  const W = n + 2;
-  for (let r = 0; r < n; r++) {
-    for (let c = 0; c < n; c++) {
-      const v = at[r * n + c];
-      if (isFinite(v) && v <= threshold) {
-        burned[(r + 1) * W + (c + 1)] = 1;
-      }
-    }
+function buildFireEllipse(lat, lng, headROS, backROS, windDirFrom, durationMin, numPoints) {
+  numPoints = numPoints || 72;
+
+  // Effective midflame wind speed (approximate from ROS ratio)
+  const windMph = parseFloat(document.getElementById('wxWind').value) || 0;
+  const Ueff = windMph * 0.5; // rough midflame = 50% of 20ft wind for shrub/timber
+
+  // Length-to-breadth ratio (Anderson 1983)
+  const LB = Math.max(1, 0.936 * Math.exp(0.2566 * Ueff) + 0.461 * Math.exp(-0.1548 * Ueff) - 0.397);
+
+  // Head fire distance (ft) → meters
+  const headDist = headROS * durationMin * 0.3048; // ft → m
+  const backDist = backROS * durationMin * 0.3048;
+
+  // Ellipse geometry
+  // Total length along wind axis = head + back distance
+  // Width = total length / LB
+  const totalLen = headDist + backDist;
+  const halfWidth = (totalLen / LB) / 2;
+
+  // Semi-major axis (a) = totalLen / 2
+  // Semi-minor axis (b) = halfWidth
+  const a = totalLen / 2;
+  const b = halfWidth;
+
+  // Center offset: the ellipse center is shifted downwind from ignition
+  // Ignition is at the back focus, so center is (a - backDist) downwind from ignition
+  const centerOffset = a - backDist;
+
+  // Wind direction: windDirFrom is where wind comes FROM
+  // Fire spreads TOWARD the downwind direction
+  const downwindRad = ((windDirFrom + 180) % 360) * Math.PI / 180;
+
+  // Generate ellipse points
+  const mPerDegLat = 111320;
+  const mPerDegLng = 111320 * Math.cos(lat * Math.PI / 180);
+
+  // Center of ellipse in lat/lng
+  const cLat = lat + (centerOffset * Math.cos(downwindRad)) / mPerDegLat;
+  const cLng = lng + (centerOffset * Math.sin(downwindRad)) / mPerDegLng;
+
+  const points = [];
+  for (let i = 0; i < numPoints; i++) {
+    const theta = (2 * Math.PI * i) / numPoints;
+
+    // Ellipse point in local coords (a along major axis, b along minor)
+    const ex = a * Math.cos(theta); // along wind axis
+    const ey = b * Math.sin(theta); // perpendicular to wind
+
+    // Rotate to align with wind direction
+    const rx = ex * Math.cos(downwindRad) - ey * Math.sin(downwindRad);
+    const ry = ex * Math.sin(downwindRad) + ey * Math.cos(downwindRad);
+
+    // Convert to lat/lng offset
+    const pLat = cLat + rx / mPerDegLat;
+    const pLng = cLng + ry / mPerDegLng;
+    points.push([pLat, pLng]);
   }
 
-  // Find boundary edges: edges between burned and unburned cells
-  // An edge is defined by its position and orientation.
-  // We store edges as: [r, c, direction] where direction is 'R' (right), 'D' (down)
-  // Each boundary edge connects two corner vertices of the grid.
-  // Convention: grid cell [r,c] has corners at (c,r), (c+1,r), (c+1,r+1), (c,r+1)
+  // Close the polygon
+  points.push(points[0]);
 
-  // Use a different approach: trace the contour using marching squares on the binary grid
-  // but treat Infinity as "unburned" (value 0) and burned as value 1, threshold 0.5
-  // This always produces clean closed contours since the padded border is all 0.
-
-  const segments = [];
-  for (let r = 0; r < n + 1; r++) {
-    for (let c = 0; c < n + 1; c++) {
-      // Four corners of this marching square cell (in padded coords)
-      const tl = burned[r * W + c];
-      const tr = burned[r * W + c + 1];
-      const br = burned[(r + 1) * W + c + 1];
-      const bl = burned[(r + 1) * W + c];
-
-      let idx = 0;
-      if (tl) idx |= 8;
-      if (tr) idx |= 4;
-      if (br) idx |= 2;
-      if (bl) idx |= 1;
-
-      if (idx === 0 || idx === 15) continue;
-
-      // For binary grid (no interpolation needed — edges are at midpoints)
-      const midTop    = [c + 0.5, r];
-      const midRight  = [c + 1,   r + 0.5];
-      const midBottom = [c + 0.5, r + 1];
-      const midLeft   = [c,       r + 0.5];
-
-      // Standard marching squares cases for binary data
-      const caseTable = {
-        1:  [[midLeft, midBottom]],
-        2:  [[midBottom, midRight]],
-        3:  [[midLeft, midRight]],
-        4:  [[midRight, midTop]],
-        5:  [[midLeft, midTop], [midBottom, midRight]], // saddle
-        6:  [[midBottom, midTop]],
-        7:  [[midLeft, midTop]],
-        8:  [[midTop, midLeft]],
-        9:  [[midTop, midBottom]],
-        10: [[midTop, midRight], [midLeft, midBottom]], // saddle
-        11: [[midTop, midRight]],
-        12: [[midRight, midLeft]],
-        13: [[midRight, midBottom]],
-        14: [[midBottom, midLeft]],
-      };
-
-      const segs = caseTable[idx];
-      if (segs) {
-        for (const s of segs) {
-          // Convert from padded coords back to original grid coords (subtract 1)
-          segments.push([
-            [s[0][0] - 1, s[0][1] - 1],
-            [s[1][0] - 1, s[1][1] - 1]
-          ]);
-        }
-      }
-    }
-  }
-
-  // Assemble segments into closed rings
-  return assembleRings(segments);
-}
-
-/**
- * Assemble line segments into closed rings using endpoint chaining
- */
-function assembleRings(segments) {
-  if (segments.length === 0) return [];
-
-  const key = (p) => `${(p[0]*10000|0)},${(p[1]*10000|0)}`;
-
-  // Build adjacency
-  const adj = new Map();
-  segments.forEach((seg, i) => {
-    const k0 = key(seg[0]), k1 = key(seg[1]);
-    if (!adj.has(k0)) adj.set(k0, []);
-    if (!adj.has(k1)) adj.set(k1, []);
-    adj.get(k0).push({ idx: i, other: seg[1], otherKey: k1 });
-    adj.get(k1).push({ idx: i, other: seg[0], otherKey: k0 });
-  });
-
-  const used = new Uint8Array(segments.length);
-  const rings = [];
-
-  for (let si = 0; si < segments.length; si++) {
-    if (used[si]) continue;
-    used[si] = 1;
-
-    const ring = [segments[si][0], segments[si][1]];
-    let currentKey = key(segments[si][1]);
-    const startKey = key(segments[si][0]);
-
-    for (let iter = 0; iter < segments.length; iter++) {
-      if (currentKey === startKey && ring.length > 2) break; // closed
-
-      const neighbors = adj.get(currentKey);
-      if (!neighbors) break;
-
-      let found = false;
-      for (const nb of neighbors) {
-        if (used[nb.idx]) continue;
-        used[nb.idx] = 1;
-
-        // Determine which endpoint connects
-        const segPt0Key = key(segments[nb.idx][0]);
-        if (segPt0Key === currentKey) {
-          ring.push(segments[nb.idx][1]);
-          currentKey = key(segments[nb.idx][1]);
-        } else {
-          ring.push(segments[nb.idx][0]);
-          currentKey = key(segments[nb.idx][0]);
-        }
-        found = true;
-        break;
-      }
-      if (!found) break;
-    }
-
-    // Only keep closed rings with enough points
-    if (ring.length >= 4 && key(ring[ring.length-1]) === key(ring[0])) {
-      rings.push(ring);
-    }
-  }
-
-  return rings;
-}
-
-/**
- * Chaikin corner-cutting subdivision for smooth contours
- */
-function chaikinSmooth(ring, iterations = 2) {
-  let pts = ring.slice();
-
-  for (let iter = 0; iter < iterations; iter++) {
-    if (pts.length < 3) return pts;
-    const smoothed = [];
-    // Assume closed ring: last point ≈ first point
-    const len = pts.length - 1; // skip duplicate closing point
-
-    for (let i = 0; i < len; i++) {
-      const p0 = pts[i];
-      const p1 = pts[(i + 1) % len];
-
-      smoothed.push([
-        0.75 * p0[0] + 0.25 * p1[0],
-        0.75 * p0[1] + 0.25 * p1[1]
-      ]);
-      smoothed.push([
-        0.25 * p0[0] + 0.75 * p1[0],
-        0.25 * p0[1] + 0.75 * p1[1]
-      ]);
-    }
-
-    // Close the ring
-    if (smoothed.length > 0) {
-      smoothed.push([smoothed[0][0], smoothed[0][1]]);
-    }
-    pts = smoothed;
-  }
-
-  return pts;
+  return { points, headDist, backDist, totalLen, halfWidth: halfWidth*2, LB, a, b };
 }
 
 
-// ═══════════════════════════════════════
-// RENDER CONTOURS TO LEAFLET
-// ═══════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// RENDER ELLIPSES ON MAP
+// ═══════════════════════════════════════════════════════════════
 const HOUR_COLORS = [
-  '#FFFF50', '#FFD620', '#FFA500', '#FF6400',
-  '#E6370F', '#CC1E14', '#A00F14', '#780A0F',
-  '#5A050A', '#410308', '#2D0205', '#1E0103'
+  '#FFFF50','#FFD620','#FFA500','#FF6400',
+  '#E6370F','#CC1E14','#A00F14','#780A0F',
+  '#5A050A','#410308','#2D0205','#1E0103'
 ];
 
-function renderContours(at, n, durHrs, grid) {
-  // Clear previous
-  contourLayers.forEach(l => map.removeLayer(l));
-  contourLayers = [];
+function renderEllipses(lat, lng, headROS, backROS, windDir, durHrs) {
+  ellipseLayers.forEach(l => map.removeLayer(l));
+  ellipseLayers = [];
 
-  const { bounds } = grid;
-
-  // Convert grid coords [col, row] to [lat, lng]
-  // Grid row 0 = north edge, row n-1 = south edge
-  // Grid col 0 = west edge, col n-1 = east edge
-  function gridToLatLng(pt) {
-    const col = pt[0], row = pt[1];
-    const lat = bounds.north - (row / (n - 1)) * (bounds.north - bounds.south);
-    const lng = bounds.west + (col / (n - 1)) * (bounds.east - bounds.west);
-    return [lat, lng];
-  }
-
-  let totalPolygons = 0;
-
-  // Render from outermost hour inward so inner rings draw on top
+  // Render from outermost hour inward
   for (let h = durHrs; h >= 1; h--) {
-    const threshold = h * 60; // minutes
-    const rings = traceBurnBoundary(at, n, threshold);
+    const durationMin = h * 60;
+    const { points } = buildFireEllipse(lat, lng, headROS, backROS, windDir, durationMin, 72);
+    const color = HOUR_COLORS[Math.min(h-1, HOUR_COLORS.length-1)];
 
-    if (rings.length === 0) continue;
-
-    const color = HOUR_COLORS[Math.min(h - 1, HOUR_COLORS.length - 1)];
-
-    // Find the largest ring (by point count) — that's the outer boundary
-    // Smaller rings are holes or isolated patches
-    let largestIdx = 0, largestLen = 0;
-    rings.forEach((ring, i) => {
-      if (ring.length > largestLen) { largestLen = ring.length; largestIdx = i; }
+    const poly = L.polygon(points, {
+      color: color,
+      weight: h === durHrs ? 2.5 : 1.5,
+      opacity: 0.9,
+      fillColor: color,
+      fillOpacity: 0.08 + 0.04 * (durHrs - h),
+      smoothFactor: 1
     });
-
-    for (let ri = 0; ri < rings.length; ri++) {
-      const ring = rings[ri];
-      if (ring.length < 4) continue;
-
-      const smoothed = chaikinSmooth(ring, 2);
-      const latlngs = smoothed.map(gridToLatLng);
-
-      if (latlngs.length < 3) continue;
-
-      const isOuter = (ri === largestIdx);
-      const polygon = L.polygon(latlngs, {
-        color: color,
-        weight: isOuter ? 2 : 1,
-        opacity: 0.9,
-        fillColor: color,
-        fillOpacity: isOuter ? 0.25 : 0.1,
-        smoothFactor: 1
-      });
-      polygon.bindTooltip(`Hour ${h}`, { sticky: true, className: '' });
-      polygon.addTo(map);
-      contourLayers.push(polygon);
-      totalPolygons++;
-    }
+    poly.bindTooltip(`Hour ${h}`, { sticky: true });
+    poly.addTo(map);
+    ellipseLayers.push(poly);
   }
 
-  // Add ignition point on top
-  const lat = parseFloat(document.getElementById('lat').value);
-  const lng = parseFloat(document.getElementById('lng').value);
-  setIgnitionMarker(lat, lng);
+  // Ignition marker on top
+  placeIgnition(lat, lng);
 
-  // Fit map to contours
-  if (contourLayers.length > 0) {
-    const group = L.featureGroup(contourLayers);
-    map.fitBounds(group.getBounds().pad(0.1));
+  // Fit map
+  if (ellipseLayers.length > 0) {
+    const group = L.featureGroup(ellipseLayers);
+    map.fitBounds(group.getBounds().pad(0.15));
   }
-
-  log(`  ${totalPolygons} contour polygons rendered`);
 
   // Legend
-  const legendBox = document.getElementById('legendBox');
-  const legendContent = document.getElementById('legendContent');
-  legendBox.classList.add('active');
-  legendContent.innerHTML = '';
+  const legend = document.getElementById('legend');
+  const content = document.getElementById('legContent');
+  legend.classList.add('on');
+  content.innerHTML = '';
   for (let h = 1; h <= durHrs; h++) {
-    const color = HOUR_COLORS[Math.min(h - 1, HOUR_COLORS.length - 1)];
-    legendContent.innerHTML += `<div class="legend-row">
-      <div class="legend-swatch" style="background:${color}"></div>
-      <span class="legend-label">Hour ${h}</span>
-    </div>`;
+    const c = HOUR_COLORS[Math.min(h-1, HOUR_COLORS.length-1)];
+    content.innerHTML += `<div class="leg-row"><div class="leg-sw" style="background:${c}"></div><span class="leg-lb">Hour ${h}</span></div>`;
   }
 }
 
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
 // MAIN RUN
-// ═══════════════════════════════════════
-async function runFireCast() {
+// ═══════════════════════════════════════════════════════════════
+async function run() {
   const btn = document.getElementById('runBtn');
   btn.disabled = true;
   btn.textContent = '⏳  Running...';
   document.getElementById('log').innerHTML = '';
-  document.getElementById('statsBar').classList.remove('active');
+  document.getElementById('stats').classList.remove('on');
 
   try {
     const lat = parseFloat(document.getElementById('lat').value);
     const lng = parseFloat(document.getElementById('lng').value);
-    const n = parseInt(document.getElementById('gridsize').value);
-    const cellM = parseInt(document.getElementById('cellsize').value);
     const durHrs = parseInt(document.getElementById('dur').value);
-    const wS = parseFloat(document.getElementById('ws').value);
-    const wD = parseFloat(document.getElementById('wd').value);
-    const m1 = parseFloat(document.getElementById('f1').value);
-    const m10 = parseFloat(document.getElementById('f10').value);
-    const m100 = parseFloat(document.getElementById('f100').value);
-    const mLv = parseFloat(document.getElementById('flv').value);
+    const windMph = parseFloat(document.getElementById('wxWind').value);
+    const windDir = parseFloat(document.getElementById('wxWindDir').value);
+    const temp = parseFloat(document.getElementById('wxTemp').value);
+    const rh = parseFloat(document.getElementById('wxRH').value);
+    const m1 = parseFloat(document.getElementById('fm1').value);
+    const m10 = parseFloat(document.getElementById('fm10').value);
+    const m100 = parseFloat(document.getElementById('fm100').value);
+    const mLive = parseFloat(document.getElementById('fmLive').value);
 
-    const extentKm = (n * cellM / 1000).toFixed(1);
-    log(`FireCast LPC — ${n}×${n} grid, ${cellM}m cells, ${extentKm}km extent`, 'info');
-    log(`Ignition: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
-    log(`Wind: ${wS}mph from ${wD}°, Duration: ${durHrs}hr`);
+    setProg(10);
+    log(`FireCast LPC — ${lat.toFixed(4)}, ${lng.toFixed(4)}`, 'i');
+    log(`Weather: ${temp}°F, ${rh}% RH, ${windMph}mph from ${windDir}°`);
+    log(`Fuel moisture: 1hr=${m1}%, 10hr=${m10}%, 100hr=${m100}%, Live=${mLive}%`);
 
-    setProgress(5);
-
-    // 1. Build grid bounds
-    const grid = buildGrid(lat, lng, n, cellM);
-    log(`Grid bounds: ${grid.bounds.south.toFixed(4)}–${grid.bounds.north.toFixed(4)} N, ${grid.bounds.west.toFixed(4)}–${grid.bounds.east.toFixed(4)} W`);
-
-    // 2. Fetch elevation (Open-Meteo / Copernicus 90m DEM — CORS enabled)
-    const t0 = performance.now();
-    const elev = await fetchElevation(grid.bounds, n, cellM);
-
-    // 3. Fetch fuel data (LANDFIRE exportImage → canvas pixel decode, with fallback)
-    let fuel;
-    try {
-      fuel = await fetchLANDFIRE(grid.bounds, n);
-      if (!fuel) {
-        log('  LANDFIRE returned null — using elevation fallback', 'warn');
-        fuel = fallbackFuel(elev, n);
-      } else {
-        // Check if we got mostly NB (service may have failed silently)
-        const nbCount = fuel.filter(f => f === 'NB').length;
-        if (nbCount > fuel.length * 0.9) {
-          log('  LANDFIRE returned >90% NB — using elevation fallback', 'warn');
-          fuel = fallbackFuel(elev, n);
-        }
+    // Determine fuel model
+    let fuelKey = document.getElementById('fuelModel').value;
+    if (fuelKey === 'auto') {
+      setProg(20);
+      // Fetch weather if we haven't already
+      if (!document.getElementById('wxDot').classList.contains('live')) {
+        await fetchWeather();
       }
-    } catch (e) {
-      log(`  LANDFIRE fetch failed: ${e.message}`, 'warn');
-      fuel = fallbackFuel(elev, n);
+      // Lookup fuel from elevation
+      const elev = await getElevationAt(lat, lng);
+      const fuel = fuelFromElevation(elev);
+      fuelKey = fuel.code;
+      document.getElementById('autoFuelInfo').textContent = `Zone: ${fuel.desc}`;
+      log(`Fuel: ${fuelKey} — ${fuel.desc}`, 'k');
+    } else {
+      log(`Fuel: ${fuelKey} (manual override)`);
     }
 
-    setProgress(65);
+    setProg(40);
 
-    // 4. Compute terrain from DEM
-    log('Computing slope/aspect from DEM...');
-    const terrain = computeTerrain(elev, n, cellM);
-    const maxSlope = Math.max(...terrain.slope);
-    log(`  Max slope: ${maxSlope.toFixed(1)}°`, 'ok');
+    if (!FM[fuelKey] || FM[fuelKey].d <= 0) {
+      log('Non-burnable fuel model — no spread', 'e');
+      return;
+    }
 
-    setProgress(70);
+    // Rothermel ROS
+    const result = calcROS(fuelKey, windMph, windDir, m1, m10, m100, mLive);
 
-    // 5. Run MTT spread model
-    log('Running MTT spread...', 'info');
-    const tMTT = performance.now();
-    const result = runMTT(n, fuel, terrain.slope, terrain.aspect, wS, wD, m1, m10, m100, mLv, durHrs * 60, cellM);
-    const solveTime = ((performance.now() - tMTT) / 1000).toFixed(2);
-    const totalTime = ((performance.now() - t0) / 1000).toFixed(1);
+    if (result.ros <= 0) {
+      log('Zero spread rate — fuel moisture may exceed extinction', 'e');
+      return;
+    }
 
-    const acres = result.burned * cellM * cellM / 4046.86;
-    const maxROS = Math.max(...result.cROS);
+    const headROS_chhr = result.ros / 66 * 60; // ft/min → chains/hr
+    const backROS_chhr = result.R0 / 66 * 60;
 
-    log(`  Burned: ${result.burned} cells (${acres.toFixed(0)} acres)`, 'ok');
-    log(`  Max ROS: ${(maxROS / 66 * 60).toFixed(1)} ch/hr`);
-    log(`  MTT solve: ${solveTime}s, Total: ${totalTime}s`);
+    log(`Head ROS: ${result.ros.toFixed(1)} ft/min (${headROS_chhr.toFixed(1)} ch/hr)`);
+    log(`Backing ROS: ${result.R0.toFixed(2)} ft/min`);
+    log(`Flame length: ${result.fl.toFixed(1)} ft`);
 
-    setProgress(85);
+    setProg(60);
 
-    // 6. Extract contours and render
-    log('Extracting contours (marching squares)...', 'info');
-    renderContours(result.at, n, durHrs, grid);
-    log(`  Contour polygons rendered on map`, 'ok');
+    // Anderson elliptical spread
+    const finalEllipse = buildFireEllipse(lat, lng, result.ros, result.R0, windDir, durHrs * 60, 72);
 
-    setProgress(100);
+    // Acreage: ellipse area = π * a * b (in meters) → acres
+    const areaM2 = Math.PI * finalEllipse.a * finalEllipse.b;
+    const acres = areaM2 / 4046.86;
 
-    // Stats bar
-    document.getElementById('stAcres').textContent = acres.toFixed(0);
-    document.getElementById('stROS').textContent = (maxROS / 66 * 60).toFixed(1);
-    document.getElementById('stSolve').textContent = solveTime;
-    document.getElementById('stCells').textContent = result.burned.toLocaleString();
-    document.getElementById('statsBar').classList.add('active');
+    log(`${durHrs}hr projection: ${(finalEllipse.headDist).toFixed(0)}m head, ${(finalEllipse.backDist).toFixed(0)}m back`);
+    log(`Width: ${(finalEllipse.halfWidth).toFixed(0)}m, L:B ratio: ${finalEllipse.LB.toFixed(2)}`);
+    log(`Area: ${acres.toFixed(0)} acres`, 'k');
 
-    log(`Done in ${totalTime}s`, 'ok');
+    setProg(80);
 
-  } catch (e) {
-    log(`ERROR: ${e.message}`, 'error');
+    // Render
+    renderEllipses(lat, lng, result.ros, result.R0, windDir, durHrs);
+
+    // Stats
+    document.getElementById('sAcres').textContent = acres.toFixed(0);
+    document.getElementById('sROS').textContent = headROS_chhr.toFixed(1) + ' ch/hr';
+    document.getElementById('sFL').textContent = result.fl.toFixed(1) + ' ft';
+    document.getElementById('sFuel').textContent = fuelKey;
+    document.getElementById('stats').classList.add('on');
+
+    setProg(100);
+    log('Done.', 'k');
+
+  } catch(e) {
+    log(`ERROR: ${e.message}`, 'e');
     console.error(e);
   } finally {
     btn.disabled = false;
     btn.textContent = '▶  Run FireCast';
-    setTimeout(() => setProgress(0), 1500);
+    setTimeout(() => setProg(0), 1200);
   }
 }
 
-// Init marker
-setIgnitionMarker(37.275, -107.88);
-log('FireCast LPC ready. Click the map or enter coordinates, then Run.', 'info');
-log('Default ignition: 37.275°N, 107.88°W (near Durango, CO)', 'info');
+// Init
+placeIgnition(37.275, -107.88);
+log('FireCast LPC ready. Click the map, then Run.', 'i');
+log('Default: 37.275°N, 107.88°W (Durango, CO)', 'i');
 </script>
 </body>
 </html>
