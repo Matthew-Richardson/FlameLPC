@@ -25,257 +25,186 @@
   --glow: rgba(232,101,26,0.15);
   --radius: 6px;
 }
-
 * { margin:0; padding:0; box-sizing:border-box; }
-
 body {
   font-family: 'Outfit', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  background: var(--bg); color: var(--text);
+  height: 100vh; display: flex; flex-direction: column; overflow: hidden;
 }
 
 /* ── Header ── */
 header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
+  display: flex; align-items: center; gap: 14px;
   padding: 8px 20px;
-  background: var(--panel);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-  z-index: 900;
+  background: var(--panel); border-bottom: 1px solid var(--border);
+  flex-shrink: 0; z-index: 900;
 }
-.logo {
-  font-family: 'IBM Plex Mono', monospace;
-  font-weight: 600; font-size: 15px;
-  color: var(--accent);
-  letter-spacing: -0.3px;
-}
-.logo span { color: var(--dim); font-weight: 400; }
-.tag {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 9px; font-weight: 600;
-  padding: 2px 7px; border-radius: 3px;
-  letter-spacing: 0.8px;
-  background: rgba(232,101,26,0.12);
-  color: var(--accent);
-  border: 1px solid rgba(232,101,26,0.25);
-}
-.hdr-right {
-  margin-left: auto;
-  display: flex; gap: 8px;
-}
-.hdr-btn {
-  font-family: 'Outfit', sans-serif;
-  font-size: 12px; font-weight: 500;
-  padding: 5px 12px;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  background: var(--panel2);
-  color: var(--dim);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.hdr-btn:hover { color: var(--text); border-color: var(--dim); }
+.logo { font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:15px; color:var(--accent); letter-spacing:-0.3px; }
+.logo span { color:var(--dim); font-weight:400; }
+.tag { font-family:'IBM Plex Mono',monospace; font-size:9px; font-weight:600; padding:2px 7px; border-radius:3px; letter-spacing:0.8px; background:rgba(232,101,26,0.12); color:var(--accent); border:1px solid rgba(232,101,26,0.25); }
+.hdr-right { margin-left:auto; display:flex; gap:8px; }
+.hdr-btn { font-family:'Outfit',sans-serif; font-size:12px; font-weight:500; padding:5px 12px; border-radius:4px; border:1px solid var(--border); background:var(--panel2); color:var(--dim); cursor:pointer; transition:all 0.15s; }
+.hdr-btn:hover { color:var(--text); border-color:var(--dim); }
 
 /* ── Layout ── */
-.main { display: flex; flex: 1; min-height: 0; }
-
-/* ── Sidebar ── */
+.main { display:flex; flex:1; min-height:0; }
 .sidebar {
-  width: 370px; flex-shrink: 0;
-  background: var(--panel);
-  border-right: 1px solid var(--border);
-  display: flex; flex-direction: column;
-  overflow-y: auto;
+  width:370px; flex-shrink:0; background:var(--panel);
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column; overflow-y:auto;
 }
-.sidebar::-webkit-scrollbar { width: 5px; }
-.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.sidebar::-webkit-scrollbar { width:5px; }
+.sidebar::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 
-.sec {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
-}
+.sec { padding:12px 16px; border-bottom:1px solid var(--border); }
 .sec-hd {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 9.5px; font-weight: 600;
-  color: var(--dim);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:600;
+  color:var(--dim); letter-spacing:1.5px; text-transform:uppercase;
+  margin-bottom:8px; display:flex; align-items:center; gap:6px;
 }
-.sec-hd .dot {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: var(--dim);
-}
-.sec-hd .dot.live { background: var(--ok); box-shadow: 0 0 6px rgba(52,211,153,0.4); }
+.sec-hd .dot { width:5px; height:5px; border-radius:50%; background:var(--dim); }
+.sec-hd .dot.live { background:var(--ok); box-shadow:0 0 6px rgba(52,211,153,0.4); }
 
-.fld { margin-bottom: 6px; }
-.fld label {
-  display: block;
-  font-size: 11px; color: var(--dim);
-  margin-bottom: 2px; font-weight: 400;
-}
+.fld { margin-bottom:6px; }
+.fld label { display:block; font-size:11px; color:var(--dim); margin-bottom:2px; font-weight:400; }
+.fld-hint { font-size:9.5px; color:#4a5670; margin-top:1px; }
 .fld input, .fld select {
-  width: 100%;
-  padding: 6px 9px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--text);
-  font-size: 12.5px;
-  font-family: 'IBM Plex Mono', monospace;
-  outline: none;
-  transition: border 0.15s;
+  width:100%; padding:6px 9px; background:var(--bg); border:1px solid var(--border);
+  border-radius:4px; color:var(--text); font-size:12.5px;
+  font-family:'IBM Plex Mono',monospace; outline:none; transition:border 0.15s;
 }
-.fld input:focus, .fld select:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--glow);
-}
-.fld .derived {
-  background: var(--panel2);
-  border-color: rgba(52,211,153,0.2);
-  color: var(--ok);
-}
+.fld input:focus, .fld select:focus { border-color:var(--accent); box-shadow:0 0 0 2px var(--glow); }
+.fld .derived { background:var(--panel2); border-color:rgba(52,211,153,0.2); color:var(--ok); }
 
-.row { display: flex; gap: 6px; }
-.row .fld { flex: 1; }
-.row3 .fld { flex: 1; }
+.row { display:flex; gap:6px; }
+.row .fld { flex:1; }
 
 .wx-summary {
-  font-size: 11px; color: var(--dim);
-  padding: 6px 8px;
-  background: var(--bg);
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  line-height: 1.5;
-  margin-bottom: 6px;
+  font-size:11px; color:var(--dim); padding:6px 8px;
+  background:var(--bg); border-radius:4px; border:1px solid var(--border);
+  line-height:1.5; margin-bottom:6px;
 }
-.wx-summary strong { color: var(--text); font-weight: 500; }
-.wx-summary .val { color: var(--accent2); font-family: 'IBM Plex Mono', monospace; font-weight: 500; }
+.wx-summary strong { color:var(--text); font-weight:500; }
+.wx-summary .val { color:var(--accent2); font-family:'IBM Plex Mono',monospace; font-weight:500; }
+
+/* Terrain cards */
+.terrain-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:5px;
+}
+.terrain-opt {
+  padding:7px 8px; border-radius:4px; border:1px solid var(--border);
+  background:var(--bg); cursor:pointer; transition:all 0.15s;
+  text-align:center;
+}
+.terrain-opt:hover { border-color:var(--dim); }
+.terrain-opt.active { border-color:var(--accent); background:rgba(232,101,26,0.08); }
+.terrain-opt .t-label { font-size:11.5px; font-weight:500; color:var(--text); }
+.terrain-opt .t-mult { font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--accent); margin-top:1px; }
+.terrain-opt .t-desc { font-size:9px; color:var(--dim); margin-top:2px; line-height:1.3; }
 
 .btn-run {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: 100%; padding: 10px;
-  border: none; border-radius: 5px;
-  font-family: 'Outfit', sans-serif;
-  font-size: 13px; font-weight: 600;
-  cursor: pointer;
-  background: var(--accent);
-  color: #fff;
-  transition: background 0.15s;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  width:100%; padding:10px; border:none; border-radius:5px;
+  font-family:'Outfit',sans-serif; font-size:13px; font-weight:600;
+  cursor:pointer; background:var(--accent); color:#fff; transition:background 0.15s;
 }
-.btn-run:hover { background: #f47a2e; }
-.btn-run:disabled { background: rgba(232,101,26,0.3); cursor: wait; }
+.btn-run:hover { background:#f47a2e; }
+.btn-run:disabled { background:rgba(232,101,26,0.3); cursor:wait; }
 
-.pbar-wrap {
-  height: 3px; background: var(--border);
-  border-radius: 2px; overflow: hidden;
-  margin-top: 8px; display: none;
-}
-.pbar-wrap.on { display: block; }
-.pbar { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; border-radius: 2px; }
+.pbar-wrap { height:3px; background:var(--border); border-radius:2px; overflow:hidden; margin-top:8px; display:none; }
+.pbar-wrap.on { display:block; }
+.pbar { height:100%; background:var(--accent); width:0%; transition:width 0.3s; border-radius:2px; }
 
 /* ── Log ── */
-.log-wrap {
-  flex: 1; min-height: 80px;
-  overflow-y: auto; padding: 8px 16px;
-}
-.log-ln {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px; line-height: 1.55;
-  color: var(--dim);
-}
-.log-ln.i { color: var(--text); }
-.log-ln.w { color: var(--accent2); }
-.log-ln.e { color: var(--danger); }
-.log-ln.k { color: var(--ok); }
-.log-ln .t { color: #2f3a4e; margin-right: 5px; }
+.log-wrap { flex:1; min-height:80px; overflow-y:auto; padding:8px 16px; }
+.log-ln { font-family:'IBM Plex Mono',monospace; font-size:10px; line-height:1.55; color:var(--dim); }
+.log-ln.i { color:var(--text); }
+.log-ln.w { color:var(--accent2); }
+.log-ln.e { color:var(--danger); }
+.log-ln.k { color:var(--ok); }
+.log-ln .t { color:#2f3a4e; margin-right:5px; }
 
 /* ── Map ── */
-.map-area { flex: 1; position: relative; }
-#map { width: 100%; height: 100%; background: var(--bg); }
+.map-area { flex:1; position:relative; }
+#map { width:100%; height:100%; background:var(--bg); }
 
-/* Stats overlay */
+/* Stats */
 .stats {
-  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 6px 16px;
-  z-index: 800; display: none; gap: 18px;
-  font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+  position:absolute; top:12px; left:50%; transform:translateX(-50%);
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:var(--radius); padding:6px 16px;
+  z-index:800; display:none; gap:18px;
+  font-family:'IBM Plex Mono',monospace; font-size:11px;
 }
-.stats.on { display: flex; }
-.st { display: flex; flex-direction: column; align-items: center; gap: 1px; }
-.st .v { color: var(--accent); font-weight: 600; font-size: 13px; }
-.st .l { color: var(--dim); font-size: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+.stats.on { display:flex; }
+.st { display:flex; flex-direction:column; align-items:center; gap:1px; }
+.st .v { color:var(--accent); font-weight:600; font-size:13px; }
+.st .l { color:var(--dim); font-size:8px; text-transform:uppercase; letter-spacing:0.5px; }
 
 /* Legend */
 .legend {
-  position: absolute; bottom: 28px; right: 12px;
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 8px 12px;
-  z-index: 800; display: none; font-size: 11px; min-width: 110px;
+  position:absolute; bottom:28px; right:12px;
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:var(--radius); padding:8px 12px;
+  z-index:800; display:none; font-size:11px; min-width:110px;
 }
-.legend.on { display: block; }
-.leg-title {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 8px; color: var(--dim);
-  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;
-}
-.leg-row { display: flex; align-items: center; gap: 7px; margin-bottom: 2px; }
-.leg-sw { width: 16px; height: 8px; border-radius: 2px; flex-shrink: 0; }
-.leg-lb { color: var(--text); font-size: 10.5px; }
+.legend.on { display:block; }
+.leg-title { font-family:'IBM Plex Mono',monospace; font-size:8px; color:var(--dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:5px; }
+.leg-row { display:flex; align-items:center; gap:7px; margin-bottom:2px; }
+.leg-sw { width:16px; height:8px; border-radius:2px; flex-shrink:0; }
+.leg-lb { color:var(--text); font-size:10.5px; }
 
-/* Info modal */
-.modal-bg {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.6); z-index: 2000;
-  align-items: center; justify-content: center;
+/* Wind arrow control on map */
+.wind-arrow-wrap {
+  position:absolute; bottom:28px; left:12px;
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:var(--radius); padding:10px;
+  z-index:800; width:130px; text-align:center;
 }
-.modal-bg.on { display: flex; }
-.modal {
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: 8px; padding: 24px 28px;
-  max-width: 620px; width: 90%;
-  max-height: 80vh; overflow-y: auto;
-  color: var(--text); font-size: 13px; line-height: 1.65;
+.wind-arrow-title {
+  font-family:'IBM Plex Mono',monospace; font-size:8px; color:var(--dim);
+  text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;
 }
-.modal h2 { font-size: 16px; color: var(--accent); margin-bottom: 12px; font-weight: 600; }
-.modal h3 { font-size: 13px; color: var(--bright); margin: 14px 0 4px; font-weight: 600; }
-.modal p { margin-bottom: 8px; }
-.modal .cite {
-  font-size: 11px; color: var(--dim); font-style: italic;
-  padding-left: 12px; border-left: 2px solid var(--border);
-  margin: 6px 0 10px;
+.wind-arrow-ring {
+  position:relative; width:100px; height:100px;
+  margin:0 auto; border-radius:50%;
+  border:2px solid var(--border);
+  background:radial-gradient(circle, var(--panel2) 30%, var(--bg) 100%);
+  cursor:grab; user-select:none; touch-action:none;
 }
-.modal .close-btn {
-  position: absolute; top: 12px; right: 16px;
-  background: none; border: none; color: var(--dim);
-  font-size: 20px; cursor: pointer;
+.wind-arrow-ring:active { cursor:grabbing; }
+.wind-arrow-ring .compass-n {
+  position:absolute; top:2px; left:50%; transform:translateX(-50%);
+  font-family:'IBM Plex Mono',monospace; font-size:9px; color:var(--dim); font-weight:600;
 }
-
-/* Ignition marker */
-.ign-icon {
-  width: 22px; height: 22px;
-  background: var(--accent);
-  border: 2px solid #fff;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px;
-  box-shadow: 0 0 10px var(--glow);
+.wind-arrow-ring .compass-s { position:absolute; bottom:2px; left:50%; transform:translateX(-50%); font-family:'IBM Plex Mono',monospace; font-size:8px; color:#2a3345; }
+.wind-arrow-ring .compass-e { position:absolute; right:3px; top:50%; transform:translateY(-50%); font-family:'IBM Plex Mono',monospace; font-size:8px; color:#2a3345; }
+.wind-arrow-ring .compass-w { position:absolute; left:3px; top:50%; transform:translateY(-50%); font-family:'IBM Plex Mono',monospace; font-size:8px; color:#2a3345; }
+.wind-arrow-svg {
+  position:absolute; top:0; left:0; width:100%; height:100%;
+  pointer-events:none;
+}
+.wind-arrow-deg {
+  font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600;
+  color:var(--accent); margin-top:6px;
+}
+.wind-arrow-hint {
+  font-size:8.5px; color:var(--dim); margin-top:2px;
 }
 
-/* Leaflet overrides */
-.leaflet-control-attribution { font-size: 9px !important; }
-.leaflet-control-zoom a { background: var(--panel) !important; color: var(--text) !important; border-color: var(--border) !important; }
+/* Modal */
+.modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:2000; align-items:center; justify-content:center; }
+.modal-bg.on { display:flex; }
+.modal { background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:24px 28px; max-width:620px; width:90%; max-height:80vh; overflow-y:auto; color:var(--text); font-size:13px; line-height:1.65; position:relative; }
+.modal h2 { font-size:16px; color:var(--accent); margin-bottom:12px; font-weight:600; }
+.modal h3 { font-size:13px; color:var(--bright); margin:14px 0 4px; font-weight:600; }
+.modal p { margin-bottom:8px; }
+.modal .cite { font-size:11px; color:var(--dim); font-style:italic; padding-left:12px; border-left:2px solid var(--border); margin:6px 0 10px; }
+.modal .close-btn { position:absolute; top:12px; right:16px; background:none; border:none; color:var(--dim); font-size:20px; cursor:pointer; }
+
+.ign-icon { width:22px; height:22px; background:var(--accent); border:2px solid #fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; box-shadow:0 0 10px var(--glow); }
+.leaflet-control-attribution { font-size:9px !important; }
+.leaflet-control-zoom a { background:var(--panel) !important; color:var(--text) !important; border-color:var(--border) !important; }
 </style>
 </head>
 <body>
@@ -284,139 +213,215 @@ header {
   <div class="logo">🔥 FireCast <span>LPC</span></div>
   <div class="tag">PLANNING SKETCH</div>
   <div class="hdr-right">
-    <button class="hdr-btn" onclick="toggleInfo()">ⓘ Sources & Methods</button>
+    <button class="hdr-btn" onclick="toggleInfo()">ⓘ Sources</button>
   </div>
 </header>
 
 <div class="main">
-  <div class="sidebar">
-    <!-- Ignition -->
-    <div class="sec">
-      <div class="sec-hd">Ignition Point</div>
-      <p style="font-size:10.5px;color:var(--dim);margin-bottom:6px">Click the map or enter coordinates</p>
-      <div class="row">
-        <div class="fld"><label>Latitude</label><input type="number" id="lat" value="37.2750" step="0.001"></div>
-        <div class="fld"><label>Longitude</label><input type="number" id="lng" value="-107.8800" step="0.001"></div>
-      </div>
-      <div class="fld"><label>Duration (hours)</label><input type="number" id="dur" value="6" min="1" max="12"></div>
+<div class="sidebar">
+  <!-- Ignition -->
+  <div class="sec">
+    <div class="sec-hd">Ignition</div>
+    <p style="font-size:10.5px;color:var(--dim);margin-bottom:6px">Click the map or enter coordinates</p>
+    <div class="row">
+      <div class="fld"><label>Latitude</label><input type="number" id="lat" value="37.2750" step="0.001"></div>
+      <div class="fld"><label>Longitude</label><input type="number" id="lng" value="-107.8800" step="0.001"></div>
     </div>
+    <div class="fld"><label>Duration (hours)</label><input type="number" id="dur" value="6" min="1" max="12"></div>
+  </div>
 
-    <!-- Weather (auto-populated, editable) -->
-    <div class="sec">
-      <div class="sec-hd"><span class="dot" id="wxDot"></span> Weather — Live Conditions</div>
-      <div class="wx-summary" id="wxSummary">Click <strong>Fetch Weather</strong> or <strong>Run</strong> to pull current conditions.</div>
-      <div class="row">
-        <div class="fld"><label>Temperature (°F)</label><input type="number" id="wxTemp" value="85" step="1"></div>
-        <div class="fld"><label>Relative Humidity (%)</label><input type="number" id="wxRH" value="15" min="1" max="100"></div>
-      </div>
-      <div class="row">
-        <div class="fld"><label>Wind Speed (mph)</label><input type="number" id="wxWind" value="15" min="0" max="80"></div>
-        <div class="fld"><label>Wind From (°)</label><input type="number" id="wxWindDir" value="225" min="0" max="360" step="5"></div>
-      </div>
-      <div class="row">
-        <div class="fld"><label>24hr Precip (in)</label><input type="number" id="wxPrecip24" value="0" min="0" step="0.01"></div>
-        <div class="fld"><label>7-day Precip (in)</label><input type="number" id="wxPrecip7d" value="0" min="0" step="0.1"></div>
-      </div>
-      <button class="hdr-btn" style="width:100%;margin-top:4px" onclick="fetchWeather()">⟳ Fetch Weather</button>
+  <!-- Weather -->
+  <div class="sec">
+    <div class="sec-hd"><span class="dot" id="wxDot"></span> Weather</div>
+    <div class="wx-summary" id="wxSummary">Click <strong>Run</strong> to pull current conditions from Open-Meteo.</div>
+    <div class="row">
+      <div class="fld"><label>Temperature (°F)</label><input type="number" id="wxTemp" value="85"></div>
+      <div class="fld"><label>Relative Humidity (%)</label><input type="number" id="wxRH" value="15" min="1" max="100"></div>
     </div>
-
-    <!-- Fuel Moisture (derived, editable) -->
-    <div class="sec">
-      <div class="sec-hd"><span class="dot" id="fmDot"></span> Fuel Moisture — Derived</div>
-      <p style="font-size:10px;color:var(--dim);margin-bottom:6px">Auto-calculated from weather. Edit to override.</p>
-      <div class="row row3">
-        <div class="fld"><label>1hr FM (%)</label><input type="number" id="fm1" class="derived" value="4" min="1" max="35"></div>
-        <div class="fld"><label>10hr FM (%)</label><input type="number" id="fm10" class="derived" value="6" min="1" max="35"></div>
-        <div class="fld"><label>100hr FM (%)</label><input type="number" id="fm100" class="derived" value="9" min="1" max="35"></div>
+    <div class="row">
+      <div class="fld"><label>Wind Speed (mph)</label><input type="number" id="wxWind" value="15" min="0" max="80"></div>
+      <div class="fld">
+        <label>Wind From (°)</label>
+        <input type="number" id="wxWindDir" value="225" min="0" max="360" step="5" oninput="updateArrowFromInput()">
       </div>
-      <div class="fld"><label>Live Herbaceous FM (%)</label><input type="number" id="fmLive" class="derived" value="70" min="30" max="250"></div>
     </div>
+    <div class="row">
+      <div class="fld"><label>24hr Precip (in)</label><input type="number" id="wxPrecip24" value="0" min="0" step="0.01"></div>
+      <div class="fld"><label>7-day Precip (in)</label><input type="number" id="wxPrecip7d" value="0" min="0" step="0.1"></div>
+    </div>
+  </div>
 
-    <!-- Fuel model -->
-    <div class="sec">
-      <div class="sec-hd">Fuel at Ignition</div>
-      <div class="fld"><label>Fuel Model (auto from location)</label>
-        <select id="fuelModel">
-          <option value="auto" selected>Auto — from fuel zone map</option>
-          <option value="GR2">GR2 — Low load dry grass</option>
-          <option value="GR4">GR4 — Moderate load dry grass</option>
-          <option value="GS2">GS2 — Moderate grass-shrub</option>
-          <option value="SH1">SH1 — Low load shrub</option>
-          <option value="SH5">SH5 — High load shrub (Gambel oak)</option>
-          <option value="SH7">SH7 — Very high load shrub</option>
-          <option value="TU1">TU1 — Timber-grass-shrub (light)</option>
-          <option value="TU5">TU5 — Timber w/ heavy understory</option>
-          <option value="TL3">TL3 — Moderate conifer litter</option>
-          <option value="TL5">TL5 — High load conifer litter</option>
+  <!-- Fuel Moisture -->
+  <div class="sec">
+    <div class="sec-hd"><span class="dot" id="fmDot"></span> Fuel Moisture</div>
+    <p style="font-size:10px;color:var(--dim);margin-bottom:6px">Auto-calculated from weather. Edit to override.</p>
+    <div class="row">
+      <div class="fld">
+        <label>Dead Fine — grass, needles</label>
+        <input type="number" id="fm1" class="derived" value="4" min="1" max="35">
+        <div class="fld-hint">1hr timelag · &lt;¼" diameter</div>
+      </div>
+      <div class="fld">
+        <label>Dead Small — twigs, sticks</label>
+        <input type="number" id="fm10" class="derived" value="6" min="1" max="35">
+        <div class="fld-hint">10hr timelag · ¼–1" diameter</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="fld">
+        <label>Dead Medium — branches</label>
+        <input type="number" id="fm100" class="derived" value="9" min="1" max="35">
+        <div class="fld-hint">100hr timelag · 1–3" diameter</div>
+      </div>
+      <div class="fld">
+        <label>Live Vegetation</label>
+        <select id="fmLiveSel" onchange="applyLiveFM()">
+          <option value="40">Fully cured / drought (40%)</option>
+          <option value="60">Late summer dry (60%)</option>
+          <option value="80">Mid-summer (80%)</option>
+          <option value="100" selected>Spring green-up (100%)</option>
+          <option value="120">Peak green / wet spring (120%)</option>
+          <option value="150">Early green / very wet (150%)</option>
         </select>
+        <div class="fld-hint">or type custom →</div>
+        <input type="number" id="fmLive" class="derived" value="100" min="30" max="250" style="margin-top:3px">
       </div>
-      <div class="fld" id="autoFuelInfo" style="font-size:10.5px;color:var(--dim)"></div>
-    </div>
-
-    <!-- Run -->
-    <div class="sec">
-      <button class="btn-run" id="runBtn" onclick="run()">▶  Run FireCast</button>
-      <div class="pbar-wrap" id="pbar"><div class="pbar" id="pbarFill"></div></div>
-    </div>
-
-    <div class="log-wrap" id="log"></div>
-  </div>
-
-  <div class="map-area">
-    <div id="map"></div>
-    <div class="stats" id="stats">
-      <div class="st"><span class="v" id="sAcres">—</span><span class="l">Acres</span></div>
-      <div class="st"><span class="v" id="sROS">—</span><span class="l">Head ROS</span></div>
-      <div class="st"><span class="v" id="sFL">—</span><span class="l">Flame Len</span></div>
-      <div class="st"><span class="v" id="sFuel">—</span><span class="l">Fuel</span></div>
-    </div>
-    <div class="legend" id="legend">
-      <div class="leg-title">Spread Hour</div>
-      <div id="legContent"></div>
     </div>
   </div>
+
+  <!-- Fuel model -->
+  <div class="sec">
+    <div class="sec-hd">Fuel at Ignition</div>
+    <div class="fld"><label>Fuel Model</label>
+      <select id="fuelModel">
+        <option value="auto" selected>Auto — from elevation at ignition</option>
+        <option value="GR2">GR2 — Low load dry grass</option>
+        <option value="GR4">GR4 — Moderate load dry grass</option>
+        <option value="GS2">GS2 — Moderate grass-shrub (PJ)</option>
+        <option value="SH1">SH1 — Low load shrub (sage)</option>
+        <option value="SH5">SH5 — High load shrub (Gambel oak)</option>
+        <option value="SH7">SH7 — Very high load shrub</option>
+        <option value="TU1">TU1 — Timber understory (light)</option>
+        <option value="TU5">TU5 — Timber w/ heavy understory</option>
+        <option value="TL3">TL3 — Moderate conifer litter</option>
+        <option value="TL5">TL5 — High load conifer litter</option>
+      </select>
+    </div>
+    <div class="fld" id="autoFuelInfo" style="font-size:10.5px;color:var(--dim)"></div>
+  </div>
+
+  <!-- Terrain -->
+  <div class="sec">
+    <div class="sec-hd">Terrain</div>
+    <p style="font-size:10px;color:var(--dim);margin-bottom:8px">Select the terrain at the ignition. Multiplies head fire spread rate.</p>
+    <div class="terrain-grid">
+      <div class="terrain-opt active" data-mult="1" onclick="pickTerrain(this)">
+        <div class="t-label">Flat / Valley</div>
+        <div class="t-mult">1×</div>
+        <div class="t-desc">Animas valley, Florida Mesa, flat benches</div>
+      </div>
+      <div class="terrain-opt" data-mult="1.5" onclick="pickTerrain(this)">
+        <div class="t-label">Moderate Slope</div>
+        <div class="t-mult">1.5×</div>
+        <div class="t-desc">Typical hillsides, gradual inclines</div>
+      </div>
+      <div class="terrain-opt" data-mult="3" onclick="pickTerrain(this)">
+        <div class="t-label">Steep Drainage</div>
+        <div class="t-mult">3×</div>
+        <div class="t-desc">Chimney effect — Missionary Ridge, 416 type runs</div>
+      </div>
+      <div class="terrain-opt" data-mult="2" onclick="pickTerrain(this)">
+        <div class="t-label">Exposed Ridge</div>
+        <div class="t-mult">2×</div>
+        <div class="t-desc">Wind funnels over ridgetops and saddles</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Run -->
+  <div class="sec">
+    <button class="btn-run" id="runBtn" onclick="run()">▶  Run FireCast</button>
+    <div class="pbar-wrap" id="pbar"><div class="pbar" id="pbarFill"></div></div>
+  </div>
+
+  <div class="log-wrap" id="log"></div>
 </div>
 
-<!-- Info / Sources Modal -->
+<div class="map-area">
+  <div id="map"></div>
+  <div class="stats" id="stats">
+    <div class="st"><span class="v" id="sAcres">—</span><span class="l">Acres</span></div>
+    <div class="st"><span class="v" id="sROS">—</span><span class="l">Head ROS</span></div>
+    <div class="st"><span class="v" id="sFL">—</span><span class="l">Flame Len</span></div>
+    <div class="st"><span class="v" id="sTerrain">—</span><span class="l">Terrain</span></div>
+    <div class="st"><span class="v" id="sFuel">—</span><span class="l">Fuel</span></div>
+  </div>
+  <div class="legend" id="legend">
+    <div class="leg-title">Spread Hour</div>
+    <div id="legContent"></div>
+  </div>
+
+  <!-- Wind arrow compass -->
+  <div class="wind-arrow-wrap" id="windArrowWrap">
+    <div class="wind-arrow-title">Wind From</div>
+    <div class="wind-arrow-ring" id="windRing">
+      <span class="compass-n">N</span>
+      <span class="compass-s">S</span>
+      <span class="compass-e">E</span>
+      <span class="compass-w">W</span>
+      <svg class="wind-arrow-svg" viewBox="0 0 100 100" id="windSvg">
+        <!-- Arrow pointing FROM the wind direction toward center -->
+        <defs>
+          <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#e8651a"/>
+          </marker>
+        </defs>
+        <line id="windLine" x1="50" y1="10" x2="50" y2="52" stroke="#e8651a" stroke-width="2.5" marker-end="url(#arrowhead)" stroke-linecap="round"/>
+        <circle cx="50" cy="50" r="3" fill="#e8651a" opacity="0.3"/>
+      </svg>
+    </div>
+    <div class="wind-arrow-deg" id="windDegLabel">225°</div>
+    <div class="wind-arrow-hint">drag to set direction</div>
+  </div>
+</div>
+</div>
+
+<!-- Sources modal -->
 <div class="modal-bg" id="infoModal" onclick="if(event.target===this)toggleInfo()">
-  <div class="modal" style="position:relative">
+  <div class="modal">
     <button class="close-btn" onclick="toggleInfo()">×</button>
     <h2>FireCast LPC — Sources & Methods</h2>
     <p>FireCast LPC is a <strong>rapid situational awareness sketch tool</strong> for wildfire spread estimation. It is not a prediction — it is a planning aid for initial evacuation zone assessment.</p>
-
     <h3>Spread Model</h3>
-    <p>Surface fire rate of spread uses the Rothermel (1972) mathematical model. Fire perimeter shape uses Anderson's (1983) wind-driven elliptical projection with length-to-breadth ratio derived from wind speed.</p>
+    <p>Surface fire rate of spread uses the Rothermel (1972) mathematical model. Fire perimeter shape uses Anderson's (1983) wind-driven elliptical projection with length-to-breadth ratio derived from effective midflame wind speed.</p>
     <div class="cite">Rothermel, R.C. (1972). "A mathematical model for predicting fire spread in wildland fuels." USDA Forest Service Research Paper INT-115.</div>
     <div class="cite">Anderson, H.E. (1983). "Predicting wind-driven wild land fire size and shape." USDA Forest Service Research Paper INT-305.</div>
-
+    <h3>Terrain Modifier</h3>
+    <p>The terrain multiplier approximates slope and channeling effects on head fire spread rate. The "steep drainage" 3× factor reflects documented chimney-effect acceleration in narrow drainages, consistent with observations from SW Colorado incidents including the Missionary Ridge (2002) and 416 (2018) fires.</p>
     <h3>Fuel Models</h3>
-    <p>Fuel model parameters follow the Scott & Burgan (2005) 40 standard fire behavior fuel models (FBFM40 system). The embedded fuel zone map for La Plata County uses elevation-band assignments calibrated to regional vegetation: piñon-juniper (GS2), Gambel oak/mountain shrub (SH5), mixed conifer (TU5), spruce-fir (TL5), and subalpine meadow (GR2).</p>
+    <p>Fuel model parameters follow the Scott & Burgan (2005) 40 standard fire behavior fuel models (FBFM40). The auto fuel assignment uses elevation bands calibrated to La Plata County vegetation zones.</p>
     <div class="cite">Scott, J.H. & Burgan, R.E. (2005). "Standard fire behavior fuel models." USDA Forest Service GTR RMRS-GTR-153.</div>
-
     <h3>Dead Fuel Moisture</h3>
-    <p>1-hour fuel moisture is estimated from current temperature and relative humidity using the Simard (1968) equilibrium moisture content equations, which underlie the NFDRS fuel moisture calculations. 10-hour and 100-hour moisture content uses time-lag weighted response to recent weather history following Nelson (2000).</p>
-    <div class="cite">Simard, A.J. (1968). "The moisture content of forest fuels — A review of the basic concepts." Forest Fire Research Institute Information Report FF-X-14.</div>
-    <div class="cite">Nelson, R.M. Jr. (2000). "Prediction of diurnal change in 10-h fuel stick moisture content." Canadian Journal of Forest Research 30(7):1105-1116.</div>
-
+    <p>Fine dead fuel moisture (1-hour timelag) is calculated from current temperature and relative humidity using the Simard (1968) equilibrium moisture content equations. 10-hour and 100-hour moisture uses time-lag weighted response to recent weather.</p>
+    <div class="cite">Simard, A.J. (1968). "The moisture content of forest fuels." Forest Fire Research Institute, Information Report FF-X-14.</div>
+    <div class="cite">Nelson, R.M. Jr. (2000). "Prediction of diurnal change in 10-h fuel stick moisture content." Can. J. For. Res. 30(7):1105-1116.</div>
     <h3>Live Fuel Moisture</h3>
-    <p>Live herbaceous fuel moisture uses a seasonal approximation for SW Colorado montane vegetation, ranging from ~30% (late summer/drought) to ~120% (spring green-up), adjusted by recent precipitation and day of year.</p>
-    <div class="cite">Jolly, W.M. et al. (2005). "Season profiles of live woody vegetation moisture in the western US." International Journal of Wildland Fire 14:169-182.</div>
-
-    <h3>Weather Data</h3>
-    <p>Current conditions from Open-Meteo API using NOAA HRRR (3km) and GFS model blends. Temperature, humidity, wind, and precipitation history are used to derive fuel moisture values. All weather inputs are editable to match RAWS observations or spot forecasts.</p>
-
+    <p>Live herbaceous fuel moisture is selected by the operator based on current vegetation conditions. Ranges follow Jolly et al. (2005) seasonal profiles for western US montane vegetation.</p>
+    <div class="cite">Jolly, W.M. et al. (2005). "Season profiles of live woody vegetation moisture in the western US." Int. J. Wildland Fire 14:169-182.</div>
+    <h3>Weather</h3>
+    <p>Current conditions from Open-Meteo API (NOAA HRRR 3km / GFS blend). All values are operator-editable to match RAWS observations or spot forecasts.</p>
     <h3>Limitations</h3>
-    <p>This tool models <strong>surface fire only</strong> — no crown fire initiation, no spotting, no diurnal wind shifts, no terrain-channeled winds. Fuel assignments are approximations from elevation bands, not LANDFIRE ground truth. The elliptical spread assumes uniform fuel and constant wind. Use for initial size-up and evacuation zone discussion only.</p>
+    <p>This tool models <strong>surface fire only</strong>. No crown fire initiation, no spotting, no diurnal wind shifts, no terrain-channeled wind fields. The elliptical spread assumes uniform fuel and constant wind. Fuel assignments from elevation bands are approximations. <strong>Use for initial size-up and evacuation zone discussion only.</strong></p>
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════
-// MAP
-// ═══════════════════════════════════════════════════════════════
-const map = L.map('map', { center: [37.275, -107.88], zoom: 12, zoomControl: true });
+// ═══════════════════════════════════════════
+// MAP INIT
+// ═══════════════════════════════════════════
+const map = L.map('map', { center:[37.275,-107.88], zoom:12, zoomControl:true });
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OSM & CARTO', maxZoom: 19
+  attribution:'&copy; OSM & CARTO', maxZoom:19
 }).addTo(map);
 
 let ignMarker = null, ellipseLayers = [];
@@ -433,92 +438,160 @@ function placeIgnition(lat, lng) {
   if (ignMarker) map.removeLayer(ignMarker);
   ignMarker = L.marker([lat, lng], { icon: ignIcon }).addTo(map);
 }
+function toggleInfo() { document.getElementById('infoModal').classList.toggle('on'); }
 
-function toggleInfo() {
-  document.getElementById('infoModal').classList.toggle('on');
-}
-
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // LOGGING / PROGRESS
-// ═══════════════════════════════════════════════════════════════
-function log(m, c='') {
-  const el = document.getElementById('log');
-  const ts = new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  el.innerHTML += `<div class="log-ln ${c}"><span class="t">${ts}</span>${m}</div>`;
-  el.scrollTop = el.scrollHeight;
+// ═══════════════════════════════════════════
+function log(m,c='') {
+  const el=document.getElementById('log');
+  const ts=new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  el.innerHTML+=`<div class="log-ln ${c}"><span class="t">${ts}</span>${m}</div>`;
+  el.scrollTop=el.scrollHeight;
 }
 function setProg(p) {
-  const w = document.getElementById('pbar');
-  w.classList.toggle('on', p > 0 && p < 100);
-  document.getElementById('pbarFill').style.width = p + '%';
+  const w=document.getElementById('pbar');
+  w.classList.toggle('on',p>0&&p<100);
+  document.getElementById('pbarFill').style.width=p+'%';
 }
 
-// ═══════════════════════════════════════════════════════════════
-// LA PLATA COUNTY FUEL ZONE MAP (embedded)
-// Elevation-band assignment calibrated to SW CO vegetation zones
-// In production, replace with pre-baked LANDFIRE FBFM40 raster
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// WIND ARROW — Draggable compass on map
+// ═══════════════════════════════════════════
+let currentWindDir = 225; // degrees, "from" direction
 
-/**
- * Determine fuel model from elevation at a given lat/lng.
- * Uses Open-Meteo elevation lookup for the ignition point (single call).
- * Returns a fuel model code and description.
- */
+function updateWindArrow(deg) {
+  currentWindDir = ((deg % 360) + 360) % 360;
+  document.getElementById('wxWindDir').value = Math.round(currentWindDir);
+  document.getElementById('windDegLabel').textContent = Math.round(currentWindDir) + '°';
+
+  // The SVG arrow points FROM the wind direction toward center
+  // So rotate the line so its tail is at the compass bearing
+  const line = document.getElementById('windLine');
+  const rad = currentWindDir * Math.PI / 180;
+  // Tail at outer edge (radius ~38 from center 50,50)
+  const tailR = 40;
+  const tipR = 8;
+  const tx = 50 + tailR * Math.sin(rad);
+  const ty = 50 - tailR * Math.cos(rad);
+  const hx = 50 + tipR * Math.sin(rad);
+  const hy = 50 - tipR * Math.cos(rad);
+  line.setAttribute('x1', tx);
+  line.setAttribute('y1', ty);
+  line.setAttribute('x2', hx);
+  line.setAttribute('y2', hy);
+}
+
+function updateArrowFromInput() {
+  const val = parseFloat(document.getElementById('wxWindDir').value) || 0;
+  updateWindArrow(val);
+}
+
+// Drag handling on the compass ring
+(function initWindDrag() {
+  const ring = document.getElementById('windRing');
+  let dragging = false;
+
+  function getAngle(e) {
+    const rect = ring.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const dx = clientX - cx;
+    const dy = clientY - cy;
+    let angle = Math.atan2(dx, -dy) * 180 / Math.PI;
+    if (angle < 0) angle += 360;
+    return angle;
+  }
+
+  function onStart(e) {
+    e.preventDefault();
+    dragging = true;
+    updateWindArrow(getAngle(e));
+  }
+  function onMove(e) {
+    if (!dragging) return;
+    e.preventDefault();
+    updateWindArrow(getAngle(e));
+  }
+  function onEnd() { dragging = false; }
+
+  ring.addEventListener('mousedown', onStart);
+  ring.addEventListener('touchstart', onStart, { passive: false });
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('touchmove', onMove, { passive: false });
+  window.addEventListener('mouseup', onEnd);
+  window.addEventListener('touchend', onEnd);
+})();
+
+// Init arrow
+updateWindArrow(225);
+
+// ═══════════════════════════════════════════
+// TERRAIN PICKER
+// ═══════════════════════════════════════════
+let terrainMult = 1;
+let terrainLabel = 'Flat';
+
+function pickTerrain(el) {
+  document.querySelectorAll('.terrain-opt').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  terrainMult = parseFloat(el.dataset.mult);
+  terrainLabel = el.querySelector('.t-label').textContent;
+}
+
+// ═══════════════════════════════════════════
+// LIVE FM SELECTOR
+// ═══════════════════════════════════════════
+function applyLiveFM() {
+  const val = document.getElementById('fmLiveSel').value;
+  document.getElementById('fmLive').value = val;
+}
+
+// ═══════════════════════════════════════════
+// FUEL ZONE LOOKUP (elevation-based)
+// ═══════════════════════════════════════════
 async function getElevationAt(lat, lng) {
   try {
     const resp = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lng}`);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
-    if (data.elevation && data.elevation[0] != null) {
-      return data.elevation[0];
-    }
-  } catch(e) {
-    log(`Elevation lookup failed: ${e.message}`, 'w');
-  }
+    if (data.elevation && data.elevation[0] != null) return data.elevation[0];
+  } catch(e) { log(`Elevation lookup: ${e.message}`, 'w'); }
   return null;
 }
 
 function fuelFromElevation(elevM) {
-  if (elevM == null) return { code: 'SH5', desc: 'Default — High load shrub (no elevation data)', elev: null };
-  if (elevM > 3500) return { code: 'GR2', desc: `Alpine meadow (${elevM.toFixed(0)}m)`, elev: elevM };
-  if (elevM > 3200) return { code: 'GR2', desc: `Subalpine meadow (${elevM.toFixed(0)}m)`, elev: elevM };
-  if (elevM > 2800) return { code: 'TL5', desc: `Spruce-fir litter (${elevM.toFixed(0)}m)`, elev: elevM };
-  if (elevM > 2500) return { code: 'TU5', desc: `Mixed conifer w/ understory (${elevM.toFixed(0)}m)`, elev: elevM };
-  if (elevM > 2200) return { code: 'SH5', desc: `Gambel oak / mountain shrub (${elevM.toFixed(0)}m)`, elev: elevM };
-  if (elevM > 2000) return { code: 'GS2', desc: `Piñon-juniper / grass-shrub (${elevM.toFixed(0)}m)`, elev: elevM };
-  if (elevM > 1700) return { code: 'SH1', desc: `Sage / desert shrub (${elevM.toFixed(0)}m)`, elev: elevM };
-  return { code: 'GR4', desc: `Low desert grass (${elevM.toFixed(0)}m)`, elev: elevM };
+  if (elevM == null) return { code:'SH5', desc:'Default (no elevation data)', elev:null };
+  if (elevM > 3500) return { code:'GR2', desc:`Alpine meadow · ${elevM.toFixed(0)}m`, elev:elevM };
+  if (elevM > 3200) return { code:'GR2', desc:`Subalpine meadow · ${elevM.toFixed(0)}m`, elev:elevM };
+  if (elevM > 2800) return { code:'TL5', desc:`Spruce-fir · ${elevM.toFixed(0)}m`, elev:elevM };
+  if (elevM > 2500) return { code:'TU5', desc:`Mixed conifer · ${elevM.toFixed(0)}m`, elev:elevM };
+  if (elevM > 2200) return { code:'SH5', desc:`Gambel oak / mtn shrub · ${elevM.toFixed(0)}m`, elev:elevM };
+  if (elevM > 2000) return { code:'GS2', desc:`Piñon-juniper · ${elevM.toFixed(0)}m`, elev:elevM };
+  if (elevM > 1700) return { code:'SH1', desc:`Sage / desert shrub · ${elevM.toFixed(0)}m`, elev:elevM };
+  return { code:'GR4', desc:`Low desert grass · ${elevM.toFixed(0)}m`, elev:elevM };
 }
 
 async function lookupFuel(lat, lng) {
   const elev = await getElevationAt(lat, lng);
   const fuel = fuelFromElevation(elev);
-  const info = document.getElementById('autoFuelInfo');
-  info.textContent = `Zone: ${fuel.desc}`;
-  // If set to auto, this will be used during run
+  document.getElementById('autoFuelInfo').textContent = `Zone: ${fuel.desc}`;
   window._autoFuel = fuel;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// WEATHER — Open-Meteo Forecast + History
-// ═══════════════════════════════════════════════════════════════
-async function fetchWeather() {
-  const lat = parseFloat(document.getElementById('lat').value);
-  const lng = parseFloat(document.getElementById('lng').value);
-
-  log('Fetching weather from Open-Meteo (HRRR/GFS)...', 'i');
+// ═══════════════════════════════════════════
+// WEATHER FETCH — Open-Meteo
+// ═══════════════════════════════════════════
+async function fetchWeather(lat, lng) {
+  log('Fetching weather (Open-Meteo HRRR/GFS)...', 'i');
   const dot = document.getElementById('wxDot');
   dot.classList.remove('live');
 
   try {
-    // Current + 7 day history for fuel moisture derivation
-    const now = new Date();
-    const weekAgo = new Date(now.getTime() - 7 * 24 * 3600 * 1000);
-    const startDate = weekAgo.toISOString().slice(0, 10);
-    const endDate = now.toISOString().slice(0, 10);
-
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}` +
-      `&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,precipitation` +
+      `&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m` +
       `&hourly=temperature_2m,relative_humidity_2m,precipitation` +
       `&past_days=7&forecast_days=1` +
       `&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`;
@@ -526,9 +599,8 @@ async function fetchWeather() {
     const resp = await fetch(url);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
-
-    // Current conditions
     const cur = data.current;
+
     const temp = Math.round(cur.temperature_2m);
     const rh = Math.round(cur.relative_humidity_2m);
     const wind = Math.round(cur.wind_speed_10m);
@@ -538,136 +610,74 @@ async function fetchWeather() {
     document.getElementById('wxRH').value = rh;
     document.getElementById('wxWind').value = wind;
     document.getElementById('wxWindDir').value = windDir;
+    updateWindArrow(windDir);
 
-    // Precipitation from hourly history
     const hourlyPrecip = data.hourly?.precipitation || [];
-    const hourlyTime = data.hourly?.time || [];
-
-    // 24-hour precip: sum of last 24 entries
-    const last24 = hourlyPrecip.slice(-24).reduce((a, b) => a + (b || 0), 0);
-    // 7-day precip: sum all
-    const last7d = hourlyPrecip.reduce((a, b) => a + (b || 0), 0);
-
+    const last24 = hourlyPrecip.slice(-24).reduce((a,b) => a+(b||0), 0);
+    const last7d = hourlyPrecip.reduce((a,b) => a+(b||0), 0);
     document.getElementById('wxPrecip24').value = last24.toFixed(2);
     document.getElementById('wxPrecip7d').value = last7d.toFixed(1);
 
-    // Summary
-    const summary = document.getElementById('wxSummary');
-    summary.innerHTML = `<strong>Current:</strong> <span class="val">${temp}°F</span>, ` +
-      `RH <span class="val">${rh}%</span>, ` +
-      `Wind <span class="val">${wind} mph</span> from <span class="val">${windDir}°</span><br>` +
-      `24hr precip: <span class="val">${last24.toFixed(2)}"</span>, ` +
-      `7-day: <span class="val">${last7d.toFixed(1)}"</span>`;
+    document.getElementById('wxSummary').innerHTML =
+      `<strong>Live:</strong> <span class="val">${temp}°F</span>, RH <span class="val">${rh}%</span>, ` +
+      `Wind <span class="val">${wind} mph</span> from <span class="val">${windDir}°</span>` +
+      `<br>24hr precip: <span class="val">${last24.toFixed(2)}"</span>, 7-day: <span class="val">${last7d.toFixed(1)}"</span>`;
 
     dot.classList.add('live');
-    log(`Weather: ${temp}°F, ${rh}% RH, ${wind}mph from ${windDir}°`, 'k');
+    log(`Weather: ${temp}°F, ${rh}% RH, wind ${wind}mph from ${windDir}°`, 'k');
 
     // Derive fuel moisture
     deriveFuelMoisture(temp, rh, last24, last7d, data.hourly);
 
-    // Also look up fuel at this point
-    lookupFuel(lat, lng);
-
   } catch(e) {
-    log(`Weather fetch failed: ${e.message}`, 'e');
+    log(`Weather failed: ${e.message}`, 'e');
   }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// FUEL MOISTURE — Nelson / Simard derivation
-// ═══════════════════════════════════════════════════════════════
-
-/**
- * Simard (1968) equilibrium moisture content from temperature and RH.
- * This is the core NFDRS fine fuel moisture equation.
- */
+// ═══════════════════════════════════════════
+// FUEL MOISTURE — Simard / Nelson derivation
+// ═══════════════════════════════════════════
 function simardEMC(tempF, rh) {
-  // Simard's EMC equations (three humidity regimes)
-  if (rh <= 10) {
-    return 0.03229 + 0.281073 * rh - 0.000578 * tempF * rh;
-  } else if (rh <= 50) {
-    return 2.22749 + 0.160107 * rh - 0.01478 * tempF;
-  } else {
-    return 21.0606 + 0.005565 * rh * rh - 0.00035 * tempF * rh - 0.483199 * rh;
-  }
+  if (rh <= 10) return 0.03229 + 0.281073*rh - 0.000578*tempF*rh;
+  if (rh <= 50) return 2.22749 + 0.160107*rh - 0.01478*tempF;
+  return 21.0606 + 0.005565*rh*rh - 0.00035*tempF*rh - 0.483199*rh;
 }
 
-/**
- * Derive all fuel moisture values from weather conditions.
- * 1hr: direct EMC from current temp/RH (responds within 1 hour)
- * 10hr: EMC weighted toward recent 10 hours of weather
- * 100hr: influenced by 7-day precipitation history
- * Live: seasonal estimate for SW Colorado montane
- */
 function deriveFuelMoisture(tempF, rh, precip24, precip7d, hourlyData) {
-  // 1-hour: equilibrium moisture content (Simard 1968)
   let fm1 = simardEMC(tempF, rh);
   fm1 = Math.max(1, Math.min(35, Math.round(fm1)));
 
-  // 10-hour: EMC with lag — average of recent 10 hours' EMC values
   let fm10 = fm1;
-  if (hourlyData && hourlyData.temperature_2m && hourlyData.relative_humidity_2m) {
+  if (hourlyData?.temperature_2m && hourlyData?.relative_humidity_2m) {
     const temps = hourlyData.temperature_2m;
     const rhs = hourlyData.relative_humidity_2m;
     const len = temps.length;
-    const window10 = Math.min(10, len);
+    const win = Math.min(10, len);
     let emcSum = 0;
-    for (let i = len - window10; i < len; i++) {
-      if (temps[i] != null && rhs[i] != null) {
-        emcSum += simardEMC(temps[i], rhs[i]);
-      }
+    for (let i = len-win; i < len; i++) {
+      if (temps[i]!=null && rhs[i]!=null) emcSum += simardEMC(temps[i], rhs[i]);
     }
-    fm10 = emcSum / window10;
-    // 10hr responds slower — bias toward EMC, slightly higher
-    fm10 = fm10 * 0.7 + fm1 * 0.3;
+    fm10 = emcSum / win * 0.7 + fm1 * 0.3;
   }
-  // Add moisture from recent precipitation (Nelson 2000 simplified)
-  if (precip24 > 0.05) fm10 += precip24 * 5; // rough wetting
+  if (precip24 > 0.05) fm10 += precip24 * 5;
   fm10 = Math.max(2, Math.min(35, Math.round(fm10)));
 
-  // 100-hour: heavily influenced by 7-day precipitation
-  let fm100 = fm10 * 1.3; // baseline
-  if (precip7d > 0.1) {
-    fm100 += precip7d * 3; // significant wetting from multi-day rain
-  }
+  let fm100 = fm10 * 1.3;
+  if (precip7d > 0.1) fm100 += precip7d * 3;
   fm100 = Math.max(3, Math.min(35, Math.round(fm100)));
 
-  // Live herbaceous: seasonal curve for SW CO montane
-  // Peak green-up ~June 15 (DOY 166), cure-out by ~Sept 15 (DOY 258)
-  const doy = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-  let fmLive;
-  if (doy < 120) {
-    fmLive = 60; // early spring, pre-green-up, carryover dead
-  } else if (doy < 166) {
-    // Greening: 60 → 120
-    fmLive = 60 + (doy - 120) / (166 - 120) * 60;
-  } else if (doy < 220) {
-    // Peak green: 120 → 90
-    fmLive = 120 - (doy - 166) / (220 - 166) * 30;
-  } else if (doy < 275) {
-    // Curing: 90 → 40
-    fmLive = 90 - (doy - 220) / (275 - 220) * 50;
-  } else {
-    fmLive = 40; // late fall/winter, cured
-  }
-  // Adjust for recent rain
-  if (precip7d > 0.5) fmLive += 15;
-  fmLive = Math.max(30, Math.min(200, Math.round(fmLive)));
-
-  // Set fields
   document.getElementById('fm1').value = fm1;
   document.getElementById('fm10').value = fm10;
   document.getElementById('fm100').value = fm100;
-  document.getElementById('fmLive').value = fmLive;
-
-  log(`Fuel moisture derived: 1hr=${fm1}%, 10hr=${fm10}%, 100hr=${fm100}%, Live=${fmLive}%`, 'k');
   document.getElementById('fmDot').classList.add('live');
+
+  log(`Fuel moisture: fine=${fm1}%, small=${fm10}%, medium=${fm100}%`, 'k');
 }
 
 
-// ═══════════════════════════════════════════════════════════════
-// FUEL MODELS — Scott & Burgan (2005) FBFM40
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// FUEL MODELS — Scott & Burgan (2005)
+// ═══════════════════════════════════════════
 const FM = {
   GR2:{w1:.1,w10:0,w100:0,wLH:1,wLW:0,sv1:2000,svLH:1800,svLW:0,d:1,mx:.15,h:8000,wrf:.6},
   GR4:{w1:.25,w10:0,w100:0,wLH:1.9,wLW:0,sv1:2000,svLH:1800,svLW:0,d:2,mx:.15,h:8000,wrf:.6},
@@ -683,178 +693,126 @@ const FM = {
 };
 
 
-// ═══════════════════════════════════════════════════════════════
-// ROTHERMEL ROS — Verbatim from verified grid test
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// ROTHERMEL ROS (verified)
+// ═══════════════════════════════════════════
 function calcROS(fk, wMph, wDir, m1, m10, m100, mLv) {
   const f = FM[fk];
   if (!f || f.d <= 0) return { ros:0, R0:0, fl:0, az:0 };
 
-  // No slope in simplified model — flat terrain assumption
-  const slopeDeg = 0, aspectDeg = 0;
+  const L = t => t*2000/43560;
+  const w = [L(f.w1),L(f.w10),L(f.w100)];
+  const wl = [L(f.wLH),L(f.wLW)];
+  const sv = [f.sv1,109,30];
+  const svl = [f.svLH||0.001, f.svLW||0.001];
+  const mf = [m1/100,m10/100,m100/100];
+  const ml = [mLv/100,mLv/100];
 
-  const L = t => t * 2000 / 43560;
-  const w = [L(f.w1), L(f.w10), L(f.w100)];
-  const wl = [L(f.wLH), L(f.wLW)];
-  const sv = [f.sv1, 109, 30];
-  const svl = [f.svLH || 0.001, f.svLW || 0.001];
-  const mf = [m1/100, m10/100, m100/100];
-  const ml = [mLv/100, mLv/100];
+  const dSA = w.map((a,i)=>a*sv[i]);
+  const dT = dSA.reduce((a,b)=>a+b,0);
+  const lSA = wl.map((a,i)=>a*svl[i]);
+  const lT = lSA.reduce((a,b)=>a+b,0);
+  const tSA = dT+lT;
+  if (tSA<1e-6) return {ros:0,R0:0,fl:0,az:0};
 
-  const dSA = w.map((a,i) => a*sv[i]);
-  const dT = dSA.reduce((a,b) => a+b, 0);
-  const lSA = wl.map((a,i) => a*svl[i]);
-  const lT = lSA.reduce((a,b) => a+b, 0);
-  const tSA = dT + lT;
-  if (tSA < 1e-6) return { ros:0, R0:0, fl:0, az:0 };
+  const dF = dSA.map(s=>dT>0?s/dT:0);
+  const lF = lSA.map(s=>lT>0?s/lT:0);
+  const fD=dT/tSA, fL=lT/tSA;
 
-  const dF = dSA.map(s => dT>0 ? s/dT : 0);
-  const lF = lSA.map(s => lT>0 ? s/lT : 0);
-  const fD = dT/tSA, fL = lT/tSA;
+  const sigma = fD*dF.reduce((s,a,i)=>s+a*sv[i],0) + fL*lF.reduce((s,a,i)=>s+a*svl[i],0);
+  if (sigma<1) return {ros:0,R0:0,fl:0,az:0};
 
-  const sigma = fD * dF.reduce((s,a,i) => s+a*sv[i], 0) + fL * lF.reduce((s,a,i) => s+a*svl[i], 0);
-  if (sigma < 1) return { ros:0, R0:0, fl:0, az:0 };
+  const wT = w.reduce((a,b)=>a+b,0)+wl.reduce((a,b)=>a+b,0);
+  const beta = wT/(f.d*32);
+  const bo = 3.348*Math.pow(sigma,-0.8189);
+  const br = beta/bo;
 
-  const wT = w.reduce((a,b) => a+b, 0) + wl.reduce((a,b) => a+b, 0);
-  const beta = wT / (f.d * 32);
-  const bo = 3.348 * Math.pow(sigma, -0.8189);
-  const br = beta / bo;
+  const A = 133*Math.pow(sigma,-0.7913);
+  const gMax = Math.pow(sigma,1.5)/(495+0.0594*Math.pow(sigma,1.5));
+  const gam = gMax*Math.pow(br,A)*Math.exp(A*(1-br));
 
-  const A = 133 * Math.pow(sigma, -0.7913);
-  const gMax = Math.pow(sigma,1.5) / (495 + 0.0594*Math.pow(sigma,1.5));
-  const gam = gMax * Math.pow(br, A) * Math.exp(A*(1-br));
+  const wnD = w.reduce((s,a,i)=>s+dF[i]*a*0.9445,0);
+  const wnL = wl.reduce((s,a,i)=>s+lF[i]*a*0.9445,0);
 
-  const wnD = w.reduce((s,a,i) => s+dF[i]*a*0.9445, 0);
-  const wnL = wl.reduce((s,a,i) => s+lF[i]*a*0.9445, 0);
+  const mfDw = dF.reduce((s,a,i)=>s+a*mf[i],0);
+  const rmD = Math.min(mfDw/f.mx,1);
+  const etD = Math.max(0,1-2.59*rmD+5.11*rmD*rmD-3.52*Math.pow(rmD,3));
 
-  const mfDw = dF.reduce((s,a,i) => s+a*mf[i], 0);
-  const rmD = Math.min(mfDw/f.mx, 1);
-  const etD = Math.max(0, 1 - 2.59*rmD + 5.11*rmD*rmD - 3.52*Math.pow(rmD,3));
-
-  let etL = 1;
-  if (lT > 1e-5) {
-    const mfLw = lF.reduce((s,a,i) => s+a*ml[i], 0);
-    const rmL = Math.min(mfLw/Math.max(f.mx, 0.3), 1);
-    etL = Math.max(0, 1 - 2.59*rmL + 5.11*rmL*rmL - 3.52*Math.pow(rmL,3));
+  let etL=1;
+  if(lT>1e-5){
+    const mfLw=lF.reduce((s,a,i)=>s+a*ml[i],0);
+    const rmL=Math.min(mfLw/Math.max(f.mx,0.3),1);
+    etL=Math.max(0,1-2.59*rmL+5.11*rmL*rmL-3.52*Math.pow(rmL,3));
   }
 
-  const etS = 0.174 * Math.pow(0.01, -0.19);
-  const IR = gam * (wnD*f.h*etD*etS + wnL*f.h*etL*etS);
+  const etS=0.174*Math.pow(0.01,-0.19);
+  const IR=gam*(wnD*f.h*etD*etS+wnL*f.h*etL*etS);
 
-  const xi = Math.exp((0.792 + 0.681*Math.pow(sigma,0.5)) * (beta+0.1)) / (192 + 0.2595*sigma);
-  const rhoB = wT / f.d;
-  const eps = Math.exp(-138/sigma);
-  const mfC = fD*mfDw + fL*(lF.reduce((s,a,i) => s+a*ml[i], 0) || 0);
-  const Qig = 250 + 1116*mfC;
-  const hs = rhoB * eps * Qig;
-  if (hs < 0.001) return { ros:0, R0:0, fl:0, az:0 };
+  const xi=Math.exp((0.792+0.681*Math.pow(sigma,0.5))*(beta+0.1))/(192+0.2595*sigma);
+  const rhoB=wT/f.d;
+  const eps=Math.exp(-138/sigma);
+  const mfC=fD*mfDw+fL*(lF.reduce((s,a,i)=>s+a*ml[i],0)||0);
+  const Qig=250+1116*mfC;
+  const hs=rhoB*eps*Qig;
+  if(hs<0.001) return {ros:0,R0:0,fl:0,az:0};
 
-  const R0 = IR * xi / hs;
+  const R0=IR*xi/hs;
+  const U=wMph*f.wrf*88;
+  const C_=7.47*Math.exp(-0.133*Math.pow(sigma,0.55));
+  const B_=0.02526*Math.pow(sigma,0.54);
+  const E_=0.715*Math.exp(-3.59e-4*sigma);
+  const phiW=U>0?C_*Math.pow(U,B_)*Math.pow(br,-E_):0;
 
-  // Wind factor (no slope factor in simplified model)
-  const U = wMph * f.wrf * 88;
-  const C = 7.47 * Math.exp(-0.133 * Math.pow(sigma, 0.55));
-  const B = 0.02526 * Math.pow(sigma, 0.54);
-  const E = 0.715 * Math.exp(-3.59e-4 * sigma);
-  const phiW = U > 0 ? C * Math.pow(U, B) * Math.pow(br, -E) : 0;
+  const wAz=((wDir+180)%360)*Math.PI/180;
+  const ros=R0*(1+phiW);
+  const fli=IR*ros/60;
+  const fl=0.45*Math.pow(Math.max(fli,0.01),0.46);
 
-  const wAz = ((wDir + 180) % 360) * Math.PI / 180;
-  const ros = R0 * (1 + phiW);
-
-  // Byram's fireline intensity → flame length
-  const fli = IR * ros / 60;
-  const fl = 0.45 * Math.pow(Math.max(fli, 0.01), 0.46);
-
-  return { ros, R0, fl, az: wAz };
+  return {ros,R0,fl,az:wAz};
 }
 
 
-// ═══════════════════════════════════════════════════════════════
-// ANDERSON (1983) ELLIPTICAL SPREAD PROJECTION
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// ANDERSON ELLIPSE (1983)
+// ═══════════════════════════════════════════
+function buildFireEllipse(lat, lng, headROS, backROS, windDirFrom, durationMin, numPts) {
+  numPts = numPts || 72;
+  const windMph = parseFloat(document.getElementById('wxWind').value)||0;
+  const Ueff = windMph * (FM[document.getElementById('fuelModel').value]?.wrf || 0.5);
 
-/**
- * Generate an elliptical fire perimeter for a given duration.
- *
- * Anderson (1983) length-to-breadth ratio:
- *   LB = 0.936 * exp(0.2566 * U_eff) + 0.461 * exp(-0.1548 * U_eff) - 0.397
- *   where U_eff = midflame wind speed (mph)
- *
- * Head fire distance = headROS * time
- * Backing fire distance = R0 * time (no-wind rate)
- * Ellipse semi-axes from LB ratio and head/back distances.
- *
- * Returns array of [lat, lng] points forming the ellipse polygon.
- */
-function buildFireEllipse(lat, lng, headROS, backROS, windDirFrom, durationMin, numPoints) {
-  numPoints = numPoints || 72;
+  const LB = Math.max(1, 0.936*Math.exp(0.2566*Ueff) + 0.461*Math.exp(-0.1548*Ueff) - 0.397);
 
-  // Effective midflame wind speed (approximate from ROS ratio)
-  const windMph = parseFloat(document.getElementById('wxWind').value) || 0;
-  const Ueff = windMph * 0.5; // rough midflame = 50% of 20ft wind for shrub/timber
-
-  // Length-to-breadth ratio (Anderson 1983)
-  const LB = Math.max(1, 0.936 * Math.exp(0.2566 * Ueff) + 0.461 * Math.exp(-0.1548 * Ueff) - 0.397);
-
-  // Head fire distance (ft) → meters
-  const headDist = headROS * durationMin * 0.3048; // ft → m
+  const headDist = headROS * durationMin * 0.3048;
   const backDist = backROS * durationMin * 0.3048;
-
-  // Ellipse geometry
-  // Total length along wind axis = head + back distance
-  // Width = total length / LB
   const totalLen = headDist + backDist;
-  const halfWidth = (totalLen / LB) / 2;
-
-  // Semi-major axis (a) = totalLen / 2
-  // Semi-minor axis (b) = halfWidth
-  const a = totalLen / 2;
-  const b = halfWidth;
-
-  // Center offset: the ellipse center is shifted downwind from ignition
-  // Ignition is at the back focus, so center is (a - backDist) downwind from ignition
+  const a = totalLen/2;
+  const b = (totalLen/LB)/2;
   const centerOffset = a - backDist;
+  const downwindRad = ((windDirFrom+180)%360) * Math.PI/180;
 
-  // Wind direction: windDirFrom is where wind comes FROM
-  // Fire spreads TOWARD the downwind direction
-  const downwindRad = ((windDirFrom + 180) % 360) * Math.PI / 180;
-
-  // Generate ellipse points
   const mPerDegLat = 111320;
-  const mPerDegLng = 111320 * Math.cos(lat * Math.PI / 180);
-
-  // Center of ellipse in lat/lng
-  const cLat = lat + (centerOffset * Math.cos(downwindRad)) / mPerDegLat;
-  const cLng = lng + (centerOffset * Math.sin(downwindRad)) / mPerDegLng;
+  const mPerDegLng = 111320*Math.cos(lat*Math.PI/180);
+  const cLat = lat + (centerOffset*Math.cos(downwindRad))/mPerDegLat;
+  const cLng = lng + (centerOffset*Math.sin(downwindRad))/mPerDegLng;
 
   const points = [];
-  for (let i = 0; i < numPoints; i++) {
-    const theta = (2 * Math.PI * i) / numPoints;
-
-    // Ellipse point in local coords (a along major axis, b along minor)
-    const ex = a * Math.cos(theta); // along wind axis
-    const ey = b * Math.sin(theta); // perpendicular to wind
-
-    // Rotate to align with wind direction
-    const rx = ex * Math.cos(downwindRad) - ey * Math.sin(downwindRad);
-    const ry = ex * Math.sin(downwindRad) + ey * Math.cos(downwindRad);
-
-    // Convert to lat/lng offset
-    const pLat = cLat + rx / mPerDegLat;
-    const pLng = cLng + ry / mPerDegLng;
-    points.push([pLat, pLng]);
+  for (let i=0; i<numPts; i++) {
+    const theta = (2*Math.PI*i)/numPts;
+    const ex = a*Math.cos(theta);
+    const ey = b*Math.sin(theta);
+    const rx = ex*Math.cos(downwindRad) - ey*Math.sin(downwindRad);
+    const ry = ex*Math.sin(downwindRad) + ey*Math.cos(downwindRad);
+    points.push([cLat+rx/mPerDegLat, cLng+ry/mPerDegLng]);
   }
-
-  // Close the polygon
   points.push(points[0]);
 
-  return { points, headDist, backDist, totalLen, halfWidth: halfWidth*2, LB, a, b };
+  return {points,headDist,backDist,totalLen,width:b*2,LB,a,b};
 }
 
 
-// ═══════════════════════════════════════════════════════════════
-// RENDER ELLIPSES ON MAP
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════
 const HOUR_COLORS = [
   '#FFFF50','#FFD620','#FFA500','#FF6400',
   '#E6370F','#CC1E14','#A00F14','#780A0F',
@@ -865,49 +823,38 @@ function renderEllipses(lat, lng, headROS, backROS, windDir, durHrs) {
   ellipseLayers.forEach(l => map.removeLayer(l));
   ellipseLayers = [];
 
-  // Render from outermost hour inward
   for (let h = durHrs; h >= 1; h--) {
-    const durationMin = h * 60;
-    const { points } = buildFireEllipse(lat, lng, headROS, backROS, windDir, durationMin, 72);
+    const {points} = buildFireEllipse(lat, lng, headROS, backROS, windDir, h*60, 72);
     const color = HOUR_COLORS[Math.min(h-1, HOUR_COLORS.length-1)];
-
     const poly = L.polygon(points, {
-      color: color,
-      weight: h === durHrs ? 2.5 : 1.5,
-      opacity: 0.9,
-      fillColor: color,
-      fillOpacity: 0.08 + 0.04 * (durHrs - h),
-      smoothFactor: 1
+      color, weight: h===durHrs?2.5:1.5, opacity:0.9,
+      fillColor:color, fillOpacity: 0.08+0.04*(durHrs-h), smoothFactor:1
     });
-    poly.bindTooltip(`Hour ${h}`, { sticky: true });
+    poly.bindTooltip(`Hour ${h}`, {sticky:true});
     poly.addTo(map);
     ellipseLayers.push(poly);
   }
 
-  // Ignition marker on top
   placeIgnition(lat, lng);
 
-  // Fit map
   if (ellipseLayers.length > 0) {
-    const group = L.featureGroup(ellipseLayers);
-    map.fitBounds(group.getBounds().pad(0.15));
+    map.fitBounds(L.featureGroup(ellipseLayers).getBounds().pad(0.15));
   }
 
-  // Legend
   const legend = document.getElementById('legend');
   const content = document.getElementById('legContent');
   legend.classList.add('on');
   content.innerHTML = '';
-  for (let h = 1; h <= durHrs; h++) {
-    const c = HOUR_COLORS[Math.min(h-1, HOUR_COLORS.length-1)];
+  for (let h=1; h<=durHrs; h++) {
+    const c = HOUR_COLORS[Math.min(h-1,HOUR_COLORS.length-1)];
     content.innerHTML += `<div class="leg-row"><div class="leg-sw" style="background:${c}"></div><span class="leg-lb">Hour ${h}</span></div>`;
   }
 }
 
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 // MAIN RUN
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 async function run() {
   const btn = document.getElementById('runBtn');
   btn.disabled = true;
@@ -921,8 +868,6 @@ async function run() {
     const durHrs = parseInt(document.getElementById('dur').value);
     const windMph = parseFloat(document.getElementById('wxWind').value);
     const windDir = parseFloat(document.getElementById('wxWindDir').value);
-    const temp = parseFloat(document.getElementById('wxTemp').value);
-    const rh = parseFloat(document.getElementById('wxRH').value);
     const m1 = parseFloat(document.getElementById('fm1').value);
     const m10 = parseFloat(document.getElementById('fm10').value);
     const m100 = parseFloat(document.getElementById('fm100').value);
@@ -930,71 +875,80 @@ async function run() {
 
     setProg(10);
     log(`FireCast LPC — ${lat.toFixed(4)}, ${lng.toFixed(4)}`, 'i');
-    log(`Weather: ${temp}°F, ${rh}% RH, ${windMph}mph from ${windDir}°`);
-    log(`Fuel moisture: 1hr=${m1}%, 10hr=${m10}%, 100hr=${m100}%, Live=${mLive}%`);
+
+    // Fetch weather if not already live
+    if (!document.getElementById('wxDot').classList.contains('live')) {
+      await fetchWeather(lat, lng);
+    }
+    setProg(20);
+
+    const temp = parseFloat(document.getElementById('wxTemp').value);
+    const rh = parseFloat(document.getElementById('wxRH').value);
+    const finalWind = parseFloat(document.getElementById('wxWind').value);
+    const finalWindDir = parseFloat(document.getElementById('wxWindDir').value);
+
+    log(`Weather: ${temp}°F, ${rh}% RH, wind ${finalWind}mph from ${finalWindDir}°`);
+    log(`Fuel moisture: fine=${m1}%, small=${m10}%, medium=${m100}%, live=${mLive}%`);
+    log(`Terrain: ${terrainLabel} (${terrainMult}× head ROS)`);
 
     // Determine fuel model
     let fuelKey = document.getElementById('fuelModel').value;
     if (fuelKey === 'auto') {
-      setProg(20);
-      // Fetch weather if we haven't already
-      if (!document.getElementById('wxDot').classList.contains('live')) {
-        await fetchWeather();
-      }
-      // Lookup fuel from elevation
       const elev = await getElevationAt(lat, lng);
       const fuel = fuelFromElevation(elev);
       fuelKey = fuel.code;
       document.getElementById('autoFuelInfo').textContent = `Zone: ${fuel.desc}`;
       log(`Fuel: ${fuelKey} — ${fuel.desc}`, 'k');
     } else {
-      log(`Fuel: ${fuelKey} (manual override)`);
+      log(`Fuel: ${fuelKey} (manual)`);
     }
-
     setProg(40);
 
     if (!FM[fuelKey] || FM[fuelKey].d <= 0) {
-      log('Non-burnable fuel model — no spread', 'e');
+      log('Non-burnable fuel — no spread', 'e');
       return;
     }
 
-    // Rothermel ROS
-    const result = calcROS(fuelKey, windMph, windDir, m1, m10, m100, mLive);
-
+    // Rothermel
+    const result = calcROS(fuelKey, finalWind, finalWindDir, m1, m10, m100, mLive);
     if (result.ros <= 0) {
-      log('Zero spread rate — fuel moisture may exceed extinction', 'e');
+      log('Zero spread — moisture may exceed extinction', 'e');
       return;
     }
 
-    const headROS_chhr = result.ros / 66 * 60; // ft/min → chains/hr
-    const backROS_chhr = result.R0 / 66 * 60;
+    // Apply terrain multiplier to head ROS
+    const headROS = result.ros * terrainMult;
+    const backROS = result.R0; // backing unaffected by upslope terrain
 
-    log(`Head ROS: ${result.ros.toFixed(1)} ft/min (${headROS_chhr.toFixed(1)} ch/hr)`);
+    const headChHr = headROS / 66 * 60;
+    const baseChHr = result.ros / 66 * 60;
+
+    log(`Base head ROS: ${result.ros.toFixed(1)} ft/min (${baseChHr.toFixed(1)} ch/hr)`);
+    if (terrainMult > 1) {
+      log(`Terrain-adjusted: ${headROS.toFixed(1)} ft/min (${headChHr.toFixed(1)} ch/hr)`, 'w');
+    }
     log(`Backing ROS: ${result.R0.toFixed(2)} ft/min`);
     log(`Flame length: ${result.fl.toFixed(1)} ft`);
 
     setProg(60);
 
-    // Anderson elliptical spread
-    const finalEllipse = buildFireEllipse(lat, lng, result.ros, result.R0, windDir, durHrs * 60, 72);
+    // Build final ellipse for stats
+    const final = buildFireEllipse(lat, lng, headROS, backROS, finalWindDir, durHrs*60, 72);
+    const acres = (Math.PI * final.a * final.b) / 4046.86;
 
-    // Acreage: ellipse area = π * a * b (in meters) → acres
-    const areaM2 = Math.PI * finalEllipse.a * finalEllipse.b;
-    const acres = areaM2 / 4046.86;
-
-    log(`${durHrs}hr projection: ${(finalEllipse.headDist).toFixed(0)}m head, ${(finalEllipse.backDist).toFixed(0)}m back`);
-    log(`Width: ${(finalEllipse.halfWidth).toFixed(0)}m, L:B ratio: ${finalEllipse.LB.toFixed(2)}`);
-    log(`Area: ${acres.toFixed(0)} acres`, 'k');
+    log(`${durHrs}hr: head ${final.headDist.toFixed(0)}m, back ${final.backDist.toFixed(0)}m, width ${final.width.toFixed(0)}m`);
+    log(`L:B ratio: ${final.LB.toFixed(2)}, Area: ${acres.toFixed(0)} acres`, 'k');
 
     setProg(80);
 
     // Render
-    renderEllipses(lat, lng, result.ros, result.R0, windDir, durHrs);
+    renderEllipses(lat, lng, headROS, backROS, finalWindDir, durHrs);
 
-    // Stats
+    // Stats bar
     document.getElementById('sAcres').textContent = acres.toFixed(0);
-    document.getElementById('sROS').textContent = headROS_chhr.toFixed(1) + ' ch/hr';
+    document.getElementById('sROS').textContent = headChHr.toFixed(0) + ' ch/hr';
     document.getElementById('sFL').textContent = result.fl.toFixed(1) + ' ft';
+    document.getElementById('sTerrain').textContent = terrainLabel + ' ' + terrainMult + '×';
     document.getElementById('sFuel').textContent = fuelKey;
     document.getElementById('stats').classList.add('on');
 
@@ -1014,7 +968,6 @@ async function run() {
 // Init
 placeIgnition(37.275, -107.88);
 log('FireCast LPC ready. Click the map, then Run.', 'i');
-log('Default: 37.275°N, 107.88°W (Durango, CO)', 'i');
 </script>
 </body>
 </html>
